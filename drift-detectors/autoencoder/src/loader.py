@@ -234,7 +234,7 @@ def get_dataframes(paths, rate=240, samples=7680, seq_len=240, exist=False):
     logger.info("Creating dataframes for training, validation, and testing.")
 
     for paths, name in zip(paths, names):
-        proc_path = utils.get_path('data', 'proc', filename=f"{name}.csv")
+        proc_path = utils.get_path('..', '..', 'data', 'proc', filename=f"{name}.csv")
 
         if exist:
             df = pd.read_csv(proc_path)
@@ -269,7 +269,7 @@ def extract_weights(df, label_col):
     weights = {key: value / sum(inverse_occs.values()) for key, value in inverse_occs.items()}
     weights = dict(sorted(weights.items()))
 
-    path = utils.get_path('data', filename='weights.json')
+    path = utils.get_path('..', '..', 'data', filename='weights.json')
     utils.save_json(data=weights, filename=path)
 
     return weights

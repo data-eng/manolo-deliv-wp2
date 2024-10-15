@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import theilslopes, pearsonr
 
-from .. import utils
-from ..loader import *
+from . import utils
+from .loader import *
 from .model import *
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,7 +46,7 @@ def plot_signals(signals, batch, outlier_threshold, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('static', 'autoencoder', 'signals', filename=f'batch_{batch}.png')
+    path = utils.get_path('..', '..', 'static', 'autoencoder', 'signals', filename=f'batch_{batch}.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -100,7 +100,7 @@ def compare_bands(signals, batch, threshold, num_bands=5, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('static', 'autoencoder', 'metrics', filename=f'batch_{batch}_bands.png')
+    path = utils.get_path('..', '..', 'static', 'autoencoder', 'metrics', filename=f'batch_{batch}_bands.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -143,7 +143,7 @@ def calculate_zero_crossings(signals, batch, num_points=100, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('static', 'autoencoder', 'metrics', filename=f'batch_{batch}_zero_crossings.png')
+    path = utils.get_path('..', '..', 'static', 'autoencoder', 'metrics', filename=f'batch_{batch}_zero_crossings.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -172,7 +172,7 @@ def theil_slope_intercept(signals, batch, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('static', 'autoencoder', 'metrics', filename=f'batch_{batch}_detrended.png')
+    path = utils.get_path('..', '..', 'static', 'autoencoder', 'metrics', filename=f'batch_{batch}_detrended.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -200,7 +200,7 @@ def calculate_rms(signals, batch, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('static', 'autoencoder', 'metrics', filename=f'batch_{batch}_rms.png')
+    path = utils.get_path('..', '..', 'static', 'autoencoder', 'metrics', filename=f'batch_{batch}_rms.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -256,13 +256,13 @@ def collect_metrics(signals, num_bands=5, threshold=10):
             'pearson_correlation': float(pearson_corr)
         }
 
-    fn = utils.get_path('static', 'autoencoder', filename='concat_signals_metrics.json')
+    fn = utils.get_path('..', '..', 'static', 'autoencoder', filename='concat_signals_metrics.json')
     utils.save_json(data=metrics, filename=fn)
 
     logger.info(f'Metrics saved to {fn}.')
 
 def test(data, criterion, model, visualize=False):
-    mfn = utils.get_path('models', filename='autoencoder.pth')
+    mfn = utils.get_path('..', '..', 'models', filename='autoencoder.pth')
 
     model.load_state_dict(torch.load(mfn))
     model.to(device)
@@ -304,8 +304,8 @@ def main():
     samples, chunks = 7680, 32
     seq_len = samples // chunks
 
-    bitbrain_dir = utils.get_dir('data', 'bitbrain')
-    raw_dir = utils.get_dir('data', 'raw')
+    bitbrain_dir = utils.get_dir('..', '..', 'data', 'bitbrain')
+    raw_dir = utils.get_dir('..', '..', 'data', 'raw')
 
     get_boas_data(base_path=bitbrain_dir, output_path=raw_dir)
     

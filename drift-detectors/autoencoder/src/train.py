@@ -3,8 +3,8 @@ import warnings
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from .. import utils
-from ..loader import *
+from . import utils
+from .loader import *
 from .model import *
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -98,7 +98,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
 
             logger.info(f'New best val found! ~ Epoch [{epoch + 1}/{epochs}], Val Loss {avg_val_loss}')
 
-            path = utils.get_path('models', filename='autoencoder.pth')
+            path = utils.get_path('..', '..', 'models', filename='autoencoder.pth')
             torch.save(model.state_dict(), path)
 
             checkpoints.update({
@@ -120,7 +120,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         'epochs': epoch + 1,
         'train_time': train_time})
     
-    cfn = utils.get_path('static', 'autoencoder', filename='train_checkpoints.json')
+    cfn = utils.get_path('..', '..', 'static', 'autoencoder', filename='train_checkpoints.json')
     utils.save_json(data=checkpoints, filename=cfn)
     
     if visualize:
@@ -131,7 +131,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
                         plot_func=plt.plot,
                         coloring=['brown', 'royalblue'],
                         names=['Training', 'Validation'],
-                        path=utils.get_dir('static', 'autoencoder'))
+                        path=utils.get_dir('..', '..', 'static', 'autoencoder'))
 
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
@@ -139,8 +139,8 @@ def main():
     samples, chunks = 7680, 32
     seq_len = samples // chunks
 
-    bitbrain_dir = utils.get_dir('data', 'bitbrain')
-    raw_dir = utils.get_dir('data', 'raw')
+    bitbrain_dir = utils.get_dir('..', '..', 'data', 'bitbrain')
+    raw_dir = utils.get_dir('..', '..', 'data', 'raw')
 
     get_boas_data(base_path=bitbrain_dir, output_path=raw_dir)
 

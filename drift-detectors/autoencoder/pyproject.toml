@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mldq"
-packages = [ {include = "timeseries"} ]
+packages = [ {include = "src"} ]
 version = "0.1"
 description = "Methods for estimating the quality of data to be used for ML exercises"
 authors = [ "Natalia Koliou <nataliakoliou@iit.demokritos.gr>",
@@ -27,6 +27,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train_transformer = "timeseries.transformer.train:main"
-train_autoencoder = "timeseries.autoencoder.train:main"
-test_autoencoder = "timeseries.autoencoder.test:main"
+train_autoencoder = "src.train:main"
+test_autoencoder = "src.test:main"
