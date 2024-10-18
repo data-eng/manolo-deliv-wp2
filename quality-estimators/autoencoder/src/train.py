@@ -48,10 +48,10 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         #for _, (X, _) in progress_bar:
             X = X.to(device)
 
-            X, _ = separate(src=X, c=[0,1], t=[3])
+            X, _ = separate(src=X, c=[0,1], t=[9])
 
             if ignore_outliers:
-                    X[(X > 10) | (X < -10)] = 0
+                X[(X > 10) | (X < -10)] = 0
 
             X_dec, _ = model(X)
 
@@ -73,7 +73,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
             for _, (X, _) in enumerate(val_data):
                 X = X.to(device)
 
-                X, _ = separate(src=X, c=[0,1], t=[3])
+                X, _ = separate(src=X, c=[0,1], t=[9])
                 
                 if ignore_outliers:
                     X[(X > 10) | (X < -10)] = 0
@@ -146,7 +146,7 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, samples=samples, seq_len=seq_len, exist=True)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 

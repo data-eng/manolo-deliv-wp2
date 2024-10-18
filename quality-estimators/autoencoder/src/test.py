@@ -14,6 +14,21 @@ logger.info(f'Device is {device}')
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.csv'):
+    """
+    Save testing dataset along with MSE differences to a CSV file.
+    """
+    all_data = []
+
+    for X, X_dec in testing_signals:
+        mse = np.mean((X.cpu().numpy() - X_dec.cpu().numpy()) ** 2, axis=1)
+
+        for i in range(len(mse)):
+            all_data.append(np.append(X[i].cpu().numpy(), mse[i]))
+
+    df = pd.DataFrame(all_data, columns=[f'Feature_{j+1}' for j in range(X.shape[1])] + ['MSE'])
+    df.to_csv(utils.get_path('..', '..', 'data', filename), index=False)
+
 def plot_signals(signals, batch, outlier_threshold, dpi=1200):
     num_features = signals[0][0].shape[-1]
     
@@ -311,7 +326,7 @@ def main():
     
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    _, _, test_df = get_dataframes(datapaths, samples=samples, seq_len=seq_len, exist=True)
+    _, _, test_df = get_dataframes(datapaths, seq_len=seq_len, exist=True)
 
     datasets = create_datasets(dataframes=(test_df,), seq_len=seq_len)
 

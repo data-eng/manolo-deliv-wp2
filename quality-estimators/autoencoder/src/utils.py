@@ -214,7 +214,7 @@ def normalize(df, exclude):
 
     return newdf
 
-def robust_normalize(df, exclude):
+def robust_normalize(df, exclude, path):
     """
     Normalize data using robust scaling (median and IQR) from precomputed stats.
 
@@ -223,7 +223,9 @@ def robust_normalize(df, exclude):
     :return: processed dataframe
     """
     newdf = df.copy()
+    
     stats = get_stats(df)
+    save_json(data=stats, filename=path)
     
     for col in df.columns:
         if col not in exclude:
@@ -257,9 +259,6 @@ def get_stats(df):
             'median': median,
             'iqr': iqr
         }
-
-    path = get_path('data', filename='stats.json')
-    save_json(data=stats, filename=path)
 
     return stats
 

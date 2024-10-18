@@ -29,7 +29,7 @@ def get_boas_data(base_path, output_path):
             continue
 
         if not os.path.exists(eeg_folder):
-            print(f"No EEG folder found for {subject_id}. Skipping.")
+            print(f'No EEG folder found for {subject_id}. Skipping.')
             continue
 
         eeg_file_pattern = os.path.join(eeg_folder, f'{subject_id}_task-Sleep_acq-headband_eeg.edf')
@@ -39,19 +39,19 @@ def get_boas_data(base_path, output_path):
             raw = mne.io.read_raw_edf(eeg_file_pattern, preload=True)
             x_data = raw.to_data_frame()
         except Exception as e:
-            print(f"Error loading EEG data for {subject_id}: {e}")
+            print(f'Error loading EEG data for {subject_id}: {e}')
             continue
 
         try:
             y_data = pd.read_csv(events_file_pattern, delimiter='\t')
         except Exception as e:
-            print(f"Error loading events data for {subject_id}: {e}")
+            print(f'Error loading events data for {subject_id}: {e}')
             continue
 
         combined_data = pd.concat([x_data, y_data], axis=1)
 
         combined_data.to_csv(output_file, index=False)
-        print(f"Saved combined data for {subject_id} to {output_file}")
+        print(f'Saved combined data for {subject_id} to {output_file}')
 
 class TSDataset(Dataset):
     def __init__(self, df, seq_len, X, t, y, per_epoch=True):
@@ -70,7 +70,7 @@ class TSDataset(Dataset):
         self.y = df[y]
         self.per_epoch = per_epoch
 
-        logger.info(f"Initializing dataset with: samples={self.num_samples}, samples/seq={seq_len}, seqs={self.num_seqs}, epochs={self.num_epochs} ")
+        logger.info(f'Initializing dataset with: samples={self.num_samples}, samples/seq={seq_len}, seqs={self.num_seqs}, epochs={self.num_epochs} ')
 
     def __len__(self):
         """
@@ -135,29 +135,15 @@ def split_data(dir, train_size=57, val_size=1, test_size=1):
     :return: tuple of lists containing csv file paths for train, val, and test sets
     """
     paths = [utils.get_path(dir, filename=file) for file in os.listdir(dir)]
-    logger.info(f"Found {len(paths)} files in directory: {dir} ready for splitting.")
+    logger.info(f'Found {len(paths)} files in directory: {dir} ready for splitting.')
 
     train_paths = paths[:train_size]
     val_paths = paths[train_size:train_size + val_size]
     test_paths = paths[train_size + val_size:train_size + val_size + test_size]
 
-    logger.info(f"Splitting complete!")
+    logger.info(f'Splitting complete!')
 
     return (train_paths, val_paths, test_paths)
-
-def load_file(path):
-    """
-    Load data from a .csv file.
-
-    :param path: path to the .csv file
-    :return: tuple (X, y)
-    """
-    df = pd.read_csv(path)
-
-    X = df[['HB_1', 'HB_2']].values
-    y = df['majority'].values
-
-    return X, y
 
 def get_fs(path):
     """
@@ -176,51 +162,71 @@ def get_fs(path):
     avg_time_diff = time_diffs.mean()
 
     fs = 1 / avg_time_diff
-    print(f"Sampling frequency: {fs:.2f} Hz")
+    print(f'Sampling frequency: {fs:.2f} Hz')
 
     return fs
 
-def combine_data(paths, samples=7680, seq_len=240):
+def load_file(path):
     """
-    Combine data from multiple npz files into a dataframe.
+    Load data from a .csv file.
 
-    :param paths: list of file paths to npz files
-    :param samples: int
+    :param path: path to the .csv file
+    :return: tuple (X, t, y)
+    """
+    df = pd.read_csv(path)
+
+    X = df[['HB_1', 'HB_2']].values
+    t = df['time'].values
+    y = df['majority'].values
+
+    return X, t, y
+
+def combine_data(paths, seq_len=240):
+    """
+    Combine data from multiple csv files into a dataframe.
+
+    :param paths: list of file paths to csv files
     :param seq_len: int
     :return: dataframe
     """
     dataframes = []
+    total_removed_majority = 0
 
-    logger.info(f"Combining data from {len(paths)} files.")
+    logger.info(f'Combining data from {len(paths)} files.')
 
     for path in paths:
-        X, y = load_file(path)
+        X, t, y = load_file(path)
 
         df = pd.DataFrame(X, columns=['HB_1', 'HB_2'])
-        df['Majority'] = y
-        df['Time'] = (np.arange(len(df)) % samples) + 1
-        df['ID'] = (df['Time'] - 1) // seq_len + 1
+        df['majority'] = y
+        df['time'] = t
+
+        df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
+        df['seq_id'] = (np.arange(len(df)) // seq_len) + 1
+
+        rows_before_majority_drop = df.shape[0]
+        df.drop(df[df['majority'] == -1].index, inplace=True)
+        total_removed_majority += (rows_before_majority_drop - df.shape[0])
 
         dataframes.append(df)
 
     df = pd.concat(dataframes, ignore_index=True)
-    logger.info(f"Combined dataframe shape: {df.shape}")
+    logger.info(f'Combined dataframe shape: {df.shape}')
 
-    rows_before_majority_drop = df.shape[0]
-    df = df[df['Majority'] != -1]
-    logger.info(f"Removed {rows_before_majority_drop - df.shape[0]} rows with majority value -1.")
+    logger.info(f'Removed {total_removed_majority} rows with majority value -1.')
     
     rows_before_nan_drop = df.shape[0]
-    df = df.dropna()
-    logger.info(f"Removed {rows_before_nan_drop - df.shape[0]} rows with NaN values.")
+    df.dropna(inplace=True)
+    logger.info(f'Removed {rows_before_nan_drop - df.shape[0]} rows with NaN values.')
 
-    assert not df.isna().any().any(), "NaN values found in the dataframe!"
+    assert not df.isna().any().any(), 'NaN values found in the dataframe!'
 
-    df = utils.robust_normalize(df, exclude=['Majority', 'Time', 'ID'])
+    stats_path = utils.get_path('..', '..', 'data', filename='stats.json')
+    df = utils.robust_normalize(df, exclude=['night', 'seq_id', 'time', 'majority'], path=stats_path)
 
     return df
 
-def get_dataframes(paths, rate=240, samples=7680, seq_len=240, exist=False):
+def get_dataframes(paths, seq_len=240, exist=False):
     """
     Create or load dataframes for training, validation, and testing.
 
@@ -231,22 +237,22 @@ def get_dataframes(paths, rate=240, samples=7680, seq_len=240, exist=False):
     dataframes = []
     names = ['train', 'val', 'test']
 
-    logger.info("Creating dataframes for training, validation, and testing.")
+    logger.info('Creating dataframes for training, validation, and testing.')
 
     for paths, name in zip(paths, names):
-        proc_path = utils.get_path('..', '..', 'data', 'proc', filename=f"{name}.csv")
+        proc_path = utils.get_path('..', '..', 'data', 'proc', filename=f'{name}.csv')
 
         if exist:
             df = pd.read_csv(proc_path)
-            logger.info(f"Loaded existing dataframe from {proc_path}.")
+            logger.info(f'Loaded existing dataframe from {proc_path}.')
         else:
-            df = combine_data(paths, samples, seq_len)
+            df = combine_data(paths, seq_len)
             df.to_csv(proc_path, index=False)
-            logger.info(f"Saved new dataframe to {proc_path}.")
+            logger.info(f'Saved new dataframe to {proc_path}.')
 
         dataframes.append(df)
 
-    logger.info("Dataframes for training, validation, and testing are ready!")
+    logger.info('Dataframes for training, validation, and testing are ready!')
 
     return tuple(dataframes)
 
@@ -258,7 +264,7 @@ def extract_weights(df, label_col):
     :param label_col: the name of the column containing class labels
     :return: dictionary
     """
-    logger.info("Calculating class weights from the training dataframe.")
+    logger.info('Calculating class weights from the training dataframe.')
 
     occs = df[label_col].value_counts().to_dict()
     inverse_occs = {key: 1e-10 for key in range(5)}
@@ -284,15 +290,18 @@ def create_datasets(dataframes, seq_len=7680):
     """
 
     datasets = []
-    X, t, y = ["HB_1", "HB_2"], ["Time", "ID"], ["Majority"]
 
-    logger.info("Creating datasets from dataframes.") 
+    X = ['HB_1', 'HB_2', 'onset', 'duration', 'begsample', 'endsample', 'offset']
+    t = ['time', 'steps', 'seq_id', 'night']
+    y = ['majority' ,'ai_psg']
+
+    logger.info('Creating datasets from dataframes.') 
 
     for df in dataframes:
         dataset = TSDataset(df, seq_len, X, t, y)
         datasets.append(dataset)
 
-    logger.info(f"Datasets created successfully!")
+    logger.info(f'Datasets created successfully!')
 
     return tuple(datasets)
 
@@ -321,7 +330,7 @@ def create_dataloaders(datasets, batch_size=1, shuffle=[True, False, False], num
     if num_workers is None:
         num_workers = cpu_cores
 
-    logger.info(f"System has {cpu_cores} CPU cores. Using {num_workers}/{cpu_cores} workers for data loading.")
+    logger.info(f'System has {cpu_cores} CPU cores. Using {num_workers}/{cpu_cores} workers for data loading.')
     
     for dataset, shuffle in zip(datasets, shuffle):
         full_batches = dataset.num_seqs // batch_size
@@ -335,9 +344,9 @@ def create_dataloaders(datasets, batch_size=1, shuffle=[True, False, False], num
         )
         dataloaders.append(dataloader)
 
-        logger.info(f"Total batches={len(dataloader)} & full batches={full_batches}, with each full batch containing {batch_size} sequences.")
+        logger.info(f'Total batches={len(dataloader)} & full batches={full_batches}, with each full batch containing {batch_size} sequences.')
     
-    logger.info("DataLoaders created successfully.")
+    logger.info('DataLoaders created successfully.')
 
     return tuple(dataloaders)
 
