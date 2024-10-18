@@ -201,8 +201,8 @@ def combine_data(paths, seq_len=240):
         df['majority'] = y
         df['time'] = t
 
-        df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
         df['seq_id'] = (np.arange(len(df)) // seq_len) + 1
+        df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
 
         rows_before_majority_drop = df.shape[0]
         df.drop(df[df['majority'] == -1].index, inplace=True)
@@ -291,9 +291,9 @@ def create_datasets(dataframes, seq_len=7680):
 
     datasets = []
 
-    X = ['HB_1', 'HB_2', 'onset', 'duration', 'begsample', 'endsample', 'offset']
-    t = ['time', 'steps', 'seq_id', 'night']
-    y = ['majority' ,'ai_psg']
+    X = ['HB_1', 'HB_2']
+    t = ['time', 'seq_id', 'night']
+    y = ['majority']
 
     logger.info('Creating datasets from dataframes.') 
 

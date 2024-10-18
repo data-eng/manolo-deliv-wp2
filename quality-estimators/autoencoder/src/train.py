@@ -48,7 +48,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         #for _, (X, _) in progress_bar:
             X = X.to(device)
 
-            X, _ = separate(src=X, c=[0,1], t=[9])
+            X, _ = separate(src=X, c=[0,1], t=[2,3])
 
             if ignore_outliers:
                 X[(X > 10) | (X < -10)] = 0
@@ -73,7 +73,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
             for _, (X, _) in enumerate(val_data):
                 X = X.to(device)
 
-                X, _ = separate(src=X, c=[0,1], t=[9])
+                X, _ = separate(src=X, c=[0,1], t=[2,3])
                 
                 if ignore_outliers:
                     X[(X > 10) | (X < -10)] = 0
@@ -160,7 +160,7 @@ def main():
                         num_layers=1,
                         dropout=0.05)
     
-    train(data=dataloaders,
+    """train(data=dataloaders,
           epochs=1000,
           patience=30,
           lr=1e-4,
@@ -169,7 +169,7 @@ def main():
           optimizer='Adam',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
           ignore_outliers=False,
-          visualize=True)
+          visualize=True)"""
 
 if __name__ == '__main__':
     main()
