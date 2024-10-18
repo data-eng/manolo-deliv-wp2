@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "mldq"
+packages = [ {include = "src"} ]
+version = "0.1"
+description = "Methods for estimating the quality of data to be used for ML exercises"
+authors = [ "Natalia Koliou <nataliakoliou@iit.demokritos.gr>",
+	    "Tatiana Boura <tatianabou@iit.demokritos.gr>",
+	    "Stasinos Konstantopoulos <konstant@iit.demokritos.gr>" ]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+pandas = "^2.1"
+numpy = "^1.26"
+scipy = "^1.11"
+scikit-learn = "^1.4"
+matplotlib = "^3.8"
+mne = "^1.7"
+yasa = "^0.6.4"
+librosa = "^0.10.2.post1"
+torch = "^2.0.1"
+seaborn = "^0.13.2"
+tqdm = "^4.66.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+train_lstm_ae = "src.train:main"
+test_lstm_ae = "src.test:main"

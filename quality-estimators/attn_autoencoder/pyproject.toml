@@ -27,5 +27,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train_autoencoder = "src.train:main"
-test_autoencoder = "src.test:main"
+train_attn_ae = "src.train:main"
+test_attn_ae = "src.test:main"

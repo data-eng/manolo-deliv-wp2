@@ -276,7 +276,39 @@ def collect_metrics(signals, num_bands=5, threshold=10):
 
     logger.info(f'Metrics saved to {fn}.')
 
-def test(data, criterion, model, visualize=False):
+def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+    all_data = []
+    X_cols, t_cols, y_cols = cols
+
+    for (feats, labels), (X, X_dec) in zip(dataloader, signals):
+        feats = feats.cpu().numpy()
+        labels = labels.cpu().numpy()
+        X = X.cpu().numpy()
+        X_dec = X_dec.cpu().numpy()
+
+        noise = X - X_dec
+
+        for batch_idx in range(X.shape[0]):
+            for seq_idx in range(X.shape[1]):
+                row_data = {}
+
+                for i, col_name in enumerate(X_cols + t_cols):
+                    row_data[col_name] = feats[batch_idx, seq_idx, i]
+
+                for i, y_col in enumerate(y_cols):
+                    row_data[y_col] = labels[batch_idx, seq_idx, i]
+
+                for i, X_col in enumerate(X_cols):
+                    row_data[f'noise_{X_col}'] = noise[batch_idx, seq_idx, i]
+
+                all_data.append(row_data)
+
+    df = pd.DataFrame(all_data)
+
+    path = utils.get_path('..', '..', 'data', 'proc', 'test_lstm.csv')
+    df.to_csv(path, index=False)
+
+def test(data, criterion, model, visualize=False, estimate=False):
     mfn = utils.get_path('..', '..', 'models', filename='autoencoder.pth')
 
     model.load_state_dict(torch.load(mfn))
@@ -291,7 +323,9 @@ def test(data, criterion, model, visualize=False):
 
     with torch.no_grad():
         for _, (X, _) in progress_bar:
-            X = X[:, :, :2].to(device)
+            X = X.to(device)
+
+            X, _ = separate(src=X, c=[0,1], t=[2,4])
 
             X_dec, _ = model(X)
 
@@ -301,6 +335,9 @@ def test(data, criterion, model, visualize=False):
             progress_bar.set_postfix(Loss=test_loss.item())
 
             signals.append((X, X_dec))
+        
+        if estimate:
+            estimate_quality(data, signals)
 
         if visualize:
             plot_signals(signals, batch=4, outlier_threshold=10)
@@ -343,7 +380,8 @@ def main():
     test(data=dataloaders[0],
          criterion=utils.BlendedLoss(p=1.0, blend=0.1),
          model=model,
-         visualize=True)
+         visualize=False,
+         estimate=False)
 
 if __name__ == '__main__':
     main()

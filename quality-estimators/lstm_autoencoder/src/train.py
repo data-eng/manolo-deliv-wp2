@@ -146,7 +146,7 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 
@@ -160,7 +160,7 @@ def main():
                         num_layers=1,
                         dropout=0.05)
     
-    """train(data=dataloaders,
+    train(data=dataloaders,
           epochs=1000,
           patience=30,
           lr=1e-4,
@@ -169,7 +169,7 @@ def main():
           optimizer='Adam',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
           ignore_outliers=False,
-          visualize=True)"""
+          visualize=True)
 
 if __name__ == '__main__':
     main()
