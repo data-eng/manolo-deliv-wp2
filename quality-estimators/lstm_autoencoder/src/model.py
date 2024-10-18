@@ -41,9 +41,9 @@ class Decoder(nn.Module):
         
         return x
 
-class Autoencoder(nn.Module):
+class LSTM_Autoencoder(nn.Module):
     def __init__(self, seq_len, num_feats, latent_seq_len, latent_num_feats, hidden_size, num_layers, dropout=0.5):
-        super(Autoencoder, self).__init__()
+        super(LSTM_Autoencoder, self).__init__()
 
         self.latent_seq_len = latent_seq_len
         self.latent_num_feats = latent_num_feats

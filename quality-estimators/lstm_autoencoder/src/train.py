@@ -98,7 +98,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
 
             logger.info(f'New best val found! ~ Epoch [{epoch + 1}/{epochs}], Val Loss {avg_val_loss}')
 
-            path = utils.get_path('..', '..', 'models', filename='autoencoder.pth')
+            path = utils.get_path('..', '..', 'models', filename='lstm_autoencoder.pth')
             torch.save(model.state_dict(), path)
 
             checkpoints.update({
@@ -120,7 +120,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         'epochs': epoch + 1,
         'train_time': train_time})
     
-    cfn = utils.get_path('..', '..', 'static', 'autoencoder', filename='train_checkpoints.json')
+    cfn = utils.get_path('..', '..', 'static', 'lstm_autoencoder', filename='train_checkpoints.json')
     utils.save_json(data=checkpoints, filename=cfn)
     
     if visualize:
@@ -131,7 +131,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
                         plot_func=plt.plot,
                         coloring=['brown', 'royalblue'],
                         names=['Training', 'Validation'],
-                        path=utils.get_dir('..', '..', 'static', 'autoencoder'))
+                        path=utils.get_dir('..', '..', 'static', 'lstm_autoencoder'))
 
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
@@ -152,14 +152,14 @@ def main():
 
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
-    model = Autoencoder(seq_len=seq_len,
-                        num_feats=2, 
-                        latent_seq_len=1, 
-                        latent_num_feats=16, 
-                        hidden_size=32, 
-                        num_layers=1,
-                        dropout=0.05)
-    
+    model = LSTM_Autoencoder(seq_len=seq_len,
+                             num_feats=2, 
+                             latent_seq_len=1, 
+                             latent_num_feats=16, 
+                             hidden_size=32, 
+                             num_layers=1,
+                             dropout=0.05)
+        
     train(data=dataloaders,
           epochs=1000,
           patience=30,
