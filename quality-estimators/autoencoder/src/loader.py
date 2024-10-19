@@ -14,10 +14,12 @@ logger = utils.get_logger(level='DEBUG')
 
 def get_boas_data(base_path, output_path):
     """
-    Retrieve and combine EEG and event data for subjects from the specified Bitbrain dataset folder.
+    Retrieve and combine EEG and event data for subjects from the Bitbrain dataset. For each subject, 
+    this function reads EEG signals from an EDF file and event data from a TSV file, combines them, 
+    and saves the result as a CSV file in the specified output directory.
 
-    :param base_path: path to the base directory containing subject folders
-    :param output_path: path to the directory where combined data will be saved
+    :param base_path: Path to the base directory containing subject folders.
+    :param output_path: Path to the directory where combined data will be saved.
     """
     for subject_folder in glob.glob(os.path.join(base_path, 'sub-*')):
         subject_id = os.path.basename(subject_folder)
@@ -56,14 +58,15 @@ def get_boas_data(base_path, output_path):
 class TSDataset(Dataset):
     def __init__(self, df, seq_len, X, t, y, per_epoch=True):
         """
-        Initializes a time series dataset.
+        Initializes a time series dataset. It creates sequences from the input data by 
+        concatenating features and time columns. The target variable is stored separately.
 
-        :param df: dataframe
-        :param seq_len: length of the input sequence
-        :param X: list of feature columns
-        :param t: list of time columns
-        :param y: list of target columns
-        :param per_epoch: whether to create sequences with overlapping epochs or not
+        :param df: Pandas dataframe containing the data.
+        :param seq_len: Length of the input sequence (number of time steps).
+        :param X: List of feature columns.
+        :param t: List of time-related columns.
+        :param y: List of target columns.
+        :param per_epoch: Whether to create sequences in non-overlapping (True) or overlapping (False) epochs.
         """
         self.seq_len = seq_len
         self.X = pd.concat([df[X], df[t]], axis=1)
@@ -74,7 +77,9 @@ class TSDataset(Dataset):
 
     def __len__(self):
         """
-        :return: length of the dataset
+        Returns the number of sequences in the dataset.
+
+        :return: Length of the dataset.
         """
         return self.num_seqs
 
@@ -82,8 +87,8 @@ class TSDataset(Dataset):
         """
         Retrieves a sample from the dataset at the specified index.
 
-        :param idx: index of the sample
-        :return: tuple of features and target tensors
+        :param idx: Index of the sample.
+        :return: Tuple of features and target tensors.
         """
         if self.per_epoch:
             start_idx = idx * self.seq_len
@@ -101,23 +106,37 @@ class TSDataset(Dataset):
     
     @property
     def num_samples(self):
+        """
+        Returns the total number of samples in the dataset.
+        
+        :return: Total number of samples.
+        """
         return self.X.shape[0]
     
     @property
     def num_epochs(self):
+        """
+        Returns the number of full epochs available based on the dataset size.
+
+        :return: Number of epochs.
+        """
         return self.num_samples // 7680
 
     @property
     def max_seq_id(self):
         """
-        :return: maximum index for a sequence
+        Returns the maximum index for a sequence.
+
+        :return: Maximum index for a sequence.
         """
         return self.num_samples - self.seq_len
     
     @property
     def num_seqs(self):
         """
-        :return: number of sequences that can be created from the dataset
+        Returns the number of sequences that can be created from the dataset.
+
+        :return: Number of sequences.
         """
         if self.per_epoch:
             return self.num_samples // self.seq_len
@@ -126,13 +145,13 @@ class TSDataset(Dataset):
 
 def split_data(dir, train_size=57, val_size=1, test_size=1):
     """
-    Split the csv files into training, validation, and test sets.
+    Split the CSV files into training, validation, and test sets.
 
-    :param dir: directory containing the csv files
-    :param train_size: number of files for training
-    :param val_size: number of files for validation
-    :param test_size: number of files for testing
-    :return: tuple of lists containing csv file paths for train, val, and test sets
+    :param dir: Directory containing the CSV files.
+    :param train_size: Number of files for training.
+    :param val_size: Number of files for validation.
+    :param test_size: Number of files for testing.
+    :return: Tuple of lists containing CSV file paths for train, val, and test sets.
     """
     paths = [utils.get_path(dir, filename=file) for file in os.listdir(dir)]
     logger.info(f'Found {len(paths)} files in directory: {dir} ready for splitting.')
@@ -147,10 +166,10 @@ def split_data(dir, train_size=57, val_size=1, test_size=1):
 
 def get_fs(path):
     """
-    Get the sampling frequency (fs) from a randomly selected csv file in the specified directory.
+    Get the sampling frequency (fs) from a randomly selected CSV file in the specified directory.
 
-    :param path: path to the directory containing csv files
-    :return: sampling frequency (fs) in Hz
+    :param path: Path to the directory containing CSV files.
+    :return: Sampling frequency (fs) in Hz.
     """
     csv_files = [f for f in os.listdir(path) if f.endswith('.csv')]
     selected_file = os.path.join(path, random.choice(csv_files))
@@ -168,10 +187,10 @@ def get_fs(path):
 
 def load_file(path):
     """
-    Load data from a .csv file.
+    Load data from a CSV file.
 
-    :param path: path to the .csv file
-    :return: tuple (X, t, y)
+    :param path: Path to the CSV file.
+    :return: Tuple (X, t, y) where X contains EEG features, t contains time, and y contains labels.
     """
     df = pd.read_csv(path)
 
@@ -183,11 +202,11 @@ def load_file(path):
 
 def combine_data(paths, seq_len=240):
     """
-    Combine data from multiple csv files into a dataframe.
+    Combine data from multiple CSV files into a dataframe, processing sequences and removing invalid rows.
 
-    :param paths: list of file paths to csv files
-    :param seq_len: int
-    :return: dataframe
+    :param paths: List of file paths to CSV files.
+    :param seq_len: Sequence length for grouping data.
+    :return: Combined dataframe after processing.
     """
     dataframes = []
     total_removed_majority = 0
@@ -230,9 +249,9 @@ def get_dataframes(paths, seq_len=240, exist=False):
     """
     Create or load dataframes for training, validation, and testing.
 
-    :param paths: list of training, validation and test file paths
-    :param exist: whether dataframe csvs already exist
-    :return: tuple of dataframes
+    :param paths: List of file paths for training, validation, and testing.
+    :param exist: Boolean flag indicating if the dataframes already exist.
+    :return: Tuple of dataframes for train, validation, and test sets.
     """
     dataframes = []
     names = ['train', 'val', 'test']
@@ -258,11 +277,11 @@ def get_dataframes(paths, seq_len=240, exist=False):
 
 def extract_weights(df, label_col):
     """
-    Calculate class weights from the training dataframe to handle class imbalance.
+    Calculate class weights from the training dataframe to handle class imbalance, and save them to a file.
 
-    :param df: dataframe containing the training data
-    :param label_col: the name of the column containing class labels
-    :return: dictionary
+    :param df: Dataframe containing the training data.
+    :param label_col: The name of the column containing class labels.
+    :return: Dictionary of class weights.
     """
     logger.info('Calculating class weights from the training dataframe.')
 
@@ -282,13 +301,12 @@ def extract_weights(df, label_col):
 
 def create_datasets(dataframes, seq_len=7680):
     """
-    Create datasets for the specified dataframes, e.g. training, validation and testing, or a subset of those.
+    Create datasets for the specified dataframes (e.g. training, validation, and testing).
 
-    :param dataframes: tuple of dataframes
-    :param seq_len: length of the input sequence
-    :return: tuple of datasets
+    :param dataframes: Tuple of dataframes.
+    :param seq_len: Sequence length for each dataset sample.
+    :return: Tuple of datasets.
     """
-
     datasets = []
 
     X = ['HB_1', 'HB_2']
@@ -307,22 +325,14 @@ def create_datasets(dataframes, seq_len=7680):
 
 def create_dataloaders(datasets, batch_size=1, shuffle=[True, False, False], num_workers=None, drop_last=False):
     """
-    Create dataloaders for the specified datasets, e.g. training, validation and testing, or a subset of those.
+    Create DataLoader objects for the specified datasets, providing data in batches for training, validation, and testing.
 
-    The batch size should be 1, 2, 4, 8, 16, or 32, as these values ensure that all sequences are distributed 
-    across batches (batch_size must divide evenly: num_seqs = 7680 * epochs / 240 = 32 * epochs). This prevents 
-    the number of sequences in the last batch from being smaller than the batch size.
-
-    The number of batches is determined by num_seqs / batch_size. Additionally, aggr = 32 should ideally divide 
-    batches evenly: (7680 * epochs) / (240 * batch_size * 32). Therefore, the batch size must be 1 if we want the 
-    transformer model to receive input with a fixed seq_len=aggr. Otherwise, any of the batch sizes listed above 
-    should be fine. The model works well with input X being (batch_size, smaller_seq_len, num_feats).
-
-    :param datasets: tuple of datasets
-    :param batch_size: batch size for the dataloaders
-    :param num_workers: number of subprocesses to use for data loading
-    :param shuffle: whether to shuffle the data
-    :return: tuple of dataloaders
+    :param datasets: Tuple of datasets.
+    :param batch_size: Batch size for the DataLoader.
+    :param shuffle: List indicating whether to shuffle data for each dataset.
+    :param num_workers: Number of subprocesses to use for data loading (default is all available CPU cores).
+    :param drop_last: Whether to drop the last incomplete batch.
+    :return: Tuple of DataLoader objects.
     """
     dataloaders = []
     cpu_cores = multiprocessing.cpu_count()
@@ -354,10 +364,10 @@ def separate(src, c, t):
     """
     Separates channels and time features from the source tensor.
 
-    :param src: tensor (batch_size, seq_len, num_feats)
-    :param c: range of channels features
-    :param t: range of time features
-    :return: tuple of (batch_size, seq_len, num_channels_feats) and (batch_size, seq_len, num_time_feats)
+    :param src: Tensor of shape (batch_size, seq_len, num_feats).
+    :param c: Range of channel features.
+    :param t: Range of time features.
+    :return: Tuple of (channels, time) tensors.
     """
     channels = src[:, :, c]
     time = src[:, :, t]
@@ -368,17 +378,17 @@ def aggregate_seqs(data):
     """
     Aggregates the tensor by reducing the sequence length to a single time step.
 
-    :param data: tensor (batch_size, seq_len, num_feats)
-    :return: tensor (batch_size, 1, num_feats)
+    :param data: Tensor of shape (batch_size, seq_len, num_feats).
+    :return: Tensor of shape (batch_size, 1, num_feats).
     """
     return data[:, 0:1, :]
 
 def merge(channels, time):
     """
-    Concatenates channels and time feature tensors along the feature dimension.
+    Concatenates channel and time feature tensors along the feature dimension.
 
-    :param channels: tensor (batch_size, seq_len, num_channels_feats)
-    :param time: tensor (batch_size, seq_len, 1)
-    :return: tensor (batch_size, seq_len, num_channels_feats + 1)
+    :param channels: Tensor of shape (batch_size, seq_len, num_channels_feats).
+    :param time: Tensor of shape (batch_size, seq_len, 1).
+    :return: Tensor of shape (batch_size, seq_len, num_channels_feats + 1).
     """
     return torch.cat((channels, time), dim=2)
