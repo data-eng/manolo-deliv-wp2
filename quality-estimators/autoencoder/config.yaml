@@ -22,7 +22,7 @@
 #  num_layers: 1
 #  dropout: 0.05
 
-# CONVOLUTIONAL LSTM AUTOENCODER CONFIGURATION #
+# ATTENTION AUTOENCODER CONFIGURATION #
 
 id: attn_ae
 name: Attn_Autoencoder
