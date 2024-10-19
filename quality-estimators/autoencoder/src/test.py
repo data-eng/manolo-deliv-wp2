@@ -18,9 +18,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-model = config['model']
-id = config['id']
-
 def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.csv'):
     """
     Save testing dataset along with MSE differences to a CSV file.
