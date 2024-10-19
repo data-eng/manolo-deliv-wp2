@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 import warnings
+import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import theilslopes, pearsonr
@@ -13,6 +14,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 logger.info(f'Device is {device}')
 
 warnings.filterwarnings("ignore", category=FutureWarning)
+
+with open('config.yaml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+
+model = config['model']
+id = config['id']
 
 def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.csv'):
     """
@@ -61,7 +68,7 @@ def plot_signals(signals, batch, outlier_threshold, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('..', '..', 'static', 'lstm_autoencoder', 'signals', filename=f'batch_{batch}.png')
+    path = utils.get_path('..', '..', 'static', config['id'], 'signals', filename=f'batch_{batch}.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -115,7 +122,7 @@ def compare_bands(signals, batch, threshold, num_bands=5, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('..', '..', 'static', 'lstm_autoencoder', 'metrics', filename=f'batch_{batch}_bands.png')
+    path = utils.get_path('..', '..', 'static', config['id'], 'metrics', filename=f'batch_{batch}_bands.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -158,7 +165,7 @@ def calculate_zero_crossings(signals, batch, num_points=100, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('..', '..', 'static', 'lstm_autoencoder', 'metrics', filename=f'batch_{batch}_zero_crossings.png')
+    path = utils.get_path('..', '..', 'static', config['id'], 'metrics', filename=f'batch_{batch}_zero_crossings.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -187,7 +194,7 @@ def theil_slope_intercept(signals, batch, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('..', '..', 'static', 'lstm_autoencoder', 'metrics', filename=f'batch_{batch}_detrended.png')
+    path = utils.get_path('..', '..', 'static', config['id'], 'metrics', filename=f'batch_{batch}_detrended.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -215,7 +222,7 @@ def calculate_rms(signals, batch, dpi=1200):
 
     plt.tight_layout()
 
-    path = utils.get_path('..', '..', 'static', 'lstm_autoencoder', 'metrics', filename=f'batch_{batch}_rms.png')
+    path = utils.get_path('..', '..', 'static', config['id'], 'metrics', filename=f'batch_{batch}_rms.png')
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
@@ -271,7 +278,7 @@ def collect_metrics(signals, num_bands=5, threshold=10):
             'pearson_correlation': float(pearson_corr)
         }
 
-    fn = utils.get_path('..', '..', 'static', 'lstm_autoencoder', filename='concat_signals_metrics.json')
+    fn = utils.get_path('..', '..', 'static', config['id'], filename='concat_signals_metrics.json')
     utils.save_json(data=metrics, filename=fn)
 
     logger.info(f'Metrics saved to {fn}.')
@@ -309,7 +316,7 @@ def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_
     df.to_csv(path, index=False)
 
 def test(data, criterion, model, visualize=False, estimate=False):
-    mfn = utils.get_path('..', '..', 'models', filename='lstm_autoencoder.pth')
+    mfn = utils.get_path('..', '..', 'models', filename=f'{config['id']}.pth')
 
     model.load_state_dict(torch.load(mfn))
     model.to(device)
@@ -369,13 +376,8 @@ def main():
 
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=True)
 
-    model = LSTM_Autoencoder(seq_len=seq_len,
-                             num_feats=2, 
-                             latent_seq_len=1, 
-                             latent_num_feats=16, 
-                             hidden_size=32, 
-                             num_layers=1,
-                             dropout=0.05)
+    model_class = globals()[config['name']]
+    model = model_class(seq_len=seq_len, **config['params'])
     
     test(data=dataloaders[0],
          criterion=utils.BlendedLoss(p=1.0, blend=0.1),
