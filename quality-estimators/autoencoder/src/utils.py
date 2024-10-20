@@ -13,6 +13,12 @@ from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 import seaborn as sns
 
 def get_logger(level='DEBUG'):
+    """
+    Create and configure a logger object with the specified logging level.
+
+    :param level: Logging level to set for the logger. Default is 'DEBUG'.
+    :return: Logger object configured with the specified logging level.
+    """
     logger = logging.getLogger(__name__)
 
     level_name = logging.getLevelName(level)
@@ -27,6 +33,12 @@ def get_logger(level='DEBUG'):
     return logger
 
 def get_dir(*sub_dirs):
+    """
+    Retrieve or create a directory path based on the script's location and the specified subdirectories.
+
+    :param sub_dirs: List of subdirectories to append to the script's directory.
+    :return: Full path to the directory.
+    """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     dir = os.path.join(script_dir, *sub_dirs)
 
@@ -36,6 +48,13 @@ def get_dir(*sub_dirs):
     return dir
 
 def get_path(*dirs, filename):
+    """
+    Construct a full file path by combining directory paths and a filename.
+
+    :param dirs: List of directory paths.
+    :param filename: Name of the file.
+    :return: Full path to the file.
+    """
     dir_path = get_dir(*dirs)
     path = os.path.join(dir_path, filename)
 
@@ -43,13 +62,14 @@ def get_path(*dirs, filename):
 
 def get_prfs(true, pred, avg=['micro', 'macro', 'weighted'], include_support=False, zero_division=0):
     """
-    Calculate precision, recall, fscore and support using the given averaging methods.
+    Calculate Precision, Recall, F-score, and Support using specified averaging methods.
 
-    :param true: list
-    :param pred: list
-    :param avg: list
-    :param include_support: boolean
-    :return: dict
+    :param true: List of true labels.
+    :param pred: List of predicted labels.
+    :param avg: Averaging methods to use for calculating metrics.
+    :param include_support: Whether to include Support in the output.
+    :param zero_division: Value to return when there is a zero division.
+    :return: Dictionary containing Precision, Recall, F-score, and Support for each averaging method.
     """
     prfs = {}
 
@@ -69,10 +89,10 @@ def get_optim(name, model, lr):
     """
     Get optimizer object based on name, model, and learning rate.
 
-    :param name: str
-    :param model: model
-    :param lr: float
-    :return: optimizer object
+    :param name: Name of the optimizer class.
+    :param model: Model to optimize.
+    :param lr: Learning rate for the optimizer.
+    :return: Optimizer object.
     """
     optim_class = getattr(optim, name)
     optimizer = optim_class(model.parameters(), lr=lr)
@@ -83,10 +103,10 @@ def get_sched(optimizer, name, **params):
     """
     Get scheduler object based on optimizer and additional parameters.
 
-    :param optimizer: optimizer object
-    :param name: str, name of the scheduler
-    :param params: additional parameters for the scheduler
-    :return: scheduler object
+    :param optimizer: Optimizer object to schedule.
+    :param name: Name of the scheduler.
+    :param params: Additional parameters for the scheduler.
+    :return: Scheduler object.
     """
     sched_class = getattr(sched, name)
     scheduler = sched_class(optimizer, **params)
@@ -96,16 +116,17 @@ def get_sched(optimizer, name, **params):
 def visualize(type, values, labels, title, plot_func=None, coloring=None, names=None, classes=None, tick=False, path='static'):
     """
     Visualize (x,y) data points.
-    :param type: str
-    :param values: list of tuples / tuple
-    :param labels: tuple
-    :param title: str
-    :param plot_func: plotting function (optional)
-    :param colors: list / str (optional)
-    :param names: list (optional)
-    :param tick: bool (optional)
-    :param classes: list (optional)
-    :param path: str
+
+    :param type: Type of visualization ('single-plot', 'multi-plot', or 'heatmap').
+    :param values: List of tuples or tuple containing the data points to visualize.
+    :param labels: Tuple containing labels for the x and y axes.
+    :param title: Title of the visualization.
+    :param plot_func: Plotting function (optional).
+    :param coloring: List or str containing colors for the plots (optional).
+    :param names: List of names for the plots (optional).
+    :param tick: Whether to display ticks on axes (optional).
+    :param classes: List of class names for labeling (optional).
+    :param path: Directory path to save the visualization.
     """
     x_label, y_label = labels
     plt.figure(figsize=(10, 6))
@@ -149,8 +170,9 @@ def visualize(type, values, labels, title, plot_func=None, coloring=None, names=
 def save_json(data, filename):
     """
     Save data to a JSON file.
-    :param data: dictionary
-    :param filename: str
+
+    :param data: Dictionary containing the data to save.
+    :param filename: Name of the file to save the data into.
     """
     with open(filename, 'w') as f:
         json.dump(data, f)
@@ -160,7 +182,7 @@ class WeightedCrossEntropyLoss(nn.Module):
         """
         Initialize the WeightedCrossEntropyLoss module.
 
-        :param weights: dictionary
+        :param weights: Dictionary containing the weights to apply for each class.
         """
         super(WeightedCrossEntropyLoss, self).__init__()
         self.weights = self.get_weights(weights)
@@ -169,8 +191,8 @@ class WeightedCrossEntropyLoss(nn.Module):
         """
         Extract weights from the given dictionary and convert them to a tensor.
 
-        :param weights: dictionary
-        :return: tensor
+        :param weights: Dictionary containing the weights.
+        :return: Tensor containing the weights.
         """
         weights = [weights[i] for i in range(len(weights))]
 
@@ -180,9 +202,9 @@ class WeightedCrossEntropyLoss(nn.Module):
         """
         Compute the weighted cross-entropy loss.
 
-        :param pred: tensor (batch_size * seq_len, num_classes)
-        :param true: tensor (batch_size * seq_len)
-        :return: tensor
+        :param pred: Tensor containing predicted outputs of shape (batch_size * seq_len, num_classes).
+        :param true: Tensor containing true labels of shape (batch_size * seq_len).
+        :return: Tensor containing the computed loss value.
         """
         if true.size(0) == 0 or pred.size(0) == 0:
             return torch.tensor(0.0, requires_grad=True, device=pred.device)
@@ -190,37 +212,15 @@ class WeightedCrossEntropyLoss(nn.Module):
         loss = F.cross_entropy(pred, true, weight=self.weights.to(pred.device))
 
         return loss
-    
-def normalize(df, exclude):
-    """
-    Normalize data.
-
-    :param df: dataframe
-    :param exclude: columns to exclude from normalization
-    :return: processed dataframe
-    """
-    newdf = df.copy()
-    stats = get_stats(df)
-
-    for col in df.columns:
-        if col not in exclude:
-            series = df[col]
-
-            mean = stats[col]['mean']
-            std = stats[col]['std']
-
-            series = (series - mean) / std
-            newdf[col] = series
-
-    return newdf
 
 def robust_normalize(df, exclude, path):
     """
     Normalize data using robust scaling (median and IQR) from precomputed stats.
 
-    :param df: dataframe
-    :param exclude: columns to exclude from normalization
-    :return: processed dataframe
+    :param df: DataFrame containing the data to normalize.
+    :param exclude: List of columns to exclude from normalization.
+    :param path: File path to save the computed statistics.
+    :return: Processed DataFrame with normalized data.
     """
     newdf = df.copy()
     
@@ -238,10 +238,10 @@ def robust_normalize(df, exclude, path):
 
 def get_stats(df):
     """
-    Compute mean, standard deviation, median, and IQR for each column in the dataframe.
+    Compute mean, standard deviation, median, and IQR for each column in the DataFrame.
 
-    :param df: dataframe
-    :return: dictionary with statistics
+    :param df: DataFrame containing the data to compute statistics for.
+    :return: Dictionary containing statistics for each column.
     """
     stats = {}
 
@@ -266,8 +266,8 @@ def get_max(arr):
     """
     Get the maximum value and its index from an array.
 
-    :param arr: numpy array
-    :return: namedtuple
+    :param arr: Array to search for the maximum value.
+    :return: Named tuple containing the maximum value and its index.
     """
     Info = namedtuple('Info', ['value', 'index'])
 
@@ -278,12 +278,26 @@ def get_max(arr):
     
 class BlendedLoss(nn.Module):
     def __init__(self, p=1.0, epsilon=1e-6, blend=0.01):
+        """
+        Initialize the BlendedLoss module.
+
+        :param p: Power to which the differences are raised.
+        :param epsilon: Small value added for numerical stability.
+        :param blend: Blend factor between median and mean.
+        """
         super(BlendedLoss, self).__init__()
         self.p = p
         self.epsilon = epsilon
         self.blend = blend
 
     def forward(self, input, target):
+        """
+        Compute the blended loss between the input and target.
+
+        :param input: Tensor containing the predicted values.
+        :param target: Tensor containing the target values.
+        :return: Computed blended loss.
+        """
         diff = torch.abs(input - target) + self.epsilon
 
         powered_diff = diff ** self.p

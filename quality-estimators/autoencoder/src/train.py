@@ -1,7 +1,6 @@
 import time
 import warnings
 import yaml
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 from . import utils
@@ -17,6 +16,20 @@ with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
 def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ignore_outliers=False, visualize=False):
+    """
+    Trains the model using the provided training data.
+
+    :param data: Tuple containing training and validation data loaders.
+    :param epochs: Number of epochs to train the model.
+    :param patience: Number of epochs with no improvement after which training will be stopped.
+    :param lr: Learning rate for the optimizer.
+    :param criterion: Loss function used for training.
+    :param model: The model to be trained.
+    :param optimizer: Optimizer to use for training.
+    :param scheduler: Learning rate scheduler configuration.
+    :param ignore_outliers: Flag to indicate whether to ignore outlier values during training.
+    :param visualize: Flag to indicate whether to visualize training progress.
+    """
     model.to(device)
 
     train_data, val_data = data
@@ -45,11 +58,8 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         total_train_loss = 0.0
 
         model.train()
-
-        #progress_bar = tqdm(enumerate(train_data), total=batches, desc=f"Epoch {epoch + 1}/{epochs}", leave=True)
         
         for _, (X, _) in enumerate(train_data):
-        #for _, (X, _) in progress_bar:
             X = X.to(device)
 
             X, _ = separate(src=X, c=[0,1], t=[2,3])
@@ -65,7 +75,6 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
             optimizer.step()
 
             total_train_loss += train_loss.item()
-            #progress_bar.set_postfix(Loss=train_loss.item())
 
         avg_train_loss = total_train_loss / batches
         train_losses.append(avg_train_loss)
@@ -140,6 +149,9 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
 def main():
+    """
+    Main function to execute the training process. Prepares data, initializes the model, and starts training.
+    """
     samples, chunks = 7680, 32
     seq_len = samples // chunks
 

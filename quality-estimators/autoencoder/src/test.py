@@ -18,12 +18,12 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-model = config['model']
-id = config['id']
-
 def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.csv'):
     """
-    Save testing dataset along with MSE differences to a CSV file.
+    Save the testing signals along with their mean squared error (MSE) to a CSV file.
+
+    :param testing_signals: List of tuples containing original and decoded signals.
+    :param filename: Name of the CSV file to save the data.
     """
     all_data = []
 
@@ -37,6 +37,14 @@ def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.
     df.to_csv(utils.get_path('..', '..', 'data', filename), index=False)
 
 def plot_signals(signals, batch, outlier_threshold, dpi=1200):
+    """
+    Plot the original and decoded signals for a specified batch.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param batch: Index of the batch to plot.
+    :param outlier_threshold: Threshold for detecting outliers in the signals.
+    :param dpi: Dots per inch for the output plot.
+    """
     num_features = signals[0][0].shape[-1]
     
     X, X_dec = signals[batch]
@@ -73,6 +81,15 @@ def plot_signals(signals, batch, outlier_threshold, dpi=1200):
     plt.close(fig)
 
 def compare_bands(signals, batch, threshold, num_bands=5, dpi=1200):
+    """
+    Compare the distribution of original and decoded signals in specified bands.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param batch: Index of the batch to compare.
+    :param threshold: Threshold for outlier detection.
+    :param num_bands: Number of bands to divide the signal range into.
+    :param dpi: Dots per inch for the output plot.
+    """
     num_features = signals[0][0].shape[-1]
 
     X, X_dec = signals[batch]
@@ -127,6 +144,14 @@ def compare_bands(signals, batch, threshold, num_bands=5, dpi=1200):
     plt.close(fig)
 
 def calculate_zero_crossings(signals, batch, num_points=100, dpi=1200):
+    """
+    Calculate and plot zero crossings for the original and decoded signals in a specified batch.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param batch: Index of the batch to analyze.
+    :param num_points: Number of points to use for smoothing zero crossings.
+    :param dpi: Dots per inch for the output plot.
+    """
     num_features = signals[0][0].shape[-1]
     
     X, X_dec = signals[batch]
@@ -170,6 +195,13 @@ def calculate_zero_crossings(signals, batch, num_points=100, dpi=1200):
     plt.close(fig)
 
 def theil_slope_intercept(signals, batch, dpi=1200):
+    """
+    Calculate and plot the Theil slope and intercept for original and decoded signals.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param batch: Index of the batch to analyze.
+    :param dpi: Dots per inch for the output plot.
+    """
     num_features = signals[0][0].shape[-1]
     
     X, X_dec = signals[batch]
@@ -199,6 +231,13 @@ def theil_slope_intercept(signals, batch, dpi=1200):
     plt.close(fig)
 
 def calculate_rms(signals, batch, dpi=1200):
+    """
+    Calculate and plot the root mean square (RMS) of the differences between original and decoded signals.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param batch: Index of the batch to analyze.
+    :param dpi: Dots per inch for the output plot.
+    """
     num_features = signals[0][0].shape[-1]
 
     X, X_dec = signals[batch]
@@ -227,6 +266,14 @@ def calculate_rms(signals, batch, dpi=1200):
     plt.close(fig)
 
 def collect_metrics(signals, num_bands=5, threshold=10):
+    """
+    Collect metrics by analyzing raw and decoded signals across specified bands.
+
+    :param signals: List of tuples containing original and decoded signals.
+    :param num_bands: Number of bands to divide the signal range into.
+    :param threshold: Threshold for outlier detection.
+    :return: Dictionary containing collected metrics for each feature.
+    """
     num_features = signals[0][0].shape[-1]
 
     all_raw_signals = [[] for _ in range(num_features)]
@@ -284,6 +331,13 @@ def collect_metrics(signals, num_bands=5, threshold=10):
     logger.info(f'Metrics saved to {fn}.')
 
 def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+    """
+    Estimate the quality of the model's predictions and save the results to a CSV file.
+
+    :param dataloader: Dataloader providing batches of input data and labels.
+    :param signals: Model output signals for the evaluation.
+    :param cols: Tuple containing lists of feature columns, time-related columns, and target columns.
+    """
     all_data = []
     X_cols, t_cols, y_cols = cols
 
@@ -312,10 +366,19 @@ def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_
 
     df = pd.DataFrame(all_data)
 
-    path = utils.get_path('..', '..', 'data', 'proc', 'test_lstm.csv')
+    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_{config['id']}.csv')
     df.to_csv(path, index=False)
 
 def test(data, criterion, model, visualize=False, estimate=False):
+    """
+    Test the model on the provided data and calculate the test loss.
+
+    :param data: Data to test the model on.
+    :param criterion: Loss function used to compute the test loss.
+    :param model: The model to be evaluated.
+    :param visualize: Whether to visualize the model's predictions.
+    :param estimate: Whether to estimate the quality of the predictions.
+    """
     mfn = utils.get_path('..', '..', 'models', filename=f'{config['id']}.pth')
 
     model.load_state_dict(torch.load(mfn))
@@ -360,6 +423,9 @@ def test(data, criterion, model, visualize=False, estimate=False):
     logger.info(f'\nTesting complete!\nTesting Loss: {avg_test_loss:.6f}\n')
 
 def main():
+    """
+    Main function to execute the testing workflow, including data preparation and model evaluation.
+    """
     samples, chunks = 7680, 32
     seq_len = samples // chunks
 
@@ -382,8 +448,8 @@ def main():
     test(data=dataloaders[0],
          criterion=utils.BlendedLoss(p=1.0, blend=0.1),
          model=model,
-         visualize=False,
-         estimate=False)
+         visualize=True,
+         estimate=True)
 
 if __name__ == '__main__':
     main()
