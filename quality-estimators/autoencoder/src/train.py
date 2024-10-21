@@ -111,7 +111,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
 
             logger.info(f'New best val found! ~ Epoch [{epoch + 1}/{epochs}], Val Loss {avg_val_loss}')
 
-            path = utils.get_path('..', '..', 'models', filename=f'{id}.pth')
+            path = utils.get_path('..', '..', 'models', filename=f'{config['id']}.pth')
             torch.save(model.state_dict(), path)
 
             checkpoints.update({
@@ -133,7 +133,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         'epochs': epoch + 1,
         'train_time': train_time})
     
-    cfn = utils.get_path('..', '..', 'static', id, filename='train_checkpoints.json')
+    cfn = utils.get_path('..', '..', 'static', config['id'], filename='train_checkpoints.json')
     utils.save_json(data=checkpoints, filename=cfn)
     
     if visualize:
@@ -144,7 +144,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
                         plot_func=plt.plot,
                         coloring=['brown', 'royalblue'],
                         names=['Training', 'Validation'],
-                        path=utils.get_dir('..', '..', 'static', id))
+                        path=utils.get_dir('..', '..', 'static', config['id']))
 
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
