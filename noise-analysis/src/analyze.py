@@ -42,7 +42,7 @@ def main():
             logger.debug(f"Loaded CSV for {id} from {csv_path}")
             logger.info(f"Unique {passage['name']}s in {id}.csv: {df[passage['name']].unique()}")
 
-            df = df[df[passage['name']] == passage['value']]
+            df = df[df[passage['name']] == passage['value']].sort_values(by='time')
             
             noise_cols = [col for col in df.columns if col.startswith('noise_')]
             noise_dict[id] = {col.replace('noise_', ''): None for col in noise_cols}
