@@ -1,0 +1,7 @@
+passage: 32
+
+estimators:
+  - lstm_ae
+  - conv_lstm_ae
+
+transformation: None
