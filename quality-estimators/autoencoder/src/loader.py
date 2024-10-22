@@ -164,27 +164,6 @@ def split_data(dir, train_size=57, val_size=1, test_size=1):
 
     return (train_paths, val_paths, test_paths)
 
-def get_fs(path):
-    """
-    Get the sampling frequency (fs) from a randomly selected CSV file in the specified directory.
-
-    :param path: Path to the directory containing CSV files.
-    :return: Sampling frequency (fs) in Hz.
-    """
-    csv_files = [f for f in os.listdir(path) if f.endswith('.csv')]
-    selected_file = os.path.join(path, random.choice(csv_files))
-
-    data = pd.read_csv(selected_file)
-    time = data['time']
-
-    time_diffs = time.diff().dropna()
-    avg_time_diff = time_diffs.mean()
-
-    fs = 1 / avg_time_diff
-    print(f'Sampling frequency: {fs:.2f} Hz')
-
-    return fs
-
 def load_file(path):
     """
     Load data from a CSV file.

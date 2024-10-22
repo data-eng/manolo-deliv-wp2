@@ -50,21 +50,3 @@ def get_dir(*sub_dirs):
         os.makedirs(dir)
 
     return dir
-
-def get_fs(path):
-    """
-    Get the sampling frequency (fs) from the specified CSV file.
-
-    :param path: Path to the CSV file.
-    :return: Sampling frequency (fs) in Hz.
-    """
-    data = pd.read_csv(path)
-    time = data['time']
-
-    time_diffs = time.diff().dropna()
-    avg_time_diff = time_diffs.mean()
-
-    fs = 1 / avg_time_diff
-    print(f'Sampling frequency: {fs:.2f} Hz')
-
-    return fs

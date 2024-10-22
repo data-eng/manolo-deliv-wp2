@@ -5,8 +5,9 @@ passage:
 estimators:
   - lstm_ae
   - conv_lstm_ae
+  - mne
 
 transformation: None
 # transformation: "retain_if_greater_than_one"
 
-window: 50000
+window: 1000

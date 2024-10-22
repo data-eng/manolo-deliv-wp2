@@ -14,7 +14,7 @@ def main():
     """
     data_columns = ['HB_1', 'HB_2']
 
-    csv_path = utils.get_path('..', '..', 'data', 'proc', filename='test.csv')
+    csv_path = utils.get_path('..', '..', 'data', 'proc', filename='test_unorm.csv')
     mne_csv_path = utils.get_path('..', '..', 'data', 'proc', filename='estim_mne.csv')
 
     df = pd.read_csv(csv_path)
@@ -22,10 +22,7 @@ def main():
 
     data = df[data_columns].to_numpy().T
 
-    sfreq = utils.get_fs(path=csv_path)
-    logger.info(f"Sampling frequency is: {sfreq} Hz.")
-
-    filtered_data = mne.filter.filter_data(data, sfreq=sfreq, l_freq=0.5, h_freq=40)
+    filtered_data = mne.filter.filter_data(data, sfreq=256, l_freq=0.5, h_freq=40)
     filtered_df = pd.DataFrame(filtered_data.T, columns=data_columns)
 
     for col in data_columns:
