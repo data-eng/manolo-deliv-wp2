@@ -12,11 +12,21 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-def visualize_estimators(noise_dict, passage, shift=0.5, dpi=600):
+def average_over_segments(values, segment_size):
+    """
+    Calculate the average of values over specified segments.
+    :param values: List of values to be averaged.
+    :param segment_size: Size of each segment for averaging.
+    :return: List of averaged values for each segment.
+    """
+    return [np.mean(values[i:i + segment_size]) for i in range(0, len(values), segment_size)]
+
+def visualize_estimators(noise_dict, passage, shift=2, window=10000, dpi=600):
     """
     Visualize the noise values for each estimator with a shift.
     :param noise_dict: Dictionary of noise values for each estimator.
     :param passage: Information about the specific passage to visualize.
+    :param window_size: Size of the window for averaging.
     :param dpi: Dots per inch for the saved figure.
     """
     features = list(noise_dict[next(iter(noise_dict))].keys())
@@ -30,10 +40,12 @@ def visualize_estimators(noise_dict, passage, shift=0.5, dpi=600):
         ax = axes[idx] if num_features > 1 else axes
         
         for estimator_id, (noise_values, color) in zip(noise_dict.keys(), zip(noise_dict.values(), colors)):
-            s = list(noise_dict.keys()).index(estimator_id) * 0.5
+            s = list(noise_dict.keys()).index(estimator_id) * shift
 
-            x_values = range(len(noise_values[feature]))
-            y_values = [val + s for val in noise_values[feature]]
+            averaged_values = average_over_segments(noise_values[feature], window)
+
+            x_values = range(len(averaged_values))
+            y_values = [abs(val) + s for val in averaged_values]
 
             ax.plot(x_values, y_values, label=estimator_id, color=color, linewidth=0.5)
         
@@ -88,7 +100,7 @@ def main():
         except FileNotFoundError:
             logger.error(f"CSV file for {id} not found at {csv_path}")
 
-    visualize_estimators(noise_dict, passage)
+    visualize_estimators(noise_dict, passage, window=config['window'])
 
 if __name__ == '__main__':
     main()
