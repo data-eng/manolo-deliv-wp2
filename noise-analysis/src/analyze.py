@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import theilslopes, pearsonr
+import matplotlib.cm as cm
 from . import utils
 
 logger = utils.get_logger(level='DEBUG')
@@ -11,6 +11,41 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
+
+def visualize_estimators(noise_dict, passage, shift=0.5, dpi=600):
+    """
+    Visualize the noise values for each estimator with a shift.
+    :param noise_dict: Dictionary of noise values for each estimator.
+    :param passage: Information about the specific passage to visualize.
+    :param dpi: Dots per inch for the saved figure.
+    """
+    features = list(noise_dict[next(iter(noise_dict))].keys())
+    num_features = len(features)
+    pn, pv = passage['name'], passage['value']
+    
+    fig, axes = plt.subplots(nrows=1, ncols=num_features, figsize=(10 * num_features, 5))
+    colors = cm.viridis(np.linspace(0, 1, len(noise_dict)))
+    
+    for idx, feature in enumerate(features):
+        ax = axes[idx] if num_features > 1 else axes
+        
+        for estimator_id, (noise_values, color) in zip(noise_dict.keys(), zip(noise_dict.values(), colors)):
+            s = list(noise_dict.keys()).index(estimator_id) * 0.5
+
+            x_values = range(len(noise_values[feature]))
+            y_values = [val + s for val in noise_values[feature]]
+
+            ax.plot(x_values, y_values, label=estimator_id, color=color, linewidth=0.5)
+        
+        ax.set_title(f'Noise values for {feature} - {pn.capitalize()} {pv}')
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Noise')
+        ax.legend()
+        ax.grid(True)
+
+    path = utils.get_path('..', 'static', filename=f'noise_analysis_{pn}_{pv}.png')
+    plt.savefig(path, dpi=dpi)
+    plt.close(fig)
 
 def apply(values, func=None):
     """
@@ -52,6 +87,8 @@ def main():
 
         except FileNotFoundError:
             logger.error(f"CSV file for {id} not found at {csv_path}")
+
+    visualize_estimators(noise_dict, passage)
 
 if __name__ == '__main__':
     main()
