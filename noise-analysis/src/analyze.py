@@ -203,22 +203,17 @@ def visualize_agreement(dict):
 
     :param dict: Dictionary containing agreement percentages for each feature.
     """
-    estimator_ids = list(dict[next(iter(dict))].keys())
-    estimator_names = [config['estimators'][i] for i in range(len(estimator_ids))]
+    estimator_ids = config['estimators']
 
     num_features = len(dict)
     fig, axes = plt.subplots(1, num_features, figsize=(8 * num_features, 6))
 
     axes = [axes] if num_features == 1 else axes
 
-    for _, (feature, agreements) in zip(axes, dict.items()):
+    for ax, (feature, agreements) in zip(axes, dict.items()):
         agreement_matrix = np.zeros((len(estimator_ids), len(estimator_ids)))
 
         for (est_1, est_2), percentage in agreements.items():
-            
-            if est_1 not in estimator_ids or est_2 not in estimator_ids:
-                continue
-
             idx_1 = estimator_ids.index(est_1)
             idx_2 = estimator_ids.index(est_2)
 
@@ -226,8 +221,8 @@ def visualize_agreement(dict):
             agreement_matrix[idx_2, idx_1] = percentage
 
         sns.heatmap(agreement_matrix, annot=True, fmt=".2f", cmap='coolwarm',
-                    xticklabels=estimator_names, yticklabels=estimator_names,
-                    cbar_kws={'label': 'Agreement Percentage (%)'})
+                    xticklabels=estimator_ids, yticklabels=estimator_ids,
+                    cbar_kws={'label': 'Agreement Percentage (%)'}, ax=ax)
         
         plt.title(f'Agreement Heatmap for Feature: {feature}')
         plt.xlabel('Estimators')
