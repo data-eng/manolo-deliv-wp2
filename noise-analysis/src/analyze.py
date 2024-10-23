@@ -45,20 +45,20 @@ def load_noise_data():
 
     return noise_dict
 
-def get_top10_noisy_timesteps(exists=False):
+def get_top_noisy_timesteps(k=0.1, exists=False):
     """
-    Extract top 10% noisy timesteps for each feature and estimator.
+    Extract top 100*k% noisy timesteps for each feature and estimator.
 
     :return: Dictionary containing top 10% noisy timesteps for each feature in each estimator.
     """
-    top10s = {}
-    path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='top10s.npy')
+    topKs = {}
+    path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
 
     if exists and os.path.exists(path):
-        top10s = np.load(path, allow_pickle=True).item()
-        logger.info(f"Loaded existing top 10% timesteps from {path}.")
+        topKs = np.load(path, allow_pickle=True).item()
+        logger.info(f"Loaded existing top {k*100}% timesteps from {path}.")
 
-        return top10s
+        return topKs
 
     for id in estimators:
         csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}.csv')
@@ -67,28 +67,28 @@ def get_top10_noisy_timesteps(exists=False):
         logger.debug(f"Loaded CSV for {id} from {csv_path}.")
         
         noise_cols = [col for col in df.columns if col.startswith('noise_')]
-        top10 = {}
+        topK = {}
 
         for noise_col in noise_cols:
             df_sorted = df.sort_values(by=noise_col, ascending=False)
             
             total_rows = len(df_sorted)
-            ten_perc = int(total_rows * 0.1)
-            logger.info(f"For {noise_col}: Total rows = {total_rows}, Top 10% rows = {ten_perc}.")
+            k_perc = int(total_rows * k)
+            logger.info(f"For {noise_col}: Total rows = {total_rows}, Top {k*100}% rows = {k_perc}.")
 
-            df_top_10 = df_sorted.iloc[:ten_perc]
+            df_topK = df_sorted.iloc[:k_perc]
 
-            top_10_times = df_top_10['time'].to_numpy()
+            topK_times = df_topK['time'].to_numpy()
             feature_name = noise_col.replace('noise_', '')
 
-            top10[feature_name] = top_10_times
+            topK[feature_name] = topK_times
 
-        top10s[id] = top10
+        topKs[id] = topK
     
-    np.save(path, top10s)
-    logger.info(f"Saved top 10% timesteps to {path}.")
+    np.save(path, topKs)
+    logger.info(f"Saved top {k*100}% timesteps to {path}.")
 
-    return top10s
+    return topKs
 
 def average_over_segments(values, segment_size):
     """
@@ -211,7 +211,7 @@ def visualize_agreement(dict):
     axes = [axes] if num_features == 1 else axes
 
     for ax, (feature, agreements) in zip(axes, dict.items()):
-        agreement_matrix = np.zeros((len(estimator_ids), len(estimator_ids)))
+        agreement_matrix = np.ones((len(estimator_ids), len(estimator_ids)))
 
         for (est_1, est_2), percentage in agreements.items():
             idx_1 = estimator_ids.index(est_1)
@@ -224,9 +224,9 @@ def visualize_agreement(dict):
                     xticklabels=estimator_ids, yticklabels=estimator_ids,
                     cbar_kws={'label': 'Agreement Percentage (%)'}, ax=ax)
         
-        plt.title(f'Agreement Heatmap for Feature: {feature}')
-        plt.xlabel('Estimators')
-        plt.ylabel('Estimators')
+        ax.set_title(f'{feature}')
+        ax.set_xlabel('Estimators')
+        ax.set_ylabel('Estimators')
     
     plt.tight_layout()
 
@@ -244,11 +244,11 @@ def main():
     extracts the top 10% noisy timesteps, computes the agreement percentages
     between estimator pairs for each feature, and visualizes these agreements as heatmaps.
     """
-    #noise_dict = load_noise_data()
-    #visualize_noise(dict=noise_dict)
+    noise_dict = load_noise_data()
+    visualize_noise(dict=noise_dict)
 
-    tops10s = get_top10_noisy_timesteps(exists=True)
-    agreement_dict = compute_agreement(dict=tops10s)
+    tops5s = get_top_noisy_timesteps(k=0.05, exists=True)
+    agreement_dict = compute_agreement(dict=tops5s)
     visualize_agreement(dict=agreement_dict)
 
 if __name__ == '__main__':
