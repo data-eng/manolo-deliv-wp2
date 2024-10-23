@@ -247,8 +247,8 @@ def main():
     noise_dict = load_noise_data()
     visualize_noise(dict=noise_dict)
 
-    tops5s = get_top_noisy_timesteps(k=0.05, exists=True)
-    agreement_dict = compute_agreement(dict=tops5s)
+    topsKs = get_top_noisy_timesteps(k=0.1, exists=False)
+    agreement_dict = compute_agreement(dict=topsKs)
     visualize_agreement(dict=agreement_dict)
 
 if __name__ == '__main__':
