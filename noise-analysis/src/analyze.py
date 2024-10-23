@@ -241,13 +241,13 @@ def main():
     Main function to execute the noise analysis workflow.
 
     It loads noise data from CSV files, visualizes noise values for each estimator,
-    extracts the top 10% noisy timesteps, computes the agreement percentages
+    extracts the top 100*k% noisy timesteps, computes the agreement percentages
     between estimator pairs for each feature, and visualizes these agreements as heatmaps.
     """
-    noise_dict = load_noise_data()
-    visualize_noise(dict=noise_dict)
+    #noise_dict = load_noise_data()
+    #visualize_noise(dict=noise_dict)
 
-    topsKs = get_top_noisy_timesteps(k=0.1, exists=False)
+    topsKs = get_top_noisy_timesteps(k=config["perc"], exists=False)
     agreement_dict = compute_agreement(dict=topsKs)
     visualize_agreement(dict=agreement_dict)
 
