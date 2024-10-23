@@ -217,8 +217,8 @@ def visualize_agreement(dict):
             idx_1 = estimator_ids.index(est_1)
             idx_2 = estimator_ids.index(est_2)
 
-            agreement_matrix[idx_1, idx_2] = percentage
-            agreement_matrix[idx_2, idx_1] = percentage
+            agreement_matrix[idx_1, idx_2] = percentage/100
+            agreement_matrix[idx_2, idx_1] = percentage/100
 
         sns.heatmap(agreement_matrix, annot=True, fmt=".2f", cmap='coolwarm',
                     xticklabels=estimator_ids, yticklabels=estimator_ids,
