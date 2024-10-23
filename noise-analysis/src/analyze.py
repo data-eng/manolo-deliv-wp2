@@ -217,7 +217,6 @@ def visualize_agreement(dict):
         for (est_1, est_2), percentage in agreements.items():
             
             if est_1 not in estimator_ids or est_2 not in estimator_ids:
-                logger.warning(f"Warning: '{est_1}' or '{est_2}' not found in estimator_ids!")
                 continue
 
             idx_1 = estimator_ids.index(est_1)
