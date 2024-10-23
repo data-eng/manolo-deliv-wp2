@@ -5,10 +5,10 @@ passage:
 estimators:
   - lstm_ae
   - conv_lstm_ae
+  - attn_ae
   - mne
 
 transformation: None
-# transformation: "retain_if_greater_than_one"
 
 window: 1000
-perc: 0.05
+perc: 0.01

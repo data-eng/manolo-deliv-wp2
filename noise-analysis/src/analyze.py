@@ -244,8 +244,8 @@ def main():
     extracts the top 100*k% noisy timesteps, computes the agreement percentages
     between estimator pairs for each feature, and visualizes these agreements as heatmaps.
     """
-    #noise_dict = load_noise_data()
-    #visualize_noise(dict=noise_dict)
+    noise_dict = load_noise_data()
+    visualize_noise(dict=noise_dict)
 
     topsKs = get_top_noisy_timesteps(k=config["perc"], exists=False)
     agreement_dict = compute_agreement(dict=topsKs)
