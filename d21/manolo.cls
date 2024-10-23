@@ -52,7 +52,7 @@
 %%
 \RequirePackage[%
   a4paper,
-  top=1in,   bottom=0.9in,     left=1in,    right=1in,
+  top=3cm, bottom=2cm, left=2cm, right=2cm,
   bindingoffset=0cm,
   head=1in,  headsep=0.3in,
   foot=1in,  footskip=0.4in ]{geometry}
