@@ -63,14 +63,21 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
     for id in estimators:
         csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}.csv')
         df = pd.read_csv(csv_path)
+
+        logger.debug(f"Loaded CSV for {id} from {csv_path}, with number of rows: {len(df)}")
+
+        df_avg = pd.DataFrame()
         
-        logger.debug(f"Loaded CSV for {id} from {csv_path}.")
+        for col in df.columns:
+            df_avg[col] = average_over_segments(df[col].tolist(), segment_size=window)
+
+        logger.info(f"Averaged DataFrame for {id} using window size {window}, with number of rows: {len(df_avg)}")
         
-        noise_cols = [col for col in df.columns if col.startswith('noise_')]
+        noise_cols = [col for col in df_avg.columns if col.startswith('noise_')]
         topK = {}
 
         for noise_col in noise_cols:
-            df_sorted = df.sort_values(by=noise_col, ascending=False)
+            df_sorted = df_avg.sort_values(by=noise_col, ascending=False)
             
             total_rows = len(df_sorted)
             k_perc = int(total_rows * k)
@@ -244,8 +251,8 @@ def main():
     extracts the top 100*k% noisy timesteps, computes the agreement percentages
     between estimator pairs for each feature, and visualizes these agreements as heatmaps.
     """
-    noise_dict = load_noise_data()
-    visualize_noise(dict=noise_dict)
+    #noise_dict = load_noise_data()
+    #visualize_noise(dict=noise_dict)
 
     topsKs = get_top_noisy_timesteps(k=config["perc"], exists=False)
     agreement_dict = compute_agreement(dict=topsKs)
