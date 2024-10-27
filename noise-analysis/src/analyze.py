@@ -67,7 +67,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         logger.debug(f"Loaded CSV for {id} from {csv_path}, with number of rows: {len(df)}")
 
         df_avg = pd.DataFrame()
-        
+
         for col in df.columns:
             df_avg[col] = average_over_segments(df[col].tolist(), segment_size=window)
 
@@ -100,12 +100,18 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
 def average_over_segments(values, segment_size):
     """
     Calculate the average of values over specified segments.
-
-    :param values: List of values to be averaged.
-    :param segment_size: Size of each segment for averaging.
-    :return: List of averaged values for each segment.
+    
+    The last segment may have fewer elements than segment_size.
     """
-    return [np.mean(values[i:i + segment_size]) for i in range(0, len(values), segment_size)]
+    values_array = np.array(values)
+    num_segments = len(values_array) // segment_size
+
+    if num_segments > 0:
+        averages = values_array[:num_segments * segment_size].reshape(-1, segment_size).mean(axis=1)
+    else:
+        averages = values_array
+
+    return averages.tolist()
 
 def visualize_noise(dict, shift=2, outlier_threshold=50, dpi=600):
     """
