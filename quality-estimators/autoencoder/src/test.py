@@ -18,24 +18,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-def save_testing_data_with_mse(testing_signals, filename='testing_data_with_mse.csv'):
-    """
-    Save the testing signals along with their mean squared error (MSE) to a CSV file.
-
-    :param testing_signals: List of tuples containing original and decoded signals.
-    :param filename: Name of the CSV file to save the data.
-    """
-    all_data = []
-
-    for X, X_dec in testing_signals:
-        mse = np.mean((X.cpu().numpy() - X_dec.cpu().numpy()) ** 2, axis=1)
-
-        for i in range(len(mse)):
-            all_data.append(np.append(X[i].cpu().numpy(), mse[i]))
-
-    df = pd.DataFrame(all_data, columns=[f'Feature_{j+1}' for j in range(X.shape[1])] + ['MSE'])
-    df.to_csv(utils.get_path('..', '..', 'data', filename), index=False)
-
 def plot_signals(signals, batch, outlier_threshold, dpi=1200):
     """
     Plot the original and decoded signals for a specified batch.

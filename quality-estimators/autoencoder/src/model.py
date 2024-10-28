@@ -3,13 +3,13 @@ import torch
 import torch.nn as nn
 
 class LSTM_Encoder(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers, dropout):
+    def __init__(self, in_size, hidden_size, out_size, num_layers, dropout):
         """
         LSTM Encoder module.
         
-        :param input_size: Size of the input features.
+        :param in_size: Size of the input features.
         :param hidden_size: Number of features in the hidden state.
-        :param output_size: Size of the output feature vector.
+        :param out_size: Size of the output feature vector.
         :param num_layers: Number of stacked LSTM layers.
         :param dropout: Dropout rate for regularization.
         """
@@ -17,16 +17,16 @@ class LSTM_Encoder(nn.Module):
 
         lstm_dropout = 0 if num_layers == 1 else dropout
         
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=lstm_dropout)
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.lstm = nn.LSTM(in_size, hidden_size, num_layers, batch_first=True, dropout=lstm_dropout)
+        self.fc = nn.Linear(hidden_size, out_size)
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x):
         """
         Forward pass for LSTM Encoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, input_size).
-        :return: Encoded output tensor of shape (batch_size, output_size).
+        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :return: Encoded output tensor of shape (batch_size, out_size).
         """
         x, _ = self.lstm(x)
 
@@ -38,13 +38,13 @@ class LSTM_Encoder(nn.Module):
         return x
 
 class LSTM_Decoder(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers, seq_len, dropout):
+    def __init__(self, in_size, hidden_size, out_size, num_layers, seq_len, dropout):
         """
         LSTM Decoder module.
         
-        :param input_size: Size of the input features.
+        :param in_size: Size of the input features.
         :param hidden_size: Number of features in the hidden state.
-        :param output_size: Size of the output feature vector.
+        :param out_size: Size of the output feature vector.
         :param num_layers: Number of stacked LSTM layers.
         :param seq_len: Length of the output sequence.
         :param dropout: Dropout rate for regularization.
@@ -55,16 +55,16 @@ class LSTM_Decoder(nn.Module):
         
         self.seq_len = seq_len
         
-        self.fc = nn.Linear(output_size, hidden_size)
-        self.lstm = nn.LSTM(hidden_size, input_size, num_layers, batch_first=True, dropout=lstm_dropout)
+        self.fc = nn.Linear(out_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, in_size, num_layers, batch_first=True, dropout=lstm_dropout)
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, x):
         """
         Forward pass for LSTM Decoder.
         
-        :param x: Encoded input tensor of shape (batch_size, output_size).
-        :return: Decoded output tensor of shape (batch_size, seq_len, input_size).
+        :param x: Encoded input tensor of shape (batch_size, out_size).
+        :return: Decoded output tensor of shape (batch_size, seq_len, in_size).
         """
         x = self.fc(x)
         x = self.dropout(x)
@@ -94,15 +94,15 @@ class LSTM_Autoencoder(nn.Module):
         self.latent_seq_len = latent_seq_len
         self.latent_num_feats = latent_num_feats
         
-        self.encoder = LSTM_Encoder(input_size=num_feats, 
+        self.encoder = LSTM_Encoder(in_size=num_feats, 
                                     hidden_size=hidden_size, 
-                                    output_size=latent_seq_len * latent_num_feats, 
+                                    out_size=latent_seq_len * latent_num_feats, 
                                     num_layers=num_layers,
                                     dropout=dropout)
 
-        self.decoder = LSTM_Decoder(input_size=num_feats, 
+        self.decoder = LSTM_Decoder(in_size=num_feats, 
                                     hidden_size=hidden_size, 
-                                    output_size=latent_seq_len * latent_num_feats, 
+                                    out_size=latent_seq_len * latent_num_feats, 
                                     num_layers=num_layers,
                                     seq_len=seq_len,
                                     dropout=dropout)                       
@@ -122,13 +122,13 @@ class LSTM_Autoencoder(nn.Module):
         return dec_x, latent
     
 class ConvLSTM_Encoder(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers, seq_len, dropout):
+    def __init__(self, in_size, hidden_size, out_size, num_layers, seq_len, dropout):
         """
         ConvLSTM Encoder module.
         
-        :param input_size: Size of the input features.
+        :param in_size: Size of the input features.
         :param hidden_size: Number of features in the hidden state.
-        :param output_size: Size of the output feature vector.
+        :param out_size: Size of the output feature vector.
         :param num_layers: Number of stacked LSTM layers.
         :param seq_len: Length of the input sequence.
         :param dropout: Dropout rate for regularization.
@@ -137,16 +137,16 @@ class ConvLSTM_Encoder(nn.Module):
 
         lstm_dropout = 0 if num_layers == 1 else dropout
         
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=lstm_dropout)
-        self.conv = nn.Conv1d(hidden_size, output_size, kernel_size=seq_len)
+        self.lstm = nn.LSTM(in_size, hidden_size, num_layers, batch_first=True, dropout=lstm_dropout)
+        self.conv = nn.Conv1d(hidden_size, out_size, kernel_size=seq_len)
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x):
         """
         Forward pass for ConvLSTM Encoder.
 
-        :param x: Input tensor of shape (batch_size, seq_len, input_size).
-        :return: Encoded output tensor of shape (batch_size, output_size).
+        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :return: Encoded output tensor of shape (batch_size, out_size).
         """
         x, _ = self.lstm(x)
 
@@ -159,13 +159,13 @@ class ConvLSTM_Encoder(nn.Module):
         return x
 
 class ConvLSTM_Decoder(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers, seq_len, dropout):
+    def __init__(self, in_size, hidden_size, out_size, num_layers, seq_len, dropout):
         """
         ConvLSTM Decoder module.
         
-        :param input_size: Size of the input features.
+        :param in_size: Size of the input features.
         :param hidden_size: Number of features in the hidden state.
-        :param output_size: Size of the output feature vector.
+        :param out_size: Size of the output feature vector.
         :param num_layers: Number of stacked LSTM layers.
         :param seq_len: Length of the output sequence.
         :param dropout: Dropout rate for regularization.
@@ -176,16 +176,16 @@ class ConvLSTM_Decoder(nn.Module):
         
         self.seq_len = seq_len
         
-        self.lstm = nn.LSTM(hidden_size, input_size, num_layers, batch_first=True, dropout=lstm_dropout)
-        self.conv_transpose = nn.ConvTranspose1d(in_channels=output_size, out_channels=hidden_size, kernel_size=seq_len)
+        self.lstm = nn.LSTM(hidden_size, in_size, num_layers, batch_first=True, dropout=lstm_dropout)
+        self.conv_transpose = nn.ConvTranspose1d(in_channels=out_size, out_channels=hidden_size, kernel_size=seq_len)
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, x):
         """
         Forward pass for the ConvLSTM Decoder.
         
-        :param x: Encoded input tensor of shape (batch_size, output_size).
-        :return: Decoded output tensor of shape (batch_size, seq_len, input_size).
+        :param x: Encoded input tensor of shape (batch_size, out_size).
+        :return: Decoded output tensor of shape (batch_size, seq_len, in_size).
         """
         x = x.unsqueeze(1)
         x = x.transpose(1, 2)
@@ -218,16 +218,16 @@ class ConvLSTM_Autoencoder(nn.Module):
         self.latent_seq_len = latent_seq_len
         self.latent_num_feats = latent_num_feats
         
-        self.encoder = ConvLSTM_Encoder(input_size=num_feats, 
+        self.encoder = ConvLSTM_Encoder(in_size=num_feats, 
                                         hidden_size=hidden_size, 
-                                        output_size=latent_seq_len * latent_num_feats, 
+                                        out_size=latent_seq_len * latent_num_feats, 
                                         num_layers=num_layers,
                                         seq_len=seq_len,
                                         dropout=dropout)
 
-        self.decoder = ConvLSTM_Decoder(input_size=num_feats, 
+        self.decoder = ConvLSTM_Decoder(in_size=num_feats, 
                                         hidden_size=hidden_size, 
-                                        output_size=latent_seq_len * latent_num_feats, 
+                                        out_size=latent_seq_len * latent_num_feats, 
                                         num_layers=num_layers,
                                         seq_len=seq_len,
                                         dropout=dropout)                       
@@ -249,9 +249,9 @@ class ConvLSTM_Autoencoder(nn.Module):
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, num_heads):
         """
-        Initialize the Multi-Head Attention module. The module computes attention weights with shape 
-        torch.Size([batch_size, num_heads, seq_length, seq_length]), which can be accessed as 
-        model.encoder[layer_id].self_attn.attn_weights.
+        Initialize the Multi-Head Attention module. The module computes the attention matrix 
+        with shape torch.Size([batch_size, seq_length, d_model]), which can be accessed 
+        as model.encoder[layer_id].self_attn.attn_matrix.
 
         :param d_model: dimension of the input and output features
         :param num_heads: number of attention heads
@@ -269,7 +269,7 @@ class MultiHeadAttention(nn.Module):
         self.W_v = nn.Linear(d_model, d_model)
         self.W_o = nn.Linear(d_model, d_model)
 
-        self.attn_weights = None
+        self.attn_matrix = None
         
     def attention_scores(self, Q, K, V):
         """
@@ -341,12 +341,12 @@ class MultiHeadAttention(nn.Module):
         return output
 
 class Attn_Encoder(nn.Module):
-    def __init__(self, input_size, output_size, num_heads, num_layers, seq_len, dropout):
+    def __init__(self, in_size, out_size, num_heads, num_layers, seq_len, dropout):
         """
         Multi-Head Attention Encoder module.
         
-        :param input_size: Size of the input features.
-        :param output_size: Size of the output feature vector.
+        :param in_size: Size of the input features.
+        :param out_size: Size of the output feature vector.
         :param num_heads: Number of attention heads.
         :param num_layers: Number of attention layers.
         :param seq_len: Length of the input sequence.
@@ -355,18 +355,18 @@ class Attn_Encoder(nn.Module):
         super(Attn_Encoder, self).__init__()
         
         self.attn_layers = nn.ModuleList([
-            MultiHeadAttention(d_model=input_size, num_heads=num_heads) for _ in range(num_layers)
+            MultiHeadAttention(d_model=in_size, num_heads=num_heads) for _ in range(num_layers)
         ])
 
-        self.conv = nn.Conv1d(input_size, output_size, kernel_size=seq_len)
+        self.conv = nn.Conv1d(in_size, out_size, kernel_size=seq_len)
         self.dropout = nn.Dropout(dropout)
         
     def forward(self, x):
         """
         Forward pass for Attention Encoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, input_size).
-        :return: Encoded output tensor of shape (batch_size, output_size).
+        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :return: Encoded output tensor of shape (batch_size, out_size).
         """
         for attn_layer in self.attn_layers:
             x = attn_layer(Q=x, K=x, V=x)
@@ -380,12 +380,12 @@ class Attn_Encoder(nn.Module):
         return x
 
 class Attn_Decoder(nn.Module):
-    def __init__(self, input_size, output_size, num_heads, num_layers, seq_len, dropout):
+    def __init__(self, in_size, out_size, num_heads, num_layers, seq_len, dropout):
         """
         Multi-Head Attention Decoder module.
         
-        :param input_size: Size of the input features.
-        :param output_size: Size of the output feature vector.
+        :param in_size: Size of the input features.
+        :param out_size: Size of the output feature vector.
         :param num_heads: Number of attention heads.
         :param num_layers: Number of attention layers.
         :param seq_len: Length of the output sequence.
@@ -396,18 +396,18 @@ class Attn_Decoder(nn.Module):
         self.seq_len = seq_len
 
         self.attn_layers = nn.ModuleList([
-            MultiHeadAttention(d_model=input_size, num_heads=num_heads) for _ in range(num_layers)
+            MultiHeadAttention(d_model=in_size, num_heads=num_heads) for _ in range(num_layers)
         ])
         
-        self.conv_transpose = nn.ConvTranspose1d(in_channels=output_size, out_channels=input_size, kernel_size=seq_len)
+        self.conv_transpose = nn.ConvTranspose1d(in_channels=out_size, out_channels=in_size, kernel_size=seq_len)
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, x):
         """
         Forward pass for Attention Decoder.
         
-        :param x: Encoded input tensor of shape (batch_size, output_size).
-        :return: Decoded output tensor of shape (batch_size, seq_len, input_size).
+        :param x: Encoded input tensor of shape (batch_size, out_size).
+        :return: Decoded output tensor of shape (batch_size, seq_len, in_size).
         """
         x = x.unsqueeze(1)
         x = x.transpose(1, 2)
@@ -441,15 +441,15 @@ class Attn_Autoencoder(nn.Module):
         self.latent_seq_len = latent_seq_len
         self.latent_num_feats = latent_num_feats
         
-        self.encoder = Attn_Encoder(input_size=num_feats,
-                                    output_size=latent_seq_len * latent_num_feats,
+        self.encoder = Attn_Encoder(in_size=num_feats,
+                                    out_size=latent_seq_len * latent_num_feats,
                                     num_heads=num_heads,
                                     num_layers=num_layers,
                                     seq_len=seq_len,
                                     dropout=dropout)
 
-        self.decoder = Attn_Decoder(input_size=num_feats,
-                                    output_size=latent_seq_len * latent_num_feats,
+        self.decoder = Attn_Decoder(in_size=num_feats,
+                                    out_size=latent_seq_len * latent_num_feats,
                                     num_heads=num_heads,
                                     num_layers=num_layers,
                                     seq_len=seq_len,
