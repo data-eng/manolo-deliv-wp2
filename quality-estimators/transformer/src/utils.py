@@ -261,20 +261,6 @@ def get_stats(df):
         }
 
     return stats
-
-def get_max(arr):
-    """
-    Get the maximum value and its index from an array.
-
-    :param arr: Array to search for the maximum value.
-    :return: Named tuple containing the maximum value and its index.
-    """
-    Info = namedtuple('Info', ['value', 'index'])
-
-    max_index = np.argmax(arr)
-    max_value = arr[max_index]
-
-    return Info(value=max_value, index=max_index)
     
 class BlendedLoss(nn.Module):
     def __init__(self, p=1.0, epsilon=1e-6, blend=0.01):

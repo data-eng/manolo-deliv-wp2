@@ -44,22 +44,12 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
                    'best_epoch': 0, 
                    'best_train_loss': float('inf'), 
                    'best_val_loss': float('inf'), 
-                   'precision_micro': 0, 
-                   'precision_macro': 0, 
-                   'precision_weighted': 0,
-                   'recall_micro': 0, 
-                   'recall_macro': 0, 
-                   'recall_weighted': 0, 
-                   'fscore_micro': 0,
-                   'fscore_macro': 0, 
-                   'fscore_weighted': 0,
                     'train_time': 0.0 }
 
     for epoch in range(epochs):
         start = time.time()
 
         total_train_loss = 0.0
-        true_values, pred_values = [], []
 
         model.train()
         
@@ -82,9 +72,6 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
             optimizer.step()
 
             total_train_loss += train_loss.item()
-
-            true_values.append(y.cpu().numpy())
-            pred_values.append(y_pred.detach().cpu().numpy())
 
         avg_train_loss = total_train_loss / batches
         train_losses.append(avg_train_loss)
@@ -111,12 +98,6 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         avg_val_loss = total_val_loss / batches
         val_losses.append(avg_val_loss)
 
-        true_values = np.concatenate(true_values)
-        pred_values = np.concatenate(pred_values)
-
-        true_classes = true_values.tolist()
-        pred_classes = [utils.get_max(pred).index for pred in pred_values]
-
         end = time.time()
         duration = end - start
         train_time += duration
@@ -134,8 +115,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
 
             checkpoints.update({'best_epoch': epoch+1, 
                                 'best_train_loss': avg_train_loss, 
-                                'best_val_loss': best_val_loss, 
-                                **utils.get_prfs(true=true_classes, pred=pred_classes)})
+                                'best_val_loss': best_val_loss})
                 
         else:
             stationary += 1
@@ -179,11 +159,11 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
     _, weights = extract_weights(train_df, label_col='majority')
 
     classes = list(weights.keys())
-    logger.info(f'Class labels: {classes}.')
+    logger.info(f'Weights: {weights}.')
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 

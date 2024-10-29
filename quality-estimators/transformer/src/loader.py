@@ -1,5 +1,4 @@
 import torch
-import random
 import multiprocessing
 import pandas as pd
 import numpy as np
@@ -251,13 +250,8 @@ def get_dataframes(paths, seq_len=240, exist=False):
                 logger.info('Calculating class weights from the training dataframe.')
 
                 weights, _ = extract_weights(df, label_col='majority')
-            else:
-                if weights is not None:
-                    label_mapping = get_label_mapping(weights=weights)
-                else:
-                    logger.error("Weights have not been initialized. Ensure you calculate them from the training dataframe.")
-                    continue
 
+            label_mapping = get_label_mapping(weights=weights)
             df['majority'] = df['majority'].map(label_mapping)
 
             df.to_csv(proc_path, index=False)

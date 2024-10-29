@@ -118,7 +118,7 @@ class Encoder(nn.Module):
         """
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
 
-        x = self.dropout(attn_matrix)
+        x = x + self.dropout(attn_matrix)
         x = self.relu(x)
         
         return x, attn_matrix
