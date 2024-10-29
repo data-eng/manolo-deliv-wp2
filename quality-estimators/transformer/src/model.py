@@ -118,13 +118,13 @@ class Encoder(nn.Module):
         """
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
 
-        x = x + self.dropout(attn_matrix)
+        x = self.dropout(attn_matrix)
         x = self.relu(x)
         
         return x, attn_matrix
 
 class Transformer(nn.Module):
-    def __init__(self, in_size=3, out_size=6, d_model=64, num_heads=1, dropout=0.5):
+    def __init__(self, in_size=3, out_size=6, num_heads=1, dropout=0.5):
         """
         Transformer model for classification, combining an encoder with multi-head attention 
         and a classifier. The encoder captures complex dependencies in the input data, and 
@@ -132,16 +132,13 @@ class Transformer(nn.Module):
 
         :param in_size: Size of the input features.
         :param out_size: Size of the output classes.
-        :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads.
         :param dropout: Dropout rate for regularization.
         """
         super(Transformer, self).__init__()
-
-        self.embedding = nn.Linear(in_size, d_model)
         
-        self.encoder = Encoder(d_model, num_heads, dropout)
-        self.classifier = nn.Linear(d_model, out_size)
+        self.encoder = Encoder(d_model=in_size, num_heads=num_heads, dropout=dropout)
+        self.classifier = nn.Linear(in_size, out_size)
         self.init_weights()
 
     def init_weights(self):
@@ -162,8 +159,6 @@ class Transformer(nn.Module):
             - Logits of shape (batch_size, out_size) for classification.
             - Attention matrix tensor of shape (batch_size, seq_length, d_model).
         """
-        x = self.embedding(x)
-        
         enc_x, attn_matrix = self.encoder(x)
         logits = self.classifier(enc_x)
         

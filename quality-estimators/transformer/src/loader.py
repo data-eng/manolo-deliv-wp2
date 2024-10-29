@@ -234,6 +234,7 @@ def get_dataframes(paths, seq_len=240, exist=False):
     """
     dataframes = []
     names = ['train', 'val', 'test']
+    weights = None
 
     logger.info('Creating dataframes for training, validation, and testing.')
 
@@ -245,8 +246,22 @@ def get_dataframes(paths, seq_len=240, exist=False):
             logger.info(f'Loaded existing dataframe from {proc_path}.')
         else:
             df = combine_data(paths, seq_len)
+
+            if name == 'train':
+                logger.info('Calculating class weights from the training dataframe.')
+
+                weights, _ = extract_weights(df, label_col='majority')
+            else:
+                if weights is not None:
+                    label_mapping = get_label_mapping(weights=weights)
+                else:
+                    logger.error("Weights have not been initialized. Ensure you calculate them from the training dataframe.")
+                    continue
+
+            df['majority'] = df['majority'].map(label_mapping)
+
             df.to_csv(proc_path, index=False)
-            logger.info(f'Saved new dataframe to {proc_path}.')
+            logger.info(f'Saved {name} dataframe to {proc_path}.')
 
         dataframes.append(df)
 
@@ -260,10 +275,8 @@ def extract_weights(df, label_col):
 
     :param df: Dataframe containing the training data.
     :param label_col: The name of the column containing class labels.
-    :return: Dictionary of class weights and a list of class labels.
+    :return: A tuple containing a dictionary of class weights and a list of class labels if mapping is enabled.
     """
-    logger.info('Calculating class weights from the training dataframe.')
-
     occs = df[label_col].value_counts().to_dict()
     inverse_occs = {key: 1e-10 for key in occs.keys()}
 
@@ -273,14 +286,17 @@ def extract_weights(df, label_col):
     weights = {key: value / sum(inverse_occs.values()) for key, value in inverse_occs.items()}
     weights = dict(sorted(weights.items()))
 
-    label_mapping = {original_label: new_index for new_index, original_label in enumerate(weights.keys())}
-
     new_weights = {i: weights[key] for i, key in enumerate(weights.keys())}
 
     path = utils.get_path('..', '..', 'data', filename='weights.json')
     utils.save_json(data=new_weights, filename=path)
 
-    return new_weights, label_mapping
+    return weights, new_weights
+
+def get_label_mapping(weights):
+    label_mapping = {original_label: new_index for new_index, original_label in enumerate(weights.keys())}
+
+    return label_mapping
 
 def create_datasets(dataframes, seq_len=7680):
     """

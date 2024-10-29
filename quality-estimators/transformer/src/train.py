@@ -11,12 +11,11 @@ logger.info(f'Device is {device}')
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-def train(data, mapping, epochs, patience, lr, criterion, model, optimizer, scheduler, visualize=False):
+def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, visualize=False):
     """
     Trains the model using the provided training data.
 
     :param data: Tuple containing training and validation data loaders.
-    :param mapping: Dictionary mapping original class labels to new class indices.
     :param epochs: Number of epochs to train the model.
     :param patience: Number of epochs with no improvement after which training will be stopped.
     :param lr: Learning rate for the optimizer.
@@ -69,15 +68,13 @@ def train(data, mapping, epochs, patience, lr, criterion, model, optimizer, sche
 
             X, t = separate(src=X, c=[0,1], t=[2])
             X = merge(c=X, t=t)
-            
-            y_mapped = torch.tensor([[mapping[int(label)] for label in sequence] for sequence in y], dtype=torch.long).to(device)
 
             y_pred, _ = model(X)
 
             batch_size, seq_len, num_classes = y_pred.size()
             y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
 
-            y = y_mapped.reshape(batch_size * seq_len)
+            y = y.reshape(batch_size * seq_len)
 
             train_loss = criterion(y_pred, y)
             optimizer.zero_grad()
@@ -102,13 +99,11 @@ def train(data, mapping, epochs, patience, lr, criterion, model, optimizer, sche
                 X, t = separate(src=X, c=[0,1], t=[2])
                 X = merge(c=X, t=t)
 
-                y_mapped = torch.tensor([[mapping[int(label)] for label in sequence] for sequence in y], dtype=torch.long).to(device)
-
                 y_pred, _ = model(X)
 
                 batch_size, seq_len, num_classes = y_pred.size()
                 y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
-                y = y_mapped.reshape(batch_size * seq_len)
+                y = y.reshape(batch_size * seq_len)
 
                 val_loss = criterion(y_pred, y)
                 total_val_loss += val_loss.item()
@@ -184,12 +179,11 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
+    _, weights = extract_weights(train_df, label_col='majority')
 
-    weights, mapping = extract_weights(df=train_df, label_col='majority')
-    classes = list(mapping.values())
-
-    logger.info(f"Weights: {weights} with label mapping: {mapping}")
+    classes = list(weights.keys())
+    logger.info(f'Class labels: {classes}.')
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 
@@ -197,12 +191,10 @@ def main():
 
     model = Transformer(in_size=3,
                         out_size=len(classes),
-                        d_model=64,
                         num_heads=1,
                         dropout=0.5)
         
     train(data=dataloaders,
-          mapping=mapping,
           epochs=1000,
           patience=30,
           lr=1e-4,

@@ -134,8 +134,8 @@ def main():
     
     train_df, _, test_df = get_dataframes(datapaths, seq_len=seq_len, exist=True)
 
-    weights, classes = extract_weights(df=train_df, label_col='majority')
-    logger.info(f"Weights: {weights}")
+    weights, classes = extract_weights(df=train_df, label_col='majority', mapped=False)
+    logger.info(f"Weights: {weights}.")
 
     datasets = create_datasets(dataframes=(test_df,), seq_len=seq_len)
 
