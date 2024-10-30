@@ -6,9 +6,10 @@ estimators:
   - lstm_ae
   - conv_lstm_ae
   - attn_ae
+  - transformer
   - mne
 
 transformation: None
 
-window: 1000
-perc: 0.01
+window: 1000  # set to 1 for zero effect
+perc: 0.1

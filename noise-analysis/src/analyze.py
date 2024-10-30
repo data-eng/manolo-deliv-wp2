@@ -66,15 +66,17 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
 
         logger.debug(f"Loaded CSV for {id} from {csv_path}, with number of rows: {len(df)}")
 
+        topK = {}
         df_avg = pd.DataFrame()
 
-        for col in df.columns:
+        noise_cols = [col for col in df.columns if col.startswith('noise_')]
+
+        for col in noise_cols:
             df_avg[col] = average_over_segments(df[col].tolist(), segment_size=window)
 
+        df_avg['id'] = np.arange(1, len(df_avg) + 1)
+
         logger.info(f"Averaged DataFrame for {id} using window size {window}, with number of rows: {len(df_avg)}")
-        
-        noise_cols = [col for col in df_avg.columns if col.startswith('noise_')]
-        topK = {}
 
         for noise_col in noise_cols:
             df_sorted = df_avg.sort_values(by=noise_col, ascending=False)
@@ -85,7 +87,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
 
             df_topK = df_sorted.iloc[:k_perc]
 
-            topK_times = df_topK['time'].to_numpy()
+            topK_times = df_topK['id'].to_numpy()
             feature_name = noise_col.replace('noise_', '')
 
             topK[feature_name] = topK_times
