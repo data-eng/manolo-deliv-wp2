@@ -14,27 +14,26 @@ logger.info(f'Device is {device}')
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+def estimate_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
     """
     Estimate the quality of the model's predictions and save the results to a CSV file.
 
     :param dataloader: Dataloader providing batches of input data and labels.
-    :param signals: Model output signals for the evaluation.
+    :param attn_matrices: Attention matrices obtained from the model.
     :param cols: Tuple containing lists of feature columns, time-related columns, and target columns.
     """
     all_data = []
     X_cols, t_cols, y_cols = cols
 
-    for (feats, labels), (X, X_dec) in zip(dataloader, signals):
+    for (feats, labels), attn_matrix in zip(dataloader, attn_matrices):
         feats = feats.cpu().numpy()
         labels = labels.cpu().numpy()
-        X = X.cpu().numpy()
-        X_dec = X_dec.cpu().numpy()
+        noise = attn_matrix.cpu().numpy() #(batch_size, seq_length, d_model)
 
-        noise = X - X_dec
+        batch_size, seq_len, _ = feats.shape
 
-        for batch_idx in range(X.shape[0]):
-            for seq_idx in range(X.shape[1]):
+        for batch_idx in range(batch_size):
+            for seq_idx in range(seq_len):
                 row_data = {}
 
                 for i, col_name in enumerate(X_cols + t_cols):
@@ -50,7 +49,7 @@ def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_
 
     df = pd.DataFrame(all_data)
 
-    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_{config['id']}.csv')
+    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_transformer.csv')
     df.to_csv(path, index=False)
 
 def test(data, classes, criterion, model, visualize=False, estimate=False):
@@ -72,6 +71,7 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
     batches = len(data)
     total_test_loss = 0.0
     true_values, pred_values = [], []
+    attn_matrices = []
 
     progress_bar = tqdm(enumerate(data), total=batches, desc=f'Evaluation', leave=True)
 
@@ -83,6 +83,8 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
             X = merge(c=X, t=t)
 
             y_pred, attn_matrix = model(X)
+
+            attn_matrices.append(attn_matrix)
 
             batch_size, seq_len, num_classes = y_pred.size()
             y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
@@ -99,17 +101,16 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
         true_values = np.concatenate(true_values)
         pred_values = np.concatenate(pred_values)
 
-        true_classes = true_values.tolist()
-        pred_classes = [utils.get_max(pred).index for pred in pred_values]
+        pred_classes = np.argmax(pred_values, axis=1)
 
         avg_test_loss = total_test_loss / batches
 
         if estimate:
-            estimate_quality(data, attn_matrix)
+            estimate_quality(data, attn_matrices)
 
         if visualize:
             utils.visualize(type='heatmap',
-                        values=(true_classes, pred_classes), 
+                        values=(true_values, pred_classes), 
                         labels=('True Values', 'Predicted Values'), 
                         title='Train Heatmap ',
                         classes=classes,
@@ -133,9 +134,10 @@ def main():
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
     train_df, _, test_df = get_dataframes(datapaths, seq_len=seq_len, exist=True)
+    _, weights = extract_weights(train_df, label_col='majority')
 
-    weights, classes = extract_weights(df=train_df, label_col='majority', mapped=False)
-    logger.info(f"Weights: {weights}.")
+    classes = list(weights.keys())
+    logger.info(f'Weights: {weights}.')
 
     datasets = create_datasets(dataframes=(test_df,), seq_len=seq_len)
 
@@ -143,7 +145,6 @@ def main():
 
     model = Transformer(in_size=3,
                         out_size=len(classes),
-                        d_model=64,
                         num_heads=1,
                         dropout=0.5)
     

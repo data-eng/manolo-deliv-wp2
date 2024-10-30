@@ -63,10 +63,10 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
 
             batch_size, seq_len, num_classes = y_pred.size()
             y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
-
             y = y.reshape(batch_size * seq_len)
 
             train_loss = criterion(y_pred, y)
+
             optimizer.zero_grad()
             train_loss.backward()
             optimizer.step()
