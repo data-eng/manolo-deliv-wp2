@@ -163,10 +163,6 @@ def main():
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
     train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
-    _, weights = extract_weights(train_df, label_col='majority')
-
-    classes = list(weights.keys())
-    logger.info(f'Class labels: {classes}.')
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 

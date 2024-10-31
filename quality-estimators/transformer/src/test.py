@@ -28,7 +28,7 @@ def estimate_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time',
     for (feats, labels), attn_matrix in zip(dataloader, attn_matrices):
         feats = feats.cpu().numpy()
         labels = labels.cpu().numpy()
-        noise = attn_matrix.cpu().numpy() #(batch_size, seq_length, d_model)
+        noise = attn_matrix.cpu().numpy()
 
         batch_size, seq_len, _ = feats.shape
 

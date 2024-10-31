@@ -202,7 +202,7 @@ def combine_data(paths, seq_len=240):
         df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
 
         rows_before_majority_drop = df.shape[0]
-        df.drop(df[df['majority'] == -1].index, inplace=True)
+        df.drop(df[df['majority'] == 8].index, inplace=True)
         total_removed_majority += (rows_before_majority_drop - df.shape[0])
 
         dataframes.append(df)
