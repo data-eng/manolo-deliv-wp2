@@ -52,10 +52,13 @@ def get_dir(*sub_dirs):
 
     return dir
 
-def retain_if_greater_than_one(value):
+def binary(value, threshold):
     """
-    Transformation function that retains the value if greater than 1, otherwise returns 0.
+    Transform the input value based on a specified threshold. If the input value 
+    is greater than the threshold, it returns 1; otherwise, it returns 0.
+
     :param value: The input value to be evaluated.
-    :return: The original value if greater than 1; otherwise, returns 0.
+    :param threshold: The threshold to compare the value against.
+    :return: 1 if value > threshold, otherwise 0.
     """
-    return value if value > 1 else 0
+    return 1 if value > threshold else 0

@@ -1,6 +1,6 @@
 passage: 
   name: night
-  value: 32
+  values: [32, 27]
 
 estimators:
   - lstm_ae
@@ -9,7 +9,12 @@ estimators:
   - transformer
   - mne
 
-transformation: None
+window: 7680
+perc: 1
 
-window: 1000  # set to 1 for zero effect
-perc: 0.1
+thresholds: 
+  - lstm_ae: 5
+  - conv_lstm_ae: 9
+  - attn_ae: 1
+  - transformer: 200
+  - mne: ~
