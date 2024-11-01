@@ -178,15 +178,16 @@ def load_file(path):
 
     return X, t, y
 
-def combine_data(paths, seq_len=240):
+def combine_data(paths, name, seq_len=240):
     """
     Combine data from multiple CSV files into a dataframe, processing sequences and removing invalid rows.
 
     :param paths: List of file paths to CSV files.
+    :param name: Context of the data, such as 'train', 'val' or 'test'.
     :param seq_len: Sequence length for grouping data.
     :return: Combined dataframe after processing.
     """
-    dataframes = []
+    dataframes, dataframes_8 = [], []
     total_removed_majority = 0
 
     logger.info(f'Combining data from {len(paths)} files.')
@@ -201,11 +202,22 @@ def combine_data(paths, seq_len=240):
         df['seq_id'] = (np.arange(len(df)) // seq_len) + 1
         df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
 
+        rows_8 = df[df['majority'] == 8]
+
+        if not rows_8.empty and name=='test':
+            dataframes_8.append(rows_8)
+
         rows_before_majority_drop = df.shape[0]
         df.drop(df[df['majority'] == 8].index, inplace=True)
         total_removed_majority += (rows_before_majority_drop - df.shape[0])
 
         dataframes.append(df)
+
+    if dataframes_8:
+        dataframes_8 = pd.concat(dataframes_8, ignore_index=True)
+        dataframes_8.to_csv(utils.get_path('..', '..', 'data', 'proc', f'test8.csv'), index=False)
+
+        logger.info(f'Saved rows with majority=8 to test8.csv.')
 
     df = pd.concat(dataframes, ignore_index=True)
     logger.info(f'Combined dataframe shape: {df.shape}')
@@ -244,7 +256,7 @@ def get_dataframes(paths, seq_len=240, exist=False):
             df = pd.read_csv(proc_path)
             logger.info(f'Loaded existing dataframe from {proc_path}.')
         else:
-            df = combine_data(paths, seq_len)
+            df = combine_data(paths, name, seq_len)
 
             if name == 'train':
                 logger.info('Calculating class weights from the training dataframe.')

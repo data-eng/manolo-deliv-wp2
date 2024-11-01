@@ -175,7 +175,7 @@ def main():
           epochs=1000,
           patience=30,
           lr=1e-4,
-          criterion=utils.BlendedLoss(p=1.0, blend=0.1),
+          criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
           optimizer='Adam',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
