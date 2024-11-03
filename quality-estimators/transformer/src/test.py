@@ -112,10 +112,10 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
             utils.visualize(type='heatmap',
                         values=(true_values, pred_classes), 
                         labels=('True Values', 'Predicted Values'), 
-                        title='Train Heatmap ',
+                        title='Train Heatmap',
                         classes=classes,
                         coloring=['azure', 'darkblue'],
-                        path=utils.get_dir('static', 'transformer'))
+                        path=utils.get_dir('..', '..', 'static', 'transformer'))
 
     logger.info(f'\nTesting complete!\nTesting Loss: {avg_test_loss:.6f}\n')
 
@@ -152,7 +152,7 @@ def main():
          classes=classes,
          criterion=utils.WeightedCrossEntropyLoss(weights),
          model=model,
-         visualize=True,
+         visualize=False,
          estimate=True)
 
 if __name__ == '__main__':

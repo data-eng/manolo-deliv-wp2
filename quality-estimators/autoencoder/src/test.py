@@ -428,9 +428,9 @@ def main():
     model = model_class(seq_len=seq_len, **config['params'])
     
     test(data=dataloaders[0],
-         criterion=utils.BlendedLoss(p=1.0, blend=0.1),
+         criterion=utils.BlendedLoss(p=1.0, blend=0.8),
          model=model,
-         visualize=True,
+         visualize=False,
          estimate=True)
 
 if __name__ == '__main__':

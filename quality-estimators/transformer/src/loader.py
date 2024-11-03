@@ -212,17 +212,22 @@ def combine_data(paths, name, seq_len=240):
         total_removed_majority += (rows_before_majority_drop - df.shape[0])
 
         dataframes.append(df)
+    
+    logger.info(f'Removed {total_removed_majority} rows with majority value 8.')
 
-    if dataframes_8:
-        dataframes_8 = pd.concat(dataframes_8, ignore_index=True)
-        dataframes_8.to_csv(utils.get_path('..', '..', 'data', 'proc', f'test8.csv'), index=False)
+    if name=='test':
+        if dataframes_8:
+            dataframes_8 = pd.concat(dataframes_8, ignore_index=True)
 
-        logger.info(f'Saved rows with majority=8 to test8.csv.')
+            output_file = utils.get_path('..', '..', 'data', 'proc', filename=f'{name}8.csv')
+            dataframes_8.to_csv(output_file, index=False)
+
+            logger.info(f'Saved {dataframes_8.shape[0]} rows with majority=8 to {name}8.csv.')
+        else:
+            logger.info(f"The dataframe contains no rows with majority=8, therefore no {name}8.csv was saved.")
 
     df = pd.concat(dataframes, ignore_index=True)
     logger.info(f'Combined dataframe shape: {df.shape}')
-
-    logger.info(f'Removed {total_removed_majority} rows with majority value -1.')
     
     rows_before_nan_drop = df.shape[0]
     df.dropna(inplace=True)
