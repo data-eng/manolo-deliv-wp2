@@ -141,11 +141,12 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
     for id in estimators:
         df_avg = pd.DataFrame()
         threshold = thresholds[id]
+        lows, mids, highs = {col: [] for col in noise_cols}, {col: [] for col in noise_cols}, {col: [] for col in noise_cols}
 
         csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}.csv')
         df = pd.read_csv(csv_path)
 
-        logger.info(f"Loaded CSV for {id} from {csv_path}, with columns: {df.columns.tolist()}")
+        logger.info(f"Loaded CSV for {id} from {csv_path}.")
         logger.info(f"Unique {passage['name']}s in {id}.csv: {df[passage['name']].unique()}")
 
         if df8 is None:
@@ -163,7 +164,10 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
                 df_p_avg[col] = average_over_segments(df_p[col].tolist(), segment_size=window)
 
                 low_threshold, mid_threshold, high_threshold = suggest_thresholds(df_p_avg[col].tolist())
-                logger.info(f"{id}-{col}: Suggested thresholds are low: {low_threshold:.2f}, mid: {mid_threshold:.2f}, high: {high_threshold:.2f}")
+
+                lows[col].append(low_threshold)
+                mids[col].append(mid_threshold)
+                highs[col].append(high_threshold)
 
                 df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
@@ -173,6 +177,15 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
             df_avg = pd.concat([df_avg, df_p_avg], ignore_index=True)
 
         logger.info(f"Averaged DataFrame for {id} using window size {window}, with number of rows: {len(df_avg)}")
+
+        mean_lows = {col: sum(lows[col]) / len(lows[col]) if lows[col] else 'N/A' for col in lows}
+        mean_mids = {col: sum(mids[col]) / len(mids[col]) if mids[col] else 'N/A' for col in mids}
+        mean_highs = {col: sum(highs[col]) / len(highs[col]) if highs[col] else 'N/A' for col in highs}
+
+        logger.info(f"{id} - suggested thresholds:")
+        logger.info(f"Low: [{mean_lows['noise_HB_1']:.2f}, {mean_lows['noise_HB_2']:.2f}]")
+        logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
+        logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
         binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}_{"_".join(map(str, threshold))}.csv')
         df_avg.to_csv(binary_csv_path, index=False)
