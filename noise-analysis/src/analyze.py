@@ -182,7 +182,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         mean_mids = {col: sum(mids[col]) / len(mids[col]) if mids[col] else 'N/A' for col in mids}
         mean_highs = {col: sum(highs[col]) / len(highs[col]) if highs[col] else 'N/A' for col in highs}
 
-        logger.info(f"{id} - suggested thresholds:")
+        logger.info(f"Suggested thresholds for {id}:")
         logger.info(f"Low: [{mean_lows['noise_HB_1']:.2f}, {mean_lows['noise_HB_2']:.2f}]")
         logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
