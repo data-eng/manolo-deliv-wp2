@@ -137,7 +137,8 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         if df8 is None:
             df8 = pd.DataFrame(columns=df.columns)
 
-        df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
+        if id != 'mne':
+            df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
 
         for p in passage['values']:
             df_p_avg = pd.DataFrame()
