@@ -172,11 +172,11 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
                 df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
             df_p_avg['id'] = np.arange(1, len(df_p_avg) + 1)
-            df_p_avg[pname] = df_p[pname]
+            df_p_avg[pname] = df_p[pname].iloc[0]
 
             df_avg = pd.concat([df_avg, df_p_avg], ignore_index=True)
 
-        logger.info(f"Averaged DataFrame for {id} using window size {window}, with number of rows: {len(df_avg)}")
+        logger.info(f"Averaged DataFrame for {id} using window size {window}, with {len(df_avg)} rows.")
 
         mean_lows = {col: sum(lows[col]) / len(lows[col]) if lows[col] else 'N/A' for col in lows}
         mean_mids = {col: sum(mids[col]) / len(mids[col]) if mids[col] else 'N/A' for col in mids}
@@ -190,7 +190,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}_{"_".join(map(str, threshold))}.csv')
         df_avg.to_csv(binary_csv_path, index=False)
 
-        logger.info(f"Saved binary averaged data to {binary_csv_path}")
+        logger.info(f"Saved binary averaged data to {binary_csv_path} with {len(df_avg)} rows.")
 
         topK = {}
 
