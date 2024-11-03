@@ -1,6 +1,6 @@
 passage: 
   name: night
-  values: [32, 27]
+  values: [31, 32, 26, 25, 30, 33, 28, 29, 3, 27]
 
 estimators:
   - lstm_ae
@@ -13,8 +13,16 @@ window: 7680
 perc: 1
 
 thresholds: 
-  - lstm_ae: 5
-  - conv_lstm_ae: 9
-  - attn_ae: 1
-  - transformer: 200
-  - mne: ~
+  lstm_ae: [5,2]
+  conv_lstm_ae: [9,10]
+  attn_ae: [1,1]
+  transformer: [200, 150]
+  mne: [5,4]
+
+# Threshold Suggestions {low, mid, high}
+#--------------------------------------#
+# lstm_ae: {[5,2], [5,2], [5,2]}
+# conv_lstm_ae: {[5,2], [5,2], [5,2]}
+# attn_ae: {[5,2], [5,2], [5,2]}
+# transformer: {[5,2], [5,2], [5,2]}
+# mne: {[5,2], [5,2], [5,2]}
