@@ -101,6 +101,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
     """
     topKs = {}
     noise_cols = ['noise_HB1', 'noise_HB2']
+    df8 = None
 
     path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
 
@@ -111,12 +112,16 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         return topKs
     
     csv8_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'test8.csv')
-    df8 = pd.read_csv(csv8_path)
 
-    logger.info(f"Loaded CSV from {csv8_path} that contains data from label-8 outliers.")
+    if os.path.exists(csv8_path):
+        df8 = pd.read_csv(csv8_path)
 
-    for noise_col, noise_value in zip(noise_cols, [96839061427, 72416093869]):
-        df8[noise_col] = noise_value
+        logger.info(f"Loaded CSV from {csv8_path} that contains data from label-8 outliers.")
+
+        for noise_col, noise_value in zip(noise_cols, [96839061427, 72416093869]):
+            df8[noise_col] = noise_value
+    else:
+        logger.info(f"{csv8_path} does not exist. Skipping df8 concatenation.")
 
     pname = passage['name']
 
@@ -128,6 +133,9 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         df = pd.read_csv(csv_path)
 
         logger.info(f"Loaded CSV for {id} from {csv_path}, with number of rows: {len(df)}")
+
+        if df8 is None:
+            df8 = pd.DataFrame(columns=df.columns)
 
         df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
 
@@ -273,7 +281,6 @@ def main():
     """
     #noise_dict = load_noise_data()
     #visualize_noise(dict=noise_dict)
-
 
     topKs = get_top_noisy_timesteps(k=config["perc"], exists=False)
 
