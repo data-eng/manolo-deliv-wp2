@@ -18,7 +18,7 @@ def main():
     mne_csv_path = utils.get_path('..', '..', 'data', 'proc', filename='estim_mne.csv')
 
     df = pd.read_csv(csv_path)
-    logger.debug(f"Loaded CSV from {csv_path}")
+    logger.info(f"Loaded CSV from {csv_path}")
 
     data = df[data_columns].to_numpy().T
 
