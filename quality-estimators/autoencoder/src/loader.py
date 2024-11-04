@@ -30,7 +30,7 @@ def get_boas_data(base_path, output_path):
             continue
 
         if not os.path.exists(eeg_folder):
-            print(f'No EEG folder found for {subject_id}. Skipping.')
+            logger.info(f'No EEG folder found for {subject_id}. Skipping.')
             continue
 
         eeg_file_pattern = os.path.join(eeg_folder, f'{subject_id}_task-Sleep_acq-headband_eeg.edf')
@@ -39,20 +39,36 @@ def get_boas_data(base_path, output_path):
         try:
             raw = mne.io.read_raw_edf(eeg_file_pattern, preload=True)
             x_data = raw.to_data_frame()
+
+            logger.debug(f'x_data shape for {subject_id}: {x_data.shape}')
+            logger.debug(f'x_data sample:\n{x_data.head()}')
+
         except Exception as e:
-            print(f'Error loading EEG data for {subject_id}: {e}')
+            logger.info(f'Error loading EEG data for {subject_id}: {e}')
             continue
 
         try:
             y_data = pd.read_csv(events_file_pattern, delimiter='\t')
+
+            logger.debug(f'y_data shape for {subject_id}: {y_data.shape}')
+            logger.debug(f'y_data sample:\n{y_data.head()}')
+
         except Exception as e:
-            print(f'Error loading events data for {subject_id}: {e}')
+            logger.info(f'Error loading events data for {subject_id}: {e}')
             continue
 
-        combined_data = pd.concat([x_data, y_data], axis=1)
+        y_expanded = pd.DataFrame(index=x_data.index, columns=y_data.columns)
+        
+        for _, row in y_data.iterrows():
+            begsample = row['begsample']-1
+            endsample = row['endsample']-1
+            
+            y_expanded.loc[begsample:endsample] = row.values
+
+        combined_data = pd.concat([x_data, y_expanded], axis=1)
 
         combined_data.to_csv(output_file, index=False)
-        print(f'Saved combined data for {subject_id} to {output_file}')
+        logger.info(f'Saved combined data for {subject_id} to {output_file}')
 
 class TSDataset(Dataset):
     def __init__(self, df, seq_len, X, t, y, per_epoch=True):
