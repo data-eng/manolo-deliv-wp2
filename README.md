@@ -23,6 +23,8 @@ catch22 is the result of a data-driven pipeline that distilled reduced subsets o
 most useful and complementary features for classification from thousands of initial
 candidates, included in the hctsa toolbox.
 
+An overview of the catch22 features, together with their code names used here, can be found in [here](https://time-series-features.gitbook.io/catch22/information-about-catch22/feature-descriptions/feature-overview-table)
+
 
 ### Installation ###
 
