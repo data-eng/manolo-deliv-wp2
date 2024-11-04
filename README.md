@@ -22,3 +22,9 @@ The hctsa feature set is described in the following papers:
 catch22 is the result of a data-driven pipeline that distilled reduced subsets of the
 most useful and complementary features for classification from thousands of initial
 candidates, included in the hctsa toolbox.
+
+
+### Installation ###
+
+```markdown
+conda install -c conda-forge pycatch22
