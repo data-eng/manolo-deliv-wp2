@@ -140,7 +140,10 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
 
     for id in estimators:
         df_avg = pd.DataFrame()
+
         threshold = thresholds[id]
+        transform = threshold is not None
+
         lows, mids, highs = {col: [] for col in noise_cols}, {col: [] for col in noise_cols}, {col: [] for col in noise_cols}
 
         csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}.csv')
@@ -152,7 +155,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         if df8 is None:
             df8 = pd.DataFrame(columns=df.columns)
 
-        if id != 'mne':
+        if id == 'lstm_ae' or id == 'conv_lstm_ae' or id == 'attn_ae' or id == 'transformer':
             df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
 
         for p in passage['values']:
@@ -169,7 +172,8 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
                 mids[col].append(mid_threshold)
                 highs[col].append(high_threshold)
 
-                df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
+                if transform:
+                    df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
             df_p_avg['id'] = np.arange(1, len(df_p_avg) + 1)
             df_p_avg[pname] = df_p[pname].iloc[0]
@@ -187,7 +191,7 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
-        binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'estim_{id}_{"_".join(map(str, threshold))}.csv')
+        binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'bin_{id}_{"_".join(map(str, threshold))}.csv')
         df_avg.to_csv(binary_csv_path, index=False)
 
         logger.info(f"Saved binary averaged data to {binary_csv_path} with {len(df_avg)} rows.")
