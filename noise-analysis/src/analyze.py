@@ -191,7 +191,8 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
-        binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'bin_{id}_{"_".join(map(str, threshold))}.csv')
+        binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', 
+                filename=f'bin_{id}_{"_".join(map(str, threshold)) if thresholds[id] is not None else ""}.csv')
         df_avg.to_csv(binary_csv_path, index=False)
 
         logger.info(f"Saved binary averaged data to {binary_csv_path} with {len(df_avg)} rows.")
