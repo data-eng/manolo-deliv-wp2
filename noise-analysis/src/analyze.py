@@ -106,23 +106,13 @@ def suggest_thresholds(values):
     
     return low, mid, high
 
-def get_top_noisy_timesteps(k=0.1, exists=False):
+def estimate_binary_noise():
     """
-    Extract top 100*k% noisy timesteps for each feature and estimator.
-
-    :return: Dictionary containing top 10% noisy timesteps for each feature in each estimator.
+    Estimate binary noise values for each estimator and save the results to CSV files. 
+    Loads data, applies segment averaging, computes thresholds, and outputs binary noise estimates.
     """
-    topKs = {}
     noise_cols = ['noise_HB_1', 'noise_HB_2']
     df8 = None
-
-    path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
-
-    if exists and os.path.exists(path):
-        topKs = np.load(path, allow_pickle=True).item()
-        logger.info(f"Loaded existing top {k*100}% timesteps from {path}.")
-
-        return topKs
     
     csv8_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'test8.csv')
 
@@ -142,7 +132,6 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         df_avg = pd.DataFrame()
 
         threshold = thresholds[id]
-        transform = threshold is not None
 
         lows, mids, highs = {col: [] for col in noise_cols}, {col: [] for col in noise_cols}, {col: [] for col in noise_cols}
 
@@ -172,15 +161,14 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
                 mids[col].append(mid_threshold)
                 highs[col].append(high_threshold)
 
-                if transform:
-                    df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
+                df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
             df_p_avg['id'] = np.arange(1, len(df_p_avg) + 1)
             df_p_avg[pname] = df_p[pname].iloc[0]
 
             df_avg = pd.concat([df_avg, df_p_avg], ignore_index=True)
 
-        logger.info(f"Averaged DataFrame for {id} using window size {window}, with {len(df_avg)} rows.")
+        logger.info(f"Aggregated DataFrame for {id} using window size {window}, with {len(df_avg)} rows.")
 
         mean_lows = {col: sum(lows[col]) / len(lows[col]) if lows[col] else 'N/A' for col in lows}
         mean_mids = {col: sum(mids[col]) / len(mids[col]) if mids[col] else 'N/A' for col in mids}
@@ -191,16 +179,52 @@ def get_top_noisy_timesteps(k=0.1, exists=False):
         logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
+        agg_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
+        df_avg.to_csv(agg_csv_path, index=False)
+
+        logger.info(f"Saved aggregated data to {agg_csv_path} with {len(df_avg)} rows.")
+
+        for col in noise_cols:
+            df_avg.drop(columns=[col], inplace=True)
+            df_avg.rename(columns={f'binary_{col}': col}, inplace=True)
+        
+        threshold_str = f'_{ "_".join(map(str, threshold))}' if threshold is not None else ''
         binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', 
-                filename=f'bin_{id}_{"_".join(map(str, threshold)) if thresholds[id] is not None else ""}.csv')
+                                 filename=f'bin_{id}{threshold_str}.csv')
+
         df_avg.to_csv(binary_csv_path, index=False)
 
-        logger.info(f"Saved binary averaged data to {binary_csv_path} with {len(df_avg)} rows.")
+        logger.info(f"Saved binary aggregated data to {binary_csv_path} with {len(df_avg)} rows.")
 
+def get_top_noisy_timesteps(k=0.1, type='agg'):
+    """
+    Extract the top 100*k% of noisy timesteps for each feature and estimator, based on noise values 
+    from either the aggregated or binary data.
+
+    :param k: Fraction of top noisy timesteps to extract (default is 0.1).
+    :param type: Specifies whether to use 'agg' (aggregated) or 'bin' (binary) data.
+    :return: Dictionary containing top noisy timesteps for each feature in each estimator.
+    """
+    topKs = {}
+    noise_cols = ['noise_HB_1', 'noise_HB_2']
+
+    path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
+
+    for id in estimators:
+
+        if type == "bin":
+            threshold = thresholds[id]
+
+            threshold_str = f'_{ "_".join(map(str, threshold))}' if threshold is not None else ''
+            csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'bin_{id}{threshold_str}.csv')
+        elif type == "agg":
+            csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
+        
+        df = pd.read_csv(csv_path)
         topK = {}
 
         for noise_col in noise_cols:
-            df_sorted = df_avg.sort_values(by=noise_col, ascending=False)
+            df_sorted = df.sort_values(by=noise_col, ascending=False)
             
             total_rows = len(df_sorted)
             k_perc = int(total_rows * k)
@@ -319,10 +343,11 @@ def main():
     #noise_dict = load_noise_data()
     #visualize_noise(dict=noise_dict)
 
-    topKs = get_top_noisy_timesteps(k=config["perc"], exists=False)
+    estimate_binary_noise()
+    topKs = get_top_noisy_timesteps(k=0.1, type='bin')
 
-    #agreement_dict = compute_agreement(dict=topKs)
-    #visualize_agreement(dict=agreement_dict)
+    agreement_dict = compute_agreement(dict=topKs)
+    visualize_agreement(dict=agreement_dict)
 
 if __name__ == '__main__':
     main()
