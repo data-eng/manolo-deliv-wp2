@@ -56,7 +56,7 @@ Noise estimation within this machine learning approach can be divided into two c
 
 \subsubsection{LSTM Autoencoder}
 
-We implement an LSTM-based autoencoder to transform EEG signals into a lower-dimensional latent representation. The key idea behind this approach is to compress the input signal while preserving the essential features, then reconstruct it from the compressed representation. The LSTM layers in the encoder are designed to capture the temporal patterns and dependencies inherent in the EEG signals. These temporal dependencies are crucial for accurately modeling EEG data, which often exhibits long-range correlations over time. The decoder, in turn, reconstructs the original signal from this latent representation, hoping that only non-noisy information is preserved during compression.
+We implement an LSTM-based autoencoder that uses Long Short-Term Memory (LSTM) layers to reconstruct EEG signals from a lower-dimensional latent representation. The key idea behind this autoencoding approach is to compress the input signal while preserving the essential features, then reconstruct it from the compressed representation. The LSTM layers in the encoder are designed to capture the temporal patterns and dependencies inherent in the EEG signals. These temporal dependencies are crucial for accurately modeling EEG data, which often exhibits long-range correlations over time. The decoder, in turn, reconstructs the original signal from this latent representation, hoping that only non-noisy information is preserved during compression.
 
 To process the input data, we split each 30-second segment of EEG data into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. The encoder processes each sequence and compresses it into a latent representation of size (1, 8), where the first dimension represents a single compressed time step, and the second dimension represents 8 learned features. The decoder then takes this compressed representation and attempts to reconstruct the original signal, capturing both trends and amplitudes.
 
@@ -73,14 +73,21 @@ The LSTM Autoencoder estimates noise by measuring the reconstruction error betwe
 
 \subsubsection{Convolutional LSTM Autoencoder}
 
-We implement a ConvLSTM-based autoencoder to transform EEG signals into a lower-dimensional latent representation, combining the strengths of both convolutional and LSTM layers. The convolutional layers help capture local features in the data, while the LSTM layers capture the long-range temporal dependencies. This hybrid approach is particularly effective for spatiotemporal data like EEG signals, where both spatial (local) and temporal (long-range) patterns are important.
+We implement a ConvLSTM-based autoencoder that combines convolutional and LSTM layers to reconstruct EEG signals from a lower-dimensional latent representation. The convolutional layers capture local features in the data, while the LSTM layers capture long-range temporal dependencies. This hybrid architecture is designed to effectively process spatiotemporal data like EEG signals, which contain both spatial (local) and temporal (long-range) patterns.
 
-The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the LSTM-based autoencoder. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq
-}, to balance the reconstruction of amplitude and trends. Similar to the LSTM approach, noise is estimated through the reconstruction error.
+The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the LSTM-based autoencoder. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Similar to the LSTM approach, noise is estimated through the reconstruction error.
 
 \subsubsection{Attention-based Autoencoder}
-...
-The \emph{BlendedLoss} function as defined in Equation~\ref{eq:blended_loss}, is also used for the attention-based autoencoder, ensuring consistency across all autoencoders.
+
+We implement an attention-based autoencoder that combines convolutional layers with a multi-head attention mechanism to reconstruct EEG signals from a lower-dimensional latent representation. The convolutional layers help extract spatial features from the input data, while the attention mechanism is particularly effective in modeling temporal dependencies. This allows the model to focus on important time steps and capture long-term patterns, without the need for recurrent layers like LSTM. The key innovation of this hybrid model lies in the use of multi-head attention, which enables the model to focus on different parts of the input sequence simultaneously. The attention mechanism computes a weighted sum of the input features, with the weights learned during training. This allows the model to prioritize certain features and temporal patterns over others, making it particularly effective for detecting noise or anomalies that deviate from typical signal behavior.
+
+The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the two previous autoencoders. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Regarding noise estimation, we adopt two strategies:
+
+\begin{itemize}
+    \item The first strategy defines noise as the reconstruction error, similar to other autoencoders.
+    \vspace{-0.2cm}
+    \item The second strategy defines noise based on the attention weights in the attention matrix. Attention mechanisms allow the model to assign varying levels of importance (i.e., attention weights) to different parts of the input sequence. The key idea is that the attention mechanism can distinguish between relevant and irrelevant time steps by analyzing how much focus the model places on them during the encoding and decoding process. When a time step receives a low attention weight, it suggests that the information at that moment is likely noisy and, therefore, unimportant for the reconstruction task.
+\end{itemize}
 
 \subsubsection{Transformer Predictor}
 ....
