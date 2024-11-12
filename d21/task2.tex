@@ -55,13 +55,11 @@ Noise estimation within this machine learning approach can be divided into two c
 \end{itemize}
 
 \subsubsection{LSTM Autoencoder}
-....
-Compresses the input signal into a latent representation and then attempts to reconstruct it. Noise is estimated as the difference between the original and reconstructed signals, hoping that only the non-noisy information is preserved during compression. 
-....
-We implement an LSTM-based autoencoder to transform the EEG signals into a lower-dimensional latent representation. The encoder consists of LSTM layers that capture the temporal patterns of the input sequence, while the decoder reconstructs the original signal from the latent representation. This architecture is chosen because LSTMs are well-suited for sequential data and can effectively model the temporal dependencies present in EEG signals.
-....
-We split each 30s segment into 32 chunks, so we end up with 7680/32=240 sequences in each chunk. The input, structured as sequences of length 240 with 2 features corresponding to the EEG channels, is processed by the encoder, which extracts temporal patterns and relationships within the data. This process results in a latent representation of size (1, 8), where the first dimension corresponds to a single compressed time step and the second dimension represents the 8 learned features.
-...
+
+We implement an LSTM-based autoencoder to transform EEG signals into a lower-dimensional latent representation. The key idea behind this approach is to compress the input signal while preserving the essential features, then reconstruct it from the compressed representation. The LSTM layers in the encoder are designed to capture the temporal patterns and dependencies inherent in the EEG signals. These temporal dependencies are crucial for accurately modeling EEG data, which often exhibits long-range correlations over time. The decoder, in turn, reconstructs the original signal from this latent representation, hoping that only non-noisy information is preserved during compression.
+
+To process the input data, we split each 30-second segment of EEG data into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. The encoder processes each sequence and compresses it into a latent representation of size (1, 8), where the first dimension represents a single compressed time step, and the second dimension represents 8 learned features. The decoder then takes this compressed representation and attempts to reconstruct the original signal, capturing both trends and amplitudes.
+
 To balance the models' focus on both the amplitude and trends of the EEG signals, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted ($\hat{x}$) and target values ($x$):
 %
 \begin{equation}
@@ -70,17 +68,24 @@ To balance the models' focus on both the amplitude and trends of the EEG signals
 \end{equation}
 %
 where $p$ is the power parameter that controls the sensitivity of the loss to the differences, $x$ is the original signal, and $\hat{x}$ is the reconstructed signal. The blend factor controls the trade-off between learning the overall trends (via the median) and capturing the amplitude (via the mean). We experiment with different blend values (0.1 and 0.8) to observe how this affects the model’s performance in reconstructing the signals.
-....
+
+The LSTM Autoencoder estimates noise by measuring the reconstruction error between the original and the reconstructed signal. During training, the model learns to compress and then reconstruct the input signal with minimal error. The goal is for the model to capture the common patterns and trends in the data, such as periodic fluctuations or typical signal behavior. When the model encounters unusual spikes, often caused by noise, it struggles to reconstruct them because they don't fit the typical patterns it has learned. As a result, the reconstruction error for these segments will be larger, indicating noise.
 
 \subsubsection{Convolutional LSTM Autoencoder}
-...
-The same \emph{BlendedLoss} function is used here as well, as defined in Equation~\ref{eq:blended_loss}.
+
+We implement a ConvLSTM-based autoencoder to transform EEG signals into a lower-dimensional latent representation, combining the strengths of both convolutional and LSTM layers. The convolutional layers help capture local features in the data, while the LSTM layers capture the long-range temporal dependencies. This hybrid approach is particularly effective for spatiotemporal data like EEG signals, where both spatial (local) and temporal (long-range) patterns are important.
+
+The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the LSTM-based autoencoder. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq
+}, to balance the reconstruction of amplitude and trends. Similar to the LSTM approach, noise is estimated through the reconstruction error.
 
 \subsubsection{Attention-based Autoencoder}
 ...
 The \emph{BlendedLoss} function as defined in Equation~\ref{eq:blended_loss}, is also used for the attention-based autoencoder, ensuring consistency across all autoencoders.
 
-\subsubsection{Transformer}
+\subsubsection{Transformer Predictor}
+....
+
+\subsubsection{Transformer Classifier}
 ....
 %Classifies sleep stages using attention mechanisms. Noise is identified in parts of the signal that get lower attention scores during inference. These are less informative for feature-label associations, likely due to the disruptive effect of noise.
 ...
