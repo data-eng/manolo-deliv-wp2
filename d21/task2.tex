@@ -44,6 +44,8 @@ To ensure robust model training and reliable outcomes, we rely on data preproces
 
 where $x$ represents the values of a particular feature, $\text{median}(x)$ is the median value of the feature, and $\text{IQR}(x)$ is the interquartile range, which measures the spread of the middle 50\% of the data. We use the median as a measure of central tendency because it is robust against extreme values, making it a more reliable indicator for our dataset, which exhibits low variability and where even small differences matter. Additionally, we use the interquartile range $\text{IQR} = Q_3 - Q_1$ to reduce the influence of outliers by focusing on the range within which the central portion of the data lies. This approach ensures that our normalization process allows the model to learn from the true patterns in the dataset.
 
+To process the input data, we split each 30-second segment of EEG data (7,680 samples) into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data.
+
 For all machine learning methods, we need to establish a common standard to determine what is considered noise and what is not. As the models output different value ranges, we need a policy to classify these outputs into binary values that indicate noise presence or absence. One such approach involves defining thresholds that act as a boundary between noise and clean data. For these methods, we define thresholds based on the 75th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise).
 
 Noise estimation within this machine learning approach can be divided into two categories: label-based and label-free:
@@ -58,7 +60,7 @@ Noise estimation within this machine learning approach can be divided into two c
 
 We implement an LSTM-based autoencoder that uses Long Short-Term Memory (LSTM) layers to reconstruct EEG signals from a lower-dimensional latent representation. The key idea behind this autoencoding approach is to compress the input signal while preserving the essential features, then reconstruct it from the compressed representation. The LSTM layers in the encoder are designed to capture the temporal patterns and dependencies inherent in the EEG signals. These temporal dependencies are crucial for accurately modeling EEG data, which often exhibits long-range correlations over time. The decoder, in turn, reconstructs the original signal from this latent representation, hoping that only non-noisy information is preserved during compression.
 
-To process the input data, we split each 30-second segment of EEG data into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. The encoder processes each sequence and compresses it into a latent representation of size (1, 8), where the first dimension represents a single compressed time step, and the second dimension represents 8 learned features. The decoder then takes this compressed representation and attempts to reconstruct the original signal, capturing both trends and amplitudes.
+The encoder processes each sequence in the data and compresses it into a latent representation of size (1, 8), where the first dimension represents a single compressed time step, and the second dimension represents 8 learned features. The decoder then takes this compressed representation and attempts to reconstruct the original signal, capturing both trends and amplitudes.
 
 To balance the models' focus on both the amplitude and trends of the EEG signals, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted ($\hat{x}$) and target values ($x$):
 %
@@ -75,13 +77,13 @@ The LSTM Autoencoder estimates noise by measuring the reconstruction error betwe
 
 We implement a ConvLSTM-based autoencoder that combines convolutional and LSTM layers to reconstruct EEG signals from a lower-dimensional latent representation. The convolutional layers capture local features in the data, while the LSTM layers capture long-range temporal dependencies. This hybrid architecture is designed to effectively process spatiotemporal data like EEG signals, which contain both spatial (local) and temporal (long-range) patterns.
 
-The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the LSTM-based autoencoder. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Similar to the LSTM approach, noise is estimated through the reconstruction error.
+We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Similar to the LSTM approach, noise is estimated through the reconstruction error.
 
 \subsubsection{Attention-based Autoencoder}
 
 We implement an attention-based autoencoder that combines convolutional layers with a multi-head attention mechanism to reconstruct EEG signals from a lower-dimensional latent representation. The convolutional layers help extract spatial features from the input data, while the attention mechanism is particularly effective in modeling temporal dependencies. This allows the model to focus on important time steps and capture long-term patterns, without the need for recurrent layers like LSTM. The key innovation of this hybrid model lies in the use of multi-head attention, which enables the model to focus on different parts of the input sequence simultaneously. The attention mechanism computes a weighted sum of the input features, with the weights learned during training. This allows the model to prioritize certain features and temporal patterns over others, making it particularly effective for detecting noise or anomalies that deviate from typical signal behavior.
 
-The data processing approach (splitting EEG segments into 32 smaller chunks) remains the same as in the two previous autoencoders. We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Regarding noise estimation, we adopt two strategies:
+We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Regarding noise estimation, we adopt two strategies:
 
 \begin{itemize}
     \item The first strategy defines noise as the reconstruction error, similar to other autoencoders.
@@ -90,12 +92,13 @@ The data processing approach (splitting EEG segments into 32 smaller chunks) rem
 \end{itemize}
 
 \subsubsection{Transformer Predictor}
-....
+TODO: description
+
+We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blended_loss}, to balance the reconstruction of amplitude and trends. Similar to the previous three models, noise is estimated through the reconstruction error.
 
 \subsubsection{Transformer Classifier}
-....
-%Classifies sleep stages using attention mechanisms. Noise is identified in parts of the signal that get lower attention scores during inference. These are less informative for feature-label associations, likely due to the disruptive effect of noise.
-...
+We implement a Transformer-based classifier that uses a multi-head attention mechanism to classify sleep stages from EEG signals. The architecture consists of an encoder with multi-head attention layers to capture temporal dependencies across the input sequence. The attention mechanism allows the model to focus on key time steps, while a feedforward classifier layer outputs the predicted sleep stages.
+
 To train the model, we use Cross-Entropy loss, which measures the dissimilarity between the predicted probability distribution and the true distribution. This loss function is commonly used for classification problems to penalize the model based on how confident and accurate its predictions are. Given that the dataset is quite imbalanced, with class frequencies reflected by the weights as shown in Table \ref{tab:class_freqs_weights}, we employ a weighted version of the Cross-Entropy loss (see: Equation~\ref{eq:weighted_cross_entropy_loss}). This approach adjusts the influence of each class in the loss calculation, helping the model learn across all class distributions, regardless of their prevalence in the dataset.
 
 \begin{equation}
@@ -119,6 +122,8 @@ where \(N\) is the total number of samples, \(y_i\) represents the true class la
     \caption{Class frequencies and weights used in weighted cross-entropy loss.}
     \label{tab:class_freqs_weights}
 \end{table}
+
+The Transformer Classifier estimates noise based on the attention weights in the attention matrix, similar to the approach used in the attention-based autoencoder. The attention mechanism in the Transformer model assigns varying levels of importance to different time steps in the input sequence. By analyzing the attention weights, we can identify time steps that the model considers noisy, as these time steps receive lower attention weights. The rationale behind this is that the classifier makes strong, confident predictions when the data is clean and well-defined. Noise, by nature, does not fit well into any particular class, and the model finds it harder to assign a clear class label to noisy samples.
 
 \subsection{Statistical Approach}
 ....
