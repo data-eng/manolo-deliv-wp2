@@ -15,7 +15,7 @@ The quality of time-series data plays a crucial role in the performance of machi
 
 In this research, we address this limitation by developing a flexible framework that estimates data quality, with respect to noise, anomalies, and malicious manipulation, across different time-series datasets, regardless of the specific task or domain. This approach is commonly referred to as task-agnostic data quality estimation.
 
-\subsection{Proposed Methodologies}
+\subsection{Proposed Methodology}
 
 We propose a task-agnostic framework for time-series data quality estimation, using a combination of machine learning-based and statistical approaches to detect noise and anomalies in data. The primary techniques used in this framework include:
 
@@ -27,13 +27,14 @@ We propose a task-agnostic framework for time-series data quality estimation, us
     \item[(c)] Statistical approaches which detect noise based on changes in data characteristics over time.
 \end{enumerate}
 
-To apply these techniques, we implement the following 10 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer, MNE Filtering, Adaptive Windowing, Cumulative Sum Control, Page-Hinkley Test, Kullback-Leibler Divergence and Principal Component Analysis. The last five statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework.
+To apply these techniques, we implement the following 8 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer, MNE Filtering, Cumulative Sum Control, Page-Hinkley Test and Kullback-Leibler Divergence. The last 3 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework.
 
-In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison. Specifically, for the first three methods, we define thresholds based on the 75th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise). The Frouros-based methods inherently provide binary values; therefore, thresholds are set to 0.5 solely to handle the float values resulting from sample aggregation.
+In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison.
 
-The machine learning-based methods of our framework require training to work as noise estimators. For this purpose, we split the dataset into training (43 recordings), validation (3 recordings), and testing subsets (10 recordings). Noise estimation is performed using the test dataset. To ensure consistency across all methods and enable meaningful comparisons, the same test recordings were also used for noise estimation by the statistical methods.
+\subsection{Machine Learning Approach}
+The general concept of using machine learning (ML) for noise estimation revolves around training models to solve specific tasks and then using their outputs during inference to estimate noise. These tasks may vary in nature — ranging from signal reconstruction to classification — but the core idea is that the model’s performance on these tasks can be used to infer the presence of noise.
 
-Preprocessing involves handling missing or ambiguous data by removing rows containing NaN values, as well as any samples where expert annotators could not agree on the class label (i.e., samples with a label value of 8). Regarding normalization, it is applied only to the machine learning methods, as the statistical methods require the raw data to function. Due to the low variability and the presence of extreme outliers in the EEG signals, we adopt a robust normalization approach. Instead of using the mean and standard deviation, which are sensitive to outliers, we use the median and interquartile range (IQR). Our normalization method scales the data based on statistics computed across the entire dataset, rather than on a per-batch basis, as the statistics remain consistent across the full dataset.
+To ensure robust model training and reliable outcomes, we rely on data preprocessing techniques. Proper preprocessing standardizes the input data, mitigates inconsistencies, and enhances the model’s ability to learn meaningful representations. In our case, preprocessing involves handling missing or ambiguous data by removing rows containing NaN values, as well as any samples where expert annotators could not agree on the class label (i.e., samples with a label value of 8). Additionally, we apply normalization to assist model training by making the data more uniform. Due to the low variability and the presence of extreme outliers in the EEG signals, we adopt a robust normalization approach. Instead of using the mean and standard deviation, which are sensitive to outliers, we use the median and interquartile range (IQR). We scale the data based on statistics computed across the entire dataset, rather than on a per-batch basis, since the statistics remain consistent across the full dataset.
 
 \begin{equation}
     x_{\text{norm}} = \frac{x - \text{median}(x)}{\text{IQR}(x)} \label{eq:robust_norm}
@@ -41,45 +42,95 @@ Preprocessing involves handling missing or ambiguous data by removing rows conta
 
 where $x$ represents the values of a particular feature, $\text{median}(x)$ is the median value of the feature, and $\text{IQR}(x)$ is the interquartile range, which measures the spread of the middle 50\% of the data. We use the median as a measure of central tendency because it is robust against extreme values, making it a more reliable indicator for our dataset, which exhibits low variability and where even small differences matter. Additionally, we use the interquartile range $\text{IQR} = Q_3 - Q_1$ to reduce the influence of outliers by focusing on the range within which the central portion of the data lies. This approach ensures that our normalization process allows the model to learn from the true patterns in the dataset.
 
+For all machine learning methods, we need to establish a common standard to determine what is considered noise and what is not. As the models output different value ranges, we need a policy to classify these outputs into binary values that indicate noise presence or absence. One such approach involves defining thresholds that act as a boundary between noise and clean data. For these methods, we define thresholds based on the 75th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise).
+
+The ML approach focuses on training models to perform specific tasks, such as signal reconstruction (e.g., autoencoders) or classification (e.g., transformers). Through these tasks, models learn to that can be used to infer the presence of noise. To effectively function as noise estimators, these models undergo a comprehensive training process. For this training, we split the dataset into training (43 recordings), validation (3 recordings), and testing subsets (10 recordings). Noise estimation is performed using the test dataset.
+
+For the training configuration, we set the batch size to 512 and train the models for a maximum of 1000 epochs. To prevent overfitting, we employ early stopping with a patience of 30 epochs, meaning that if the validation loss does not improve for 30 consecutive epochs, training will stop. We set the learning rate to $1e^{-4}$ and use the Adam optimizer to adjust the model weights. Additionally, we implement a \emph{ReduceLROnPlateau} scheduler to dynamically adjust the learning rate based on the validation loss. If the validation loss plateaus, the scheduler reduces the learning rate to help the model continue improving.
+
+\subsubsection{LSTM Autoencoder}
+....
+Compresses the input signal into a latent representation and then attempts to reconstruct it. Noise is estimated as the difference between the original and reconstructed signals, hoping that only the non-noisy information is preserved during compression. 
+....
+We implement an LSTM-based autoencoder to transform the EEG signals into a lower-dimensional latent representation. The encoder consists of LSTM layers that capture the temporal patterns of the input sequence, while the decoder reconstructs the original signal from the latent representation. This architecture is chosen because LSTMs are well-suited for sequential data and can effectively model the temporal dependencies present in EEG signals.
+....
+We split each 30s segment into 32 chunks, so we end up with 7680/32=240 sequences in each chunk. The input, structured as sequences of length 240 with 2 features corresponding to the EEG channels, is processed by the encoder, which extracts temporal patterns and relationships within the data. This process results in a latent representation of size (1, 8), where the first dimension corresponds to a single compressed time step and the second dimension represents the 8 learned features.
+...
 To balance the models' focus on both the amplitude and trends of the EEG signals, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted ($\hat{x}$) and target values ($x$):
 %
 \begin{equation}
 \text{Loss} = (1 - \text{blend}) \cdot \text{median}(\lvert \hat{x} - x \rvert^p) + \text{blend} \cdot \text{mean}(\lvert \hat{x} - x \rvert^p)
+\label{eq:blended_loss}
 \end{equation}
 %
 where $p$ is the power parameter that controls the sensitivity of the loss to the differences, $x$ is the original signal, and $\hat{x}$ is the reconstructed signal. The blend factor controls the trade-off between learning the overall trends (via the median) and capturing the amplitude (via the mean). We experiment with different blend values (0.1 and 0.8) to observe how this affects the model’s performance in reconstructing the signals.
+....
 
-For the training configuration, we set the batch size to 512 and train the model for a maximum of 1000 epochs. To prevent overfitting, we employ early stopping with a patience of 30 epochs, meaning that if the validation loss does not improve for 30 consecutive epochs, training will stop. We set the learning rate to $1e^{-4}$ and use the Adam optimizer to adjust the model weights. Additionally, we implement a \emph{ReduceLROnPlateau} scheduler to dynamically adjust the learning rate based on the validation loss. If the validation loss plateaus, the scheduler reduces the learning rate to help the model continue improving.
+\subsubsection{Convolutional LSTM Autoencoder}
+...
+The same \emph{BlendedLoss} function is used here as well, as defined in Equation~\ref{eq:blended_loss}.
 
-% what is this method in general (not relative to noise estimation, but generally what does it do)
-% how this method works to estimate noise
-% why you chose this method, what does it have to give
-
-\subsubsection{Autoencoder}
-Compresses the input signal into a latent representation and then attempts to reconstruct it. Noise is estimated as the difference between the original and reconstructed signals, hoping that only the non-noisy information is preserved during compression. 
-
-%We propose encoding the EEG signals into a latent representation to reduce their dimensionality. This method creates smaller embeddings from the original signals, making the data more manageable for further processing and model training. For the transformation to be successful, the embeddings must preserve the key characteristics of the original signals without losing important information.
-
-%Autoencoders are designed to reconstruct data from a lower-dimensional representation. By evaluating all three AE architectures, we aim to determine which one is more effective at capturing the essential features of the data while reducing dimensionality.
-
-\begin{enumerate}
-    \item[(1.a)] LSTM Autoencoder: ....
-    \vspace{-0.2cm}
-    \item[(1.b)] Convolutional LSTM Autoencoder: ...
-    \vspace{-0.2cm}
-    \item[(1.c)] Attention-based Autoencoder: ...
-\end{enumerate}
-
-% We implement an LSTM-based autoencoder to transform the EEG signals into a lower-dimensional latent representation. The encoder consists of LSTM layers that capture the temporal patterns of the input sequence, while the decoder reconstructs the original signal from the latent representation. This architecture is chosen because LSTMs are well-suited for sequential data and can effectively model the temporal dependencies present in EEG signals.
+\subsubsection{Attention-based Autoencoder}
+...
+The \emph{BlendedLoss} function as defined in Equation~\ref{eq:blended_loss}, is also used for the attention-based autoencoder, ensuring consistency across all autoencoders.
 
 \subsubsection{Transformer}
-Classifies sleep stages using attention mechanisms. Noise is identified in parts of the signal that get lower attention scores during inference. These are less informative for feature-label associations, likely due to the disruptive effect of noise.
+....
+%Classifies sleep stages using attention mechanisms. Noise is identified in parts of the signal that get lower attention scores during inference. These are less informative for feature-label associations, likely due to the disruptive effect of noise.
+...
+To train the model, we use Cross-Entropy loss, which measures the dissimilarity between the predicted probability distribution and the true distribution. This loss function is commonly used for classification problems to penalize the model based on how confident and accurate its predictions are. Given that the dataset is quite imbalanced, with class frequencies reflected by the weights as shown in Table \ref{tab:class_freqs_weights}, we employ a weighted version of the Cross-Entropy loss (see: Equation~\ref{eq:weighted_cross_entropy_loss}). This approach adjusts the influence of each class in the loss calculation, helping the model learn across all class distributions, regardless of their prevalence in the dataset.
+
+\begin{equation}
+    \text{Loss} = -\sum_{i=1}^{N} w_{y_i} \cdot \log(p_{y_i})
+    \label{eq:weighted_cross_entropy_loss}
+\end{equation}
+
+where \(N\) is the total number of samples, \(y_i\) represents the true class label for the \(i\)-th sample, \(p_{y_i}\) is the predicted probability for the true class, and \(w_{y_i}\) is the weight assigned to the class \(y_i\).
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{c|c|c}
+    Class & Freqs (\%) & Weights \\
+    \hline
+    0 & 14.11 & 0.12 \\
+    1 & 4.45  & 0.39 \\
+    2 & 62.16 & 0.03 \\
+    3 & 4.96  & 0.35 \\
+    4 & 14.36 & 0.12 \\
+    \end{tabular}
+    \caption{Class frequencies and weights used in weighted cross-entropy loss.}
+    \label{tab:class_freqs_weights}
+\end{table}
+
+\subsection{Statistical Approach}
+....
+Preprocessing for the statistical methods is similar to that of the machine learning-based methods in terms of handling NaN values and ambiguous samples. However, unlike the machine learning methods, no normalization is applied, as the statistical methods require the raw data to function.
+....
+For MNE filtering, the noise thresholding approach is consistent with the machine learning-based methods, using the 75th percentile to separate noise (1) from no noise (0). On the other hand, the Frouros-based methods inherently provide binary outputs. To handle cases where sample aggregation results in float values, we apply a threshold of 0.5 to convert these results into binary form.
+...
+To ensure consistency across all methods and enable meaningful comparisons, the same test recordings used for machine learning-based noise estimation are also applied to the statistical methods.
+... 
 
 \subsubsection{MNE Filtering}
-Applies bandpass filtering to the input signals to remove noise outside a specified frequency range (0.5 to 40 Hz). Noise is estimated as the difference between the original and the filtered version.
+...
+%Applies bandpass filtering to the input signals to remove noise outside a specified frequency range (0.5 to 40 Hz). Noise is estimated as the difference between the original and the filtered version.
+....
 
-\subsubsection{Adaptive Windowing}
-Maintains a dynamic window of data that adjusts its size based on changes in the mean. Noise is estimated by splitting the window into two parts and checking for significant differences between their means.
+\subsubsection{Cumulative Sum Control}
+...
+
+\subsubsection{Page-Hinkley Test}
+...
+
+\subsubsection{Kullback-Leibler Divergence}
+...
+
+
+
+
+
+
+
 
 \subsubsection{Cumulative Sum Control}
 Tracks the cumulative sum of deviations from a target mean over time. Noise is detected when the cumulative sum of these deviations exceeds a threshold.
@@ -90,23 +141,12 @@ Compares the cumulative mean of observed values to the global mean of the data. 
 \subsubsection{Kullback-Leibler Divergence}
 Measures the difference between probability distributions of two consecutive data windows. Noise is estimated when the divergence exceeds a threshold.
 
-\subsubsection{Principal Component Analysis}
-Reduces data dimensionality by identifying the directions with the highest variance. Noise is estimated by monitoring shifts in explained variance after establishing a baseline variance structure from the data.
 
 
 
 
-% The input, structured as sequences of length 240 with 2 features corresponding to the EEG channels, is processed by the encoder, which extracts temporal patterns and relationships within the data. This process results in a latent representation of size (1, 16), where the first dimension corresponds to a single compressed time step and the second dimension represents the 16 learned features.
 
-
-% \subsubsection{Convolutional LSTM Autoencoder}
-% \subsubsection{Attention Autoencoder}
-
-% \subsection{Transformer}
-% \subsection{MNE Filtering}
-
-% \subsection{Experiments \& Results}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % During the experiments, we focus on evaluating how well the decoder reconstructs the latent representations back into their original form. We compare the original signal with the decoded version, not only visually through plots but also by using various metrics to quantify performance. Since the testing data is quite large, we select one random batch for analysis. This batch is visualized using two subplots, one for each EEG feature, representing the signal for each channel separately.
 
 % \subsection{Signal Comparison} First, we plot the original and decoded signals, where the x-axis represents the samples and the y-axis shows the amplitude of the signal.
@@ -262,8 +302,3 @@ Reduces data dimensionality by identifying the directions with the highest varia
 %     \label{tab:metrics_comparison}
 % \end{table}
 % %
-
-
-
-% \subsection{Conclusions}
-
