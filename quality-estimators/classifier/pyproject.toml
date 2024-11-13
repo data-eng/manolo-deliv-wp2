@@ -27,5 +27,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-train_transformer = "src.train:main"
-test_transformer = "src.test:main"
+train_classifier = "src.train:main"
+test_classifier = "src.test:main"

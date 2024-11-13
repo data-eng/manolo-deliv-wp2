@@ -44,28 +44,23 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
                    'best_epoch': 0, 
                    'best_train_loss': float('inf'), 
                    'best_val_loss': float('inf'), 
-                    'train_time': 0.0 }
+                   'train_time': 0.0 }
 
     for epoch in range(epochs):
         start = time.time()
-
         total_train_loss = 0.0
 
         model.train()
         
-        for _, (X, y) in enumerate(train_data):
+        for _, (X, _) in enumerate(train_data):
             X = X.to(device)
 
             X, t = separate(src=X, c=[0,1], t=[2])
             X = merge(c=X, t=t)
 
-            y_pred, _ = model(X)
+            X_dec, _ = model(X)
 
-            batch_size, seq_len, num_classes = y_pred.size()
-            y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
-            y = y.reshape(batch_size * seq_len)
-
-            train_loss = criterion(y_pred, y)
+            train_loss = criterion(X_dec, X)
 
             optimizer.zero_grad()
             train_loss.backward()
@@ -80,19 +75,15 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         total_val_loss = 0.0
 
         with torch.no_grad():
-            for _, (X, y) in enumerate(val_data):
+            for _, (X, _) in enumerate(val_data):
                 X = X.to(device)
 
                 X, t = separate(src=X, c=[0,1], t=[2])
                 X = merge(c=X, t=t)
 
-                y_pred, _ = model(X)
+                X_dec, _ = model(X)
 
-                batch_size, seq_len, num_classes = y_pred.size()
-                y_pred = y_pred.reshape(batch_size * seq_len, num_classes)
-                y = y.reshape(batch_size * seq_len)
-
-                val_loss = criterion(y_pred, y)
+                val_loss = criterion(X_dec, X)
                 total_val_loss += val_loss.item()
 
         avg_val_loss = total_val_loss / batches
@@ -110,7 +101,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
 
             logger.info(f'New best val found! ~ Epoch [{epoch + 1}/{epochs}], Val Loss {avg_val_loss}')
 
-            path = utils.get_path('..', '..', 'models', filename='transformer.pth')
+            path = utils.get_path('..', '..', 'models', filename='predictor.pth')
             torch.save(model.state_dict(), path)
 
             checkpoints.update({'best_epoch': epoch+1, 
@@ -130,7 +121,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         'epochs': epoch + 1,
         'train_time': train_time})
     
-    cfn = utils.get_path('..', '..', 'static', 'transformer', filename='train_checkpoints.json')
+    cfn = utils.get_path('..', '..', 'static', 'predictor', filename='train_checkpoints.json')
     utils.save_json(data=checkpoints, filename=cfn)
     
     if visualize:
@@ -141,7 +132,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
                         plot_func=plt.plot,
                         coloring=['brown', 'royalblue'],
                         names=['Training', 'Validation'],
-                        path=utils.get_dir('..', '..', 'static', 'transformer'))
+                        path=utils.get_dir('..', '..', 'static', 'predictor'))
 
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
@@ -160,17 +151,14 @@ def main():
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
     train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
-    _, weights = extract_weights(train_df, label_col='majority')
-
-    classes = list(weights.keys())
-    logger.info(f'Weights: {weights}.')
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
-                        out_size=len(classes),
+                        hidden_dim=64,
+                        out_size=3,
                         num_heads=1,
                         dropout=0.5)
         
@@ -178,7 +166,7 @@ def main():
           epochs=1000,
           patience=30,
           lr=1e-4,
-          criterion=utils.WeightedCrossEntropyLoss(weights),
+          criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
           optimizer='Adam',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
