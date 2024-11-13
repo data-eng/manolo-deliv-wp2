@@ -45,13 +45,11 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
     stationary = 0
     train_losses, val_losses = [], []
 
-    checkpoints = {
-        'epochs': 0, 
-        'best_epoch': 0, 
-        'best_train_loss': float('inf'), 
-        'best_val_loss': float('inf'),
-        'train_time': 0.0 
-    }
+    checkpoints = {'epochs': 0, 
+                   'best_epoch': 0, 
+                   'best_train_loss': float('inf'), 
+                   'best_val_loss': float('inf'),
+                   'train_time': 0.0 }
 
     for epoch in range(epochs):
         start = time.time()

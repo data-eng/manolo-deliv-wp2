@@ -371,7 +371,8 @@ class Attn_Encoder(nn.Module):
         for attn_layer in self.attn_layers:
             attn_matrix = attn_layer(Q=x, K=x, V=x)
 
-        x = x + self.dropout(attn_matrix)
+        x = x + attn_matrix
+        x = self.dropout(x)
         
         x = x.transpose(1, 2)
         x = self.conv(x)
@@ -414,12 +415,12 @@ class Attn_Decoder(nn.Module):
         x = self.conv_transpose(x)
         x = x.transpose(1, 2)
 
-        x = x + self.dropout(x)
+        x = self.dropout(x)
 
         for attn_layer in self.attn_layers:
             attn_matrix = attn_layer(Q=x, K=x, V=x)
 
-        x = attn_matrix
+        x = x + attn_matrix
         
         return x, attn_matrix
 
