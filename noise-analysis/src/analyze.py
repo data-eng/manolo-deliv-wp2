@@ -18,6 +18,7 @@ passage = config['passage']
 estimators = config['estimators']
 thresholds = config['thresholds']
 window = config['window']
+perc = config['perc']
 
 def load_noise_data():
     """
@@ -196,12 +197,11 @@ def estimate_binary_noise():
 
         logger.info(f"Saved binary aggregated data to {binary_csv_path} with {len(df_avg)} rows.")
 
-def get_top_noisy_timesteps(k=0.1, type='agg'):
+def get_top_noisy_timesteps(type='agg'):
     """
     Extract the top 100*k% of noisy timesteps for each feature and estimator, based on noise values 
     from either the aggregated or binary data.
 
-    :param k: Fraction of top noisy timesteps to extract (default is 0.1).
     :param type: Specifies whether to use 'agg' (aggregated) or 'bin' (binary) data.
     :return: Dictionary containing top noisy timesteps for each feature in each estimator.
     """
@@ -211,24 +211,22 @@ def get_top_noisy_timesteps(k=0.1, type='agg'):
     path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
 
     for id in estimators:
-
-        if type == "bin":
-            threshold = thresholds[id]
-
-            threshold_str = f'_{ "_".join(map(str, threshold))}' if threshold is not None else ''
-            csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'bin_{id}{threshold_str}.csv')
-        elif type == "agg":
-            csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
+        csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
         
         df = pd.read_csv(csv_path)
         topK = {}
 
         for noise_col in noise_cols:
-            df_sorted = df.sort_values(by=noise_col, ascending=False)
+            binary_noise_col = 'binary_' + noise_col
+
+            if type == "bin":
+                df_filtered = df[df[binary_noise_col] == 1]
+
+            df_sorted = df_filtered.sort_values(by=noise_col, ascending=False)
             
             total_rows = len(df_sorted)
-            k_perc = int(total_rows * k)
-            logger.info(f"For {noise_col}: Total rows = {total_rows}, Top {k*100}% rows = {k_perc}.")
+            k_perc = int(total_rows * perc)
+            logger.info(f"Estimator {id} - {noise_col}: Total rows = {total_rows}, Top {perc*100}% rows = {k_perc}.")
 
             df_topK = df_sorted.iloc[:k_perc]
 
@@ -240,7 +238,7 @@ def get_top_noisy_timesteps(k=0.1, type='agg'):
         topKs[id] = topK
     
     np.save(path, topKs)
-    logger.info(f"Saved top {k*100}% timesteps to {path}.")
+    logger.info(f"Saved top {perc*100}% timesteps to {path}.")
 
     return topKs
 
@@ -260,14 +258,40 @@ def average_over_segments(values, segment_size):
 
     return averages.tolist()
 
-def compute_agreement(dict):
+def get_fscore(times_1, times_2):
+    """
+    Compute the F-score between two sets of timestamps.
+
+    :param times_1: Set of timestamps for the first estimator.
+    :param times_2: Set of timestamps for the second estimator.
+    :return: F-score between the two sets.
+    """
+    true_positives = len(times_1.intersection(times_2))
+    predicted_positives = len(times_2)
+    actual_positives = len(times_1)
+
+    precision = true_positives / predicted_positives if predicted_positives > 0 else 0
+    recall = true_positives / actual_positives if actual_positives > 0 else 0
+
+    fscore = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    return fscore
+
+def compute_agreement():
     """
     Compute the percentage agreement between pairs of estimators for each feature based on 
     the provided dict (timesteps or other metric).
 
-    :param dict: Dictionary containing noisy timesteps for each feature in each estimator.
     :return: Dictionary showing agreement percentages between estimator pairs for each feature.
     """
+    path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename='topKs.npy')
+    
+    if os.path.exists(path):
+        dict = np.load(path, allow_pickle=True).item()
+        logger.info(f"Loaded topK values from {path}")
+    else:
+        logger.warning(f"{path} does not exist. Ensure the topK values are generated.")
+        return {}
+    
     agreement_dict = {}
     
     features = list(dict[next(iter(dict))].keys())
@@ -284,12 +308,14 @@ def compute_agreement(dict):
                 
                 est_2 = estimator_ids[j]
                 times_2 = set(dict[est_2][feature])
-                
-                common_times = times_1.intersection(times_2)
-                total_times = times_1.union(times_2)
 
-                agreement_percentage = (len(common_times) / len(total_times)) * 100 if total_times else 0
-                agreement_dict[feature][(est_1, est_2)] = agreement_percentage
+                logger.info(f"Feature {feature} - Estimator {est_2}: Length of times_2 = {len(times_2)}")
+                
+                fscore_12 = get_fscore(times_1, times_2)
+                fscore_21 = get_fscore(times_2, times_1)
+
+                agreement_dict[feature][(est_1, est_2)] = fscore_12
+                agreement_dict[feature][(est_2, est_1)] = fscore_21
 
     return agreement_dict
 
@@ -309,16 +335,15 @@ def visualize_agreement(dict):
     for ax, (feature, agreements) in zip(axes, dict.items()):
         agreement_matrix = np.ones((len(estimator_ids), len(estimator_ids)))
 
-        for (est_1, est_2), percentage in agreements.items():
+        for (est_1, est_2), score in agreements.items():
             idx_1 = estimator_ids.index(est_1)
             idx_2 = estimator_ids.index(est_2)
 
-            agreement_matrix[idx_1, idx_2] = percentage/100
-            agreement_matrix[idx_2, idx_1] = percentage/100
+            agreement_matrix[idx_1, idx_2] = score
 
-        sns.heatmap(agreement_matrix, annot=True, fmt=".2f", cmap='coolwarm',
+        sns.heatmap(agreement_matrix, annot=True, fmt=".4f", cmap='RdBu',
                     xticklabels=estimator_ids, yticklabels=estimator_ids,
-                    cbar_kws={'label': 'Agreement Percentage (%)'}, ax=ax)
+                    cbar_kws={'label': 'Agreement Score'}, ax=ax)
         
         ax.set_title(f'{feature}')
         ax.set_xlabel('Estimators')
@@ -343,10 +368,10 @@ def main():
     #noise_dict = load_noise_data()
     #visualize_noise(dict=noise_dict)
 
-    estimate_binary_noise()
-    topKs = get_top_noisy_timesteps(k=0.1, type='bin')
+    #estimate_binary_noise()
+    topKs = get_top_noisy_timesteps(type='bin')
 
-    agreement_dict = compute_agreement(dict=topKs)
+    agreement_dict = compute_agreement()
     visualize_agreement(dict=agreement_dict)
 
 if __name__ == '__main__':

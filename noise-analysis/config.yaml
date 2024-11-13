@@ -9,21 +9,23 @@ estimators:
   - transformer
   - mne
   - cusum
-  - adwin
   - page_hinkley
+  - kl
 
 window: 7680
-perc: 1
+perc: 0.25
 
 thresholds: 
-  lstm_ae: [-0.54, -0.02]
-  conv_lstm_ae: [-0.62, -0.05]
-  attn_ae: [-0.05, -0.01]
-  transformer: [-13.77, -7.11]
-  mne: [-119.64, -222.67]
-  cusum: ~
-  adwin: ~
-  page_hinkley: ~
+  #lstm_ae: [-0.54, -0.02]
+  #conv_lstm_ae: [-0.62, -0.05]
+  #attn_ae: [-0.05, -0.01]
+  #transformer: [-13.77, -7.11]
+  #mne: [-119.64, -222.67]
+  #cusum: [0.5, 0.5]
+  #page_hinkley: [0.5, 0.5]
+  #kl: [0.5, 0.5]
+  adwin: [0.5, 0.5]
+  pca: [0.5, 0.5]
 
 # Threshold Suggestions {low, mid, high}
 #--------------------------------------#

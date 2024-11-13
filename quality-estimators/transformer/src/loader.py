@@ -26,8 +26,8 @@ def get_boas_data(base_path, output_path):
 
         output_file = os.path.join(output_path, f'{subject_id}.csv')
 
-        """if os.path.exists(output_file):
-            continue"""
+        if os.path.exists(output_file):
+            continue
 
         if not os.path.exists(eeg_folder):
             logger.info(f'No EEG folder found for {subject_id}. Skipping.')

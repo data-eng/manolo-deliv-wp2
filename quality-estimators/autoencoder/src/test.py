@@ -312,9 +312,10 @@ def collect_metrics(signals, num_bands=5, threshold=10):
 
     logger.info(f'Metrics saved to {fn}.')
 
-def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+def estimate_rec_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
     """
-    Estimate the quality of the model's predictions and save the results to a CSV file.
+    Estimate the quality of the model's predictions based on reconstruction error and save 
+    the results to a CSV file.
 
     :param dataloader: Dataloader providing batches of input data and labels.
     :param signals: Model output signals for the evaluation.
@@ -331,8 +332,10 @@ def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_
 
         noise = X - X_dec
 
-        for batch_idx in range(X.shape[0]):
-            for seq_idx in range(X.shape[1]):
+        batch_size, seq_len, _ = feats.shape
+
+        for batch_idx in range(batch_size):
+            for seq_idx in range(seq_len):
                 row_data = {}
 
                 for i, col_name in enumerate(X_cols + t_cols):
@@ -348,7 +351,46 @@ def estimate_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_
 
     df = pd.DataFrame(all_data)
 
-    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_{config['id']}.csv')
+    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_{config['id']}_r.csv')
+    df.to_csv(path, index=False)
+
+def estimate_attn_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+    """
+    Estimate the quality of the model's predictions based on attention matrices and save 
+    the results to a CSV file.
+
+    :param dataloader: Dataloader providing batches of input data and labels.
+    :param attn_matrices: Attention matrices obtained from the model.
+    :param cols: Tuple containing lists of feature columns, time-related columns, and target columns.
+    """
+    all_data = []
+    X_cols, t_cols, y_cols = cols
+
+    for (feats, labels), attn_matrix in zip(dataloader, attn_matrices):
+        feats = feats.cpu().numpy()
+        labels = labels.cpu().numpy()
+        noise = attn_matrix.cpu().numpy()
+
+        batch_size, seq_len, _ = feats.shape
+
+        for batch_idx in range(batch_size):
+            for seq_idx in range(seq_len):
+                row_data = {}
+
+                for i, col_name in enumerate(X_cols + t_cols):
+                    row_data[col_name] = feats[batch_idx, seq_idx, i]
+
+                for i, y_col in enumerate(y_cols):
+                    row_data[y_col] = labels[batch_idx, seq_idx, i]
+
+                for i, X_col in enumerate(X_cols):
+                    row_data[f'noise_{X_col}'] = noise[batch_idx, seq_idx, i]
+
+                all_data.append(row_data)
+
+    df = pd.DataFrame(all_data)
+
+    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_{config["id"]}_a.csv')
     df.to_csv(path, index=False)
 
 def test(data, criterion, model, visualize=False, estimate=False):
@@ -369,7 +411,7 @@ def test(data, criterion, model, visualize=False, estimate=False):
 
     batches = len(data)
     total_test_loss = 0.0
-    signals = []
+    signals, attn_matrices = [], []
 
     progress_bar = tqdm(enumerate(data), total=batches, desc=f'Evaluation', leave=True)
 
@@ -379,7 +421,11 @@ def test(data, criterion, model, visualize=False, estimate=False):
 
             X, _ = separate(src=X, c=[0,1], t=[2,4])
 
-            X_dec, _ = model(X)
+            if config['id'] == 'attn_ae':
+                X_dec, _, attn_matrix = model(X)
+                attn_matrices.append(attn_matrix)
+            else:
+                X_dec, _ = model(X)
 
             test_loss = criterion(X_dec, X)
 
@@ -389,7 +435,10 @@ def test(data, criterion, model, visualize=False, estimate=False):
             signals.append((X, X_dec))
         
         if estimate:
-            estimate_quality(data, signals)
+            estimate_rec_quality(data, signals)
+
+            if attn_matrices:
+                estimate_attn_quality(data, attn_matrices)
 
         if visualize:
             plot_signals(signals, batch=4, outlier_threshold=10)
@@ -422,7 +471,7 @@ def main():
 
     datasets = create_datasets(dataframes=(test_df,), seq_len=seq_len)
 
-    dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=True)
+    dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model_class = globals()[config['name']]
     model = model_class(seq_len=seq_len, **config['params'])

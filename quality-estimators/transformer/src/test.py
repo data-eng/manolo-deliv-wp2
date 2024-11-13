@@ -141,7 +141,7 @@ def main():
 
     datasets = create_datasets(dataframes=(test_df,), seq_len=seq_len)
 
-    dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=True)
+    dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
                         out_size=len(classes),

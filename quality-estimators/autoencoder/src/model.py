@@ -366,18 +366,18 @@ class Attn_Encoder(nn.Module):
         Forward pass for Attention Encoder.
         
         :param x: Input tensor of shape (batch_size, seq_len, in_size).
-        :return: Encoded output tensor of shape (batch_size, out_size).
+        :return: Encoded output tensor of shape (batch_size, out_size) and attention matrix of shape (batch_size, seq_len, in_size).
         """
         for attn_layer in self.attn_layers:
-            x = attn_layer(Q=x, K=x, V=x)
+            attn_matrix = attn_layer(Q=x, K=x, V=x)
 
-        x = self.dropout(x)
+        x = x + self.dropout(attn_matrix)
         
         x = x.transpose(1, 2)
         x = self.conv(x)
         x = x.squeeze(2)
         
-        return x
+        return x, attn_matrix
 
 class Attn_Decoder(nn.Module):
     def __init__(self, in_size, out_size, num_heads, num_layers, seq_len, dropout):
@@ -407,19 +407,21 @@ class Attn_Decoder(nn.Module):
         Forward pass for Attention Decoder.
         
         :param x: Encoded input tensor of shape (batch_size, out_size).
-        :return: Decoded output tensor of shape (batch_size, seq_len, in_size).
+        :return: Decoded output tensor and attention matrix, both of shape (batch_size, seq_len, in_size).
         """
         x = x.unsqueeze(1)
         x = x.transpose(1, 2)
         x = self.conv_transpose(x)
         x = x.transpose(1, 2)
 
-        x = self.dropout(x)
+        x = x + self.dropout(x)
 
         for attn_layer in self.attn_layers:
-            x = attn_layer(Q=x, K=x, V=x)
+            attn_matrix = attn_layer(Q=x, K=x, V=x)
+
+        x = attn_matrix
         
-        return x
+        return x, attn_matrix
 
 class Attn_Autoencoder(nn.Module):
     def __init__(self, seq_len, num_feats, latent_seq_len, latent_num_feats, num_heads, num_layers, dropout=0.5):
@@ -460,11 +462,13 @@ class Attn_Autoencoder(nn.Module):
         Forward pass for Attention Autoencoder.
         
         :param x: Input tensor of shape (batch_size, seq_len, num_feats).
-        :return: Decoded output and latent representation.
+        :return: Decoded output, latent representation, and averaged attention matrix.
         """
-        enc_x = self.encoder(x)
-        dec_x = self.decoder(enc_x)
+        enc_x, enc_attn_matrix = self.encoder(x)
+        dec_x, dec_attn_matrix = self.decoder(enc_x)
 
         latent = enc_x.view(enc_x.size(0), self.latent_seq_len, self.latent_num_feats)
-        
-        return dec_x, latent
+
+        attn_matrix = (enc_attn_matrix + dec_attn_matrix) / 2
+
+        return dec_x, latent, attn_matrix
