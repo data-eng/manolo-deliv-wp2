@@ -44,7 +44,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
                    'best_epoch': 0, 
                    'best_train_loss': float('inf'), 
                    'best_val_loss': float('inf'), 
-                    'train_time': 0.0 }
+                   'train_time': 0.0 }
 
     for epoch in range(epochs):
         start = time.time()
@@ -110,7 +110,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
 
             logger.info(f'New best val found! ~ Epoch [{epoch + 1}/{epochs}], Val Loss {avg_val_loss}')
 
-            path = utils.get_path('..', '..', 'models', filename='transformer.pth')
+            path = utils.get_path('..', '..', 'models', filename='classifier.pth')
             torch.save(model.state_dict(), path)
 
             checkpoints.update({'best_epoch': epoch+1, 
@@ -130,7 +130,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         'epochs': epoch + 1,
         'train_time': train_time})
     
-    cfn = utils.get_path('..', '..', 'static', 'transformer', filename='train_checkpoints.json')
+    cfn = utils.get_path('..', '..', 'static', 'classifier', filename='train_checkpoints.json')
     utils.save_json(data=checkpoints, filename=cfn)
     
     if visualize:
@@ -141,7 +141,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
                         plot_func=plt.plot,
                         coloring=['brown', 'royalblue'],
                         names=['Training', 'Validation'],
-                        path=utils.get_dir('..', '..', 'static', 'transformer'))
+                        path=utils.get_dir('..', '..', 'static', 'classifier'))
 
     logger.info(f'\nTraining complete!\nFinal Training Loss: {avg_train_loss:.6f} & Validation Loss: {best_val_loss:.6f}\n')
 
@@ -170,6 +170,7 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
+                        hidden_dim=64,
                         out_size=len(classes),
                         num_heads=1,
                         dropout=0.5)

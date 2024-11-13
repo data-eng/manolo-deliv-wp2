@@ -2,8 +2,6 @@ import torch
 from tqdm import tqdm
 import warnings
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import theilslopes, pearsonr
 
 from . import utils
 from .loader import *
@@ -49,7 +47,7 @@ def estimate_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time',
 
     df = pd.DataFrame(all_data)
 
-    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_transformer.csv')
+    path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_classifier.csv')
     df.to_csv(path, index=False)
 
 def test(data, classes, criterion, model, visualize=False, estimate=False):
@@ -57,12 +55,13 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
     Test the model on the provided data and calculate the test loss.
 
     :param data: Data to test the model on.
+    :classes: List of class indices.
     :param criterion: Loss function used to compute the test loss.
     :param model: The model to be evaluated.
     :param visualize: Whether to visualize the model's predictions.
     :param estimate: Whether to estimate the quality of the predictions.
     """
-    mfn = utils.get_path('..', '..', 'models', filename='transformer.pth')
+    mfn = utils.get_path('..', '..', 'models', filename='classifier.pth')
 
     model.load_state_dict(torch.load(mfn))
     model.to(device)
@@ -115,7 +114,7 @@ def test(data, classes, criterion, model, visualize=False, estimate=False):
                         title='Train Heatmap',
                         classes=classes,
                         coloring=['azure', 'darkblue'],
-                        path=utils.get_dir('..', '..', 'static', 'transformer'))
+                        path=utils.get_dir('..', '..', 'static', 'classifier'))
 
     logger.info(f'\nTesting complete!\nTesting Loss: {avg_test_loss:.6f}\n')
 
@@ -144,6 +143,7 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
+                        hidden_dim=64,
                         out_size=len(classes),
                         num_heads=1,
                         dropout=0.5)
