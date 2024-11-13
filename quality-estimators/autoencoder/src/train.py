@@ -65,7 +65,10 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
             if ignore_outliers:
                 X[(X > 10) | (X < -10)] = 0
 
-            X_dec, _ = model(X)
+            if config['id'] == 'attn_ae':
+                X_dec, _, _ = model(X)
+            else:
+                X_dec, _ = model(X)
 
             train_loss = criterion(X_dec, X)
             optimizer.zero_grad()
