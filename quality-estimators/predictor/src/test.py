@@ -320,13 +320,14 @@ def estimate_rec_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', '
     all_data = []
     X_cols, t_cols, y_cols = cols
 
-    for (feats, labels), (X, X_dec) in zip(dataloader, signals):
+    for (feats, next, labels), (Xn, X_dec) in zip(dataloader, signals):
         feats = feats.cpu().numpy()
+        next = next.cpu().numpy()
         labels = labels.cpu().numpy()
-        X = X.cpu().numpy()
+        Xn = Xn.cpu().numpy()
         X_dec = X_dec.cpu().numpy()
 
-        noise = X - X_dec
+        noise = Xn - X_dec
 
         batch_size, seq_len, _ = feats.shape
 
@@ -362,7 +363,7 @@ def estimate_attn_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['t
     all_data = []
     X_cols, t_cols, y_cols = cols
 
-    for (feats, labels), attn_matrix in zip(dataloader, attn_matrices):
+    for (feats, _, labels), attn_matrix in zip(dataloader, attn_matrices):
         feats = feats.cpu().numpy()
         labels = labels.cpu().numpy()
         noise = attn_matrix.cpu().numpy()
@@ -412,21 +413,22 @@ def test(data, criterion, model, visualize=False, estimate=False):
     progress_bar = tqdm(enumerate(data), total=batches, desc=f'Evaluation', leave=True)
 
     with torch.no_grad():
-        for _, (X, _) in progress_bar:
-            X = X.to(device)
+        for _, (X, Xn, _) in progress_bar:
+            X, Xn = X.to(device), Xn.to(device)
 
             X, t = separate(src=X, c=[0,1], t=[2])
+            Xn, _ = separate(src=Xn, c=[0,1], t=[2])
             X = merge(c=X, t=t)
 
             X_dec, attn_matrix = model(X)
             attn_matrices.append(attn_matrix)
 
-            test_loss = criterion(X_dec, X)
+            test_loss = criterion(X_dec, Xn)
 
             total_test_loss += test_loss.item()
             progress_bar.set_postfix(Loss=test_loss.item())
 
-            signals.append((X, X_dec))
+            signals.append((Xn, X_dec))
 
         avg_test_loss = total_test_loss / batches
 
@@ -466,7 +468,7 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
-                        hidden_dim=64,
+                        hidden_dim=6,
                         out_size=3,
                         num_heads=1,
                         dropout=0.5)

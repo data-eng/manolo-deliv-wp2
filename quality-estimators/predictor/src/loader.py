@@ -100,10 +100,10 @@ class TSDataset(Dataset):
 
     def __getitem__(self, idx):
         """
-        Retrieves a sample from the dataset at the specified index.
-
+        Retrieves a sample from the dataset at the specified index, returning the current sequence and the next sequence.
+        
         :param idx: Index of the sample.
-        :return: Tuple of features and target tensors.
+        :return: Tuple of current sequence, next sequence and current target.
         """
         if self.per_epoch:
             start_idx = idx * self.seq_len
@@ -111,13 +111,20 @@ class TSDataset(Dataset):
             start_idx = idx
 
         end_idx = start_idx + self.seq_len
+        next_start_idx = end_idx
+        next_end_idx = next_start_idx + self.seq_len
+
+        if next_end_idx > len(self.X):
+            next_start_idx = start_idx
+            next_end_idx = end_idx
 
         X = self.X.iloc[start_idx:end_idx].values
+        Xn = self.X.iloc[next_start_idx:next_end_idx].values
         y = self.y.iloc[start_idx:end_idx].values
 
-        X, y = torch.FloatTensor(X), torch.LongTensor(y)
+        X, Xn, y = torch.FloatTensor(X), torch.FloatTensor(Xn), torch.LongTensor(y)
 
-        return X, y
+        return X, Xn, y
     
     @property
     def num_samples(self):

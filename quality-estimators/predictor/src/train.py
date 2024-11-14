@@ -52,15 +52,16 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
 
         model.train()
         
-        for _, (X, _) in enumerate(train_data):
-            X = X.to(device)
+        for _, (X, Xn, _) in enumerate(train_data):
+            X, Xn = X.to(device), Xn.to(device)
 
             X, t = separate(src=X, c=[0,1], t=[2])
+            Xn, _ = separate(src=Xn, c=[0,1], t=[2])
             X = merge(c=X, t=t)
 
             X_dec, _ = model(X)
 
-            train_loss = criterion(X_dec, X)
+            train_loss = criterion(X_dec, Xn)
 
             optimizer.zero_grad()
             train_loss.backward()
@@ -75,15 +76,16 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         total_val_loss = 0.0
 
         with torch.no_grad():
-            for _, (X, _) in enumerate(val_data):
-                X = X.to(device)
+            for _, (X, Xn, _) in enumerate(val_data):
+                X, Xn = X.to(device), Xn.to(device)
 
                 X, t = separate(src=X, c=[0,1], t=[2])
+                Xn, _ = separate(src=Xn, c=[0,1], t=[2])
                 X = merge(c=X, t=t)
 
                 X_dec, _ = model(X)
 
-                val_loss = criterion(X_dec, X)
+                val_loss = criterion(X_dec, Xn)
                 total_val_loss += val_loss.item()
 
         avg_val_loss = total_val_loss / batches
@@ -157,14 +159,14 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
-                        hidden_dim=64,
+                        hidden_dim=6,
                         out_size=3,
                         num_heads=1,
                         dropout=0.5)
         
     train(data=dataloaders,
           epochs=1000,
-          patience=30,
+          patience=50,
           lr=1e-4,
           criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,

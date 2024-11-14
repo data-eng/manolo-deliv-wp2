@@ -162,7 +162,7 @@ class Decoder(nn.Module):
         return x, attn_matrix
 
 class Transformer(nn.Module):
-    def __init__(self, in_size=3, hidden_dim=64, out_size=3, num_heads=1, dropout=0.5):
+    def __init__(self, in_size=3, hidden_dim=6, out_size=3, num_heads=1, dropout=0.5):
         """
         Transformer model for next timestep prediction, combining an encoder with multi-head 
         attention and a decoder. The encoder learns sequence dependencies, and the decoder 
