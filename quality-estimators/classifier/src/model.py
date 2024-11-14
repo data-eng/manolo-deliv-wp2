@@ -164,7 +164,7 @@ class Decoder(nn.Module):
         return x, attn_matrix
 
 class Transformer(nn.Module):
-    def __init__(self, in_size=3, hidden_dim=64, out_size=5, num_heads=1, dropout=0.5):
+    def __init__(self, in_size=3, hidden_dim=4, out_size=5, num_heads=1, dropout=0.5):
         """
         Transformer model for classification, combining an encoder with multi-head attention 
         and a classifier. The encoder captures complex dependencies in the input data, and 

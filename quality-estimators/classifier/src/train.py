@@ -170,14 +170,14 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
-                        hidden_dim=64,
+                        hidden_dim=4,
                         out_size=len(classes),
                         num_heads=1,
                         dropout=0.5)
         
     train(data=dataloaders,
           epochs=1000,
-          patience=30,
+          patience=50,
           lr=1e-4,
           criterion=utils.WeightedCrossEntropyLoss(weights),
           model=model,
