@@ -467,8 +467,7 @@ def main():
 
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
-    model = Transformer(in_size=3,
-                        hidden_dim=6,
+    model = Transformer(num_feats=3,
                         out_size=3,
                         num_heads=1,
                         dropout=0.5)

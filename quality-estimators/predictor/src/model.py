@@ -93,19 +93,17 @@ class MultiHeadAttention(nn.Module):
         return output
 
 class Encoder(nn.Module):
-    def __init__(self, in_size, out_size, num_heads, dropout):
+    def __init__(self, d_model, num_heads, dropout):
         """
         Transformer Encoder module with multi-head attention and feedforward layer.
         
-        :param in_size: Dimension of the input features.
-        :param out_size: Dimensionality of the output features.
+        :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads for multi-head attention.
         :param dropout: Dropout rate for regularization.
         """
         super(Encoder, self).__init__()
         
-        self.attn_layer = MultiHeadAttention(in_size, num_heads)
-        self.linear = nn.Linear(in_size, out_size)
+        self.attn_layer = MultiHeadAttention(d_model, num_heads)
         self.relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
         
@@ -113,33 +111,31 @@ class Encoder(nn.Module):
         """
         Forward pass for Transformer Encoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :param x: Input tensor of shape (batch_size, seq_len, num_features).
         :return: Tuple containing:
-            - Encoded tensor of shape (batch_size, seq_len, out_size).
-            - Attention matrix of shape (batch_size, seq_length, in_size).
+            - Encoded tensor of shape (batch_size, seq_len, num_features).
+            - Attention matrix of shape (batch_size, seq_length, num_features).
         """
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
-        x = self.linear(attn_matrix)
+        x = x + attn_matrix
 
-        x = x + self.dropout(attn_matrix)
+        x = self.dropout(x)
         x = self.relu(x)
         
         return x, attn_matrix
 
 class Decoder(nn.Module):
-    def __init__(self, in_size, out_size, num_heads, dropout):
+    def __init__(self, d_model, num_heads, dropout):
         """
         Transformer Decoder module with multi-head attention and feedforward layer.
         
-        :param in_size: Dimension of the input features.
-        :param out_size: Dimensionality of the output features.
+        :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads for multi-head attention.
         :param dropout: Dropout rate for regularization.
         """
         super(Decoder, self).__init__()
         
-        self.linear = nn.Linear(in_size, out_size)
-        self.attn_layer = MultiHeadAttention(out_size, num_heads)
+        self.attn_layer = MultiHeadAttention(d_model, num_heads)
         self.relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
         
@@ -147,46 +143,43 @@ class Decoder(nn.Module):
         """
         Forward pass for Transformer Decoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :param x: Input tensor of shape (batch_size, seq_len, num_features).
         :return: Tuple containing:
-            - Decoded tensor of shape (batch_size, seq_len, out_size).
-            - Attention matrix of shape (batch_size, seq_length, out_size).
+            - Decoded tensor of shape (batch_size, seq_len, num_features).
+            - Attention matrix of shape (batch_size, seq_length, num_features).
         """
-        x = self.linear(x)
-
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
-
-        x = x + self.dropout(attn_matrix)
+        x = x + attn_matrix
+        
+        x = self.dropout(x)
         x = self.relu(x)
         
         return x, attn_matrix
 
 class Transformer(nn.Module):
-    def __init__(self, in_size=3, hidden_dim=6, out_size=3, num_heads=1, dropout=0.5):
+    def __init__(self, num_feats=3, num_heads=1, dropout=0.5):
         """
-        Transformer model for next timestep prediction, combining an encoder with multi-head 
-        attention and a decoder. The encoder learns sequence dependencies, and the decoder 
-        predicts the next timestep in the sequence.
+        Transformer model for sequence-to-sequence prediction, combining an encoder and decoder 
+        with multi-head attention mechanisms. The encoder extracts features from the input sequence, 
+        while the decoder generates the output sequence based on the encoded information.
 
-        :param in_size: Size of the input features.
-        :param hidden_dim: Dimensionality of the model's internal representation.
-        :param out_size: Size of the output features.
+        :param num_feats: Number of features in the input data.
         :param num_heads: Number of attention heads.
         :param dropout: Dropout rate for regularization.
         """
         super(Transformer, self).__init__()
         
-        self.encoder = Encoder(in_size, hidden_dim, num_heads, dropout)
-        self.decoder = Decoder(hidden_dim, out_size, num_heads, dropout)      
+        self.encoder = Encoder(d_model=num_feats, num_heads=num_heads, dropout=dropout)
+        self.decoder = Decoder(d_model=num_feats, num_heads=num_heads, dropout=dropout)         
     
     def forward(self, x):
         """
-        Forward pass for Transformer.
+        Forward pass for the Transformer model.
         
-        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :param x: Input tensor of shape (batch_size, seq_len, num_feats).
         :return: Tuple containing:
-            - Output tensor of shape (batch_size, seq_len, out_size).
-            - Attention matrix tensor of shape (batch_size, seq_length, out_size).
+            - Output tensor of shape (batch_size, seq_len, num_feats).
+            - Attention matrix tensor of shape (batch_size, seq_length, num_feats).
         """
         enc_x, enc_attn_matrix = self.encoder(x)
         dec_x, dec_attn_matrix = self.decoder(enc_x)

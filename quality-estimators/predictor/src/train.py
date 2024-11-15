@@ -158,8 +158,7 @@ def main():
 
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
-    model = Transformer(in_size=3,
-                        hidden_dim=6,
+    model = Transformer(num_feats=3,
                         out_size=3,
                         num_heads=1,
                         dropout=0.5)
@@ -171,7 +170,7 @@ def main():
           criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
           optimizer='Adam',
-          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
+          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.95, 'patience': 3}},
           visualize=True)
 
 if __name__ == '__main__':
