@@ -188,6 +188,24 @@ PCA is frequently used when a large number of variables have a high degree of co
 
 PCA is considered in MANOLO since the EEG signals often contain high-dimensional data from multiple electrodes, capturing different aspects of neural activity. PCA reduces dimensionality by focusing on the variance structure of the principal components, which represents the key information in the signal. Drift is detected by monitoring shifts in these variance patterns, which often correlate with underlying brain activity changes.
 
+\subsubsection{Adaptive Windowing}
+
+Adaptive Windowing (ADWIN) \cite{bifet2007learning} is a technique that allows for handling concept drift and distribution changes when learning from data sequences that may change over time \cite{sun2016online}. 
+
+ADWIN maintains a variable-length window of recent data points, ensuring that the data distribution remains stable. To detect any changes, this window is subdivided into two sub-windows ($W_0$ and $W_1$). To determine whether a change has occurred, ADWIN compares the averages of $W_0$ and $W_1$. If the equality of the distributions is no longer maintained, concept drift is detected, and $W_0$ is replaced by $W_1$, with a new $W_1$ initialized.
+
+ADWIN uses a significance value \(\delta \in (0,1)\) to assess whether the two sub-windows correspond to the same distribution. If the absolute difference between the means of $W_0$ and $W_1$ exceeds a predefined threshold, an alarm is triggered. 
+
+ADWIN is particularly effective for detecting both sudden and gradual changes in data streams due to its dynamic adjustment of the window size. This makes it an especially valuable technique for MANOLO. Additionally, ADWIN is well-suited for EEG signals, which often exhibit unpredictable shifts caused by spontaneous neural activity or external stimuli. Its ability to adaptively resize the window makes it ideal for handling such changes without relying on predefined parameters.
+
+
+
+
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % During the experiments, we focus on evaluating how well the decoder reconstructs the latent representations back into their original form. We compare the original signal with the decoded version, not only visually through plots but also by using various metrics to quantify performance. Since the testing data is quite large, we select one random batch for analysis. This batch is visualized using two subplots, one for each EEG feature, representing the signal for each channel separately.
 
