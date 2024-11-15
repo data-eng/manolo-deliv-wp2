@@ -157,7 +157,7 @@ where:
 
 In the context of MANOLO, CUSUM is applied due to its capability to detect abrupt changes, which may indicate sudden shifts in neural activity, such as those occurring during sharp transitions in mental states or in response to external stimuli. By continuously monitoring cumulative deviations from the baseline, CUSUM facilitates rapid detection of these changes.
 
-These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite{artyushenko2021modeling} \cite{volovach2021detection} \cite{tam2009theoretical} \cite{yi2021adaptive}.
+These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite{artyushenko2021modeling}\cite{volovach2021detection}\cite{tam2009theoretical}\cite{yi2021adaptive}.
 
 \subsubsection{Page-Hinkley Test}
 The Page-Hinkley Test is a sequential analysis technique used to detect abrupt changes \cite{sebastiao2017supporting} in the mean value of a signal or data stream over time, which may indicate noise or data drift. Additionally, the Page-Hinkley Test is used to monitor the performance of industrial processes \cite{mouss2004test} or assess the efficiency of learning models \cite{ali2023understanding}.
@@ -168,7 +168,7 @@ The Page-Hinkley Test is particularly useful in MANOLO as it is sensitive to gra
 
 \subsubsection{Kullback-Leibler Divergence}
 
-Kullback-Leibler Divergence (KLD) \cite{joyce2011kullback}, also known as relative entropy or l-divergence, is a fundamental equation that quantifies the proximity of two probability distributions. It measures, in bits, how close a probability distribution \( p \) is to a model distribution \( q \) \cite{shlens2014notes} \cite{vanerven2014renyi}, and is defined as:
+Kullback-Leibler Divergence (KLD) \cite{joyce2011kullback}, also known as relative entropy or l-divergence, is a fundamental equation that quantifies the proximity of two probability distributions. It measures, in bits, how close a probability distribution \( p \) is to a model distribution \( q \) \cite{shlens2014notes}\cite{vanerven2014renyi}, and is defined as:
 
 \begin{equation}
 D_{\text{KL}}(p \parallel q) = \sum_i p_i \log_2 \left( \frac{p_i}{q_i} \right)
@@ -179,6 +179,14 @@ where \( p_i \) and \( q_i \) represent the probabilities of each outcome in the
 To implement KLD, the data gets divided into consecutive windows. The probability distribution of each window is then estimated, and the KLD between successive windows is computed. If the resulting divergence exceeds a predefined threshold, drift is detected.
 
 In general, KLD is widely used in statistics and pattern recognition, but it also finds applications in speech and image recognition \cite{hershey2007approximating}. In the context of MANOLO, KLD proves to be very efficient, as it quantifies the distance between probability distributions. This makes it particularly useful for detecting changes in the distribution of EEG data across consecutive time windows, which aligns with Bitbrain’s use case. Given that EEG signals can exhibit complex distributional shifts due to changing neural states, Kullback-Leibler Divergence is sensitive to such differences, flagging drift when the distribution of features shifts significantly.
+
+\subsubsection{Principal Component Analysis}
+
+Principal Component Analysis (PCA) is a linear dimensionality reduction technique. It analyzes a data table where observations are described by quantitative dependent inter-correlated variables. With PCA, the important information is extracted from the table and represented in a new set of orthogonal variables, called principal components \cite{bro2014principal}. The similarity patterns of the observations and the variables can then be depicted as points on maps \cite{abdi2010principal}.
+
+PCA is frequently used when a large number of variables have a high degree of correlation with one another, and it is preferable to reduce them to an independent set. Specifically, the variable created as a linear combination of the original variables that accounts for the greatest amount of variance is the first principal component of a set of \( p \) variables. After the effect of the first component is eliminated, the second principal component explains the greatest amount of the variance in what remains, and the process can continue through \( p \) iterations until all of the variance is explained \cite{jolliffe2016principal}\cite{shao2014prototype}.
+
+PCA is considered in MANOLO since the EEG signals often contain high-dimensional data from multiple electrodes, capturing different aspects of neural activity. PCA reduces dimensionality by focusing on the variance structure of the principal components, which represents the key information in the signal. Drift is detected by monitoring shifts in these variance patterns, which often correlate with underlying brain activity changes.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % During the experiments, we focus on evaluating how well the decoder reconstructs the latent representations back into their original form. We compare the original signal with the decoded version, not only visually through plots but also by using various metrics to quantify performance. Since the testing data is quite large, we select one random batch for analysis. This batch is visualized using two subplots, one for each EEG feature, representing the signal for each channel separately.
