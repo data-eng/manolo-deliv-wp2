@@ -157,15 +157,14 @@ where:
 
 In the context of MANOLO, CUSUM is applied due to its capability to detect abrupt changes, which may indicate sudden shifts in neural activity, such as those occurring during sharp transitions in mental states or in response to external stimuli. By continuously monitoring cumulative deviations from the baseline, CUSUM facilitates rapid detection of these changes.
 
-These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite 4 references here \cite{artyushenko2021modeling, volovach2021detection, tam2009theoretical, yi2021adaptive}.
-
-\subsubsection{Cumulative Sum Control}
-
-\subsubsection{Cumulative Sum Control}
-...
+These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite{artyushenko2021modeling} \cite{volovach2021detection} \cite{tam2009theoretical} \cite{yi2021adaptive}.
 
 \subsubsection{Page-Hinkley Test}
-...
+The Page-Hinkley Test is a sequential analysis technique used to detect abrupt changes \cite{sebastiao2017supporting} in the mean value of a signal or data stream over time, which may indicate noise or data drift. Additionally, the Page-Hinkley Test is used to monitor the performance of industrial processes \cite{mouss2004test} or assess the efficiency of learning models \cite{ali2023understanding}.
+
+When applying the algorithm, an initial threshold value must be defined, which serves as a reference point. If a change in the mean exceeds this threshold, the change is considered significant. Furthermore, a decision function must be defined, which applies the Page-Hinkley technique by evaluating the data and returning 1 if a change is detected, and 0 if no change is detected.
+
+The Page-Hinkley Test is particularly useful in MANOLO as it is sensitive to gradual shifts, which are common in EEG signals (i.e., a key aspect of the project's use case), due to cognitive fatigue, changes in alertness, or other slow-evolving processes. This method accumulates evidence over time, making it robust for detecting slower, cumulative shifts, rather than just abrupt changes.
 
 \subsubsection{Kullback-Leibler Divergence}
 ...
