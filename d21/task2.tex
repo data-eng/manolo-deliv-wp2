@@ -126,7 +126,8 @@ where \(N\) is the total number of samples, \(y_i\) represents the true class la
 The Transformer Classifier estimates noise based on the attention weights in the attention matrix, similar to the approach used in the attention-based autoencoder. The attention mechanism in the Transformer model assigns varying levels of importance to different time steps in the input sequence. By analyzing the attention weights, we can identify time steps that the model considers noisy, as these time steps receive lower attention weights. The rationale behind this is that the classifier makes strong, confident predictions when the data is clean and well-defined. Noise, by nature, does not fit well into any particular class, and the model finds it harder to assign a clear class label to noisy samples.
 
 \subsection{Statistical Approach}
-....
+....intro to why we think statistical methods can work for nosie estimation
+
 Preprocessing for the statistical methods is similar to that of the machine learning-based methods in terms of handling NaN values and ambiguous samples. However, unlike the machine learning methods, no normalization is applied, as the statistical methods require the raw data to function.
 ....
 For MNE filtering, the noise thresholding approach is consistent with the machine learning-based methods, using the 75th percentile to separate noise (1) from no noise (0). On the other hand, the Frouros-based methods inherently provide binary outputs. To handle cases where sample aggregation results in float values, we apply a threshold of 0.5 to convert these results into binary form.
@@ -137,7 +138,28 @@ To ensure consistency across all methods and enable meaningful comparisons, the 
 \subsubsection{MNE Filtering}
 ...
 %Applies bandpass filtering to the input signals to remove noise outside a specified frequency range (0.5 to 40 Hz). Noise is estimated as the difference between the original and the filtered version.
-....
+
+\subsubsection{Cumulative Sum Control Chart}
+Cumulative Sum Control Chart (CUSUM) is a sequential analysis technique commonly used in statistical quality control to monitor change detection \cite{basseville1993detection} by identifying moments when the probability distribution of a stochastic process or time series shifts. Unlike approaches that independently analyze measurements at specified times, CUSUM accumulates information from both current and past samples \cite{ncss2024}. Thanks to this cumulative property, CUSUM proves to be more efficient \cite{koshti2011cusum} compared to simpler methods such as Shewhart charts \cite{nelson1984shewhart}.
+
+CUSUM is represented through the following equations:
+\begin{equation}
+S_m = \sum_{i=1}^{m} (\tilde{x}_i - \hat{\mu}_0) \quad \text{or} \quad S'_m = \frac{1}{\sigma_{\tilde{x}}} \sum_{i=1}^{m} (\tilde{x}_i - \hat{\mu}_0),
+\end{equation}
+where:
+\begin{itemize}
+    \item $m$ is the sample number,
+    \vspace{-0.4cm}
+    \item $\hat{\mu}_0$ is the estimated in-control mean, and
+    \vspace{-0.4cm}
+    \item $\sigma_{\tilde{x}}$ is the known or estimated standard deviation of the sample means.
+\end{itemize}
+
+In the context of MANOLO, CUSUM is applied due to its capability to detect abrupt changes, which may indicate sudden shifts in neural activity, such as those occurring during sharp transitions in mental states or in response to external stimuli. By continuously monitoring cumulative deviations from the baseline, CUSUM facilitates rapid detection of these changes.
+
+These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite 4 references here \cite{artyushenko2021modeling, volovach2021detection, tam2009theoretical, yi2021adaptive}.
+
+\subsubsection{Cumulative Sum Control}
 
 \subsubsection{Cumulative Sum Control}
 ...
