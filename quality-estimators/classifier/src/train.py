@@ -170,7 +170,6 @@ def main():
     dataloaders = create_dataloaders(datasets, batch_size=512, drop_last=False)
 
     model = Transformer(in_size=3,
-                        hidden_dim=4,
                         out_size=len(classes),
                         num_heads=1,
                         dropout=0.5)
@@ -182,7 +181,7 @@ def main():
           criterion=utils.WeightedCrossEntropyLoss(weights),
           model=model,
           optimizer='Adam',
-          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
+          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.95, 'patience': 3}},
           visualize=True)
 
 if __name__ == '__main__':

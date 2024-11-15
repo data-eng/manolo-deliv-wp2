@@ -93,19 +93,17 @@ class MultiHeadAttention(nn.Module):
         return output
 
 class Encoder(nn.Module):
-    def __init__(self, in_size, out_size, num_heads, dropout):
+    def __init__(self, d_model, num_heads, dropout):
         """
         Transformer Encoder module with multi-head attention and feedforward layer.
         
-        :param in_size: Dimension of the input features.
-        :param out_size: Dimensionality of the output features.
+        :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads for multi-head attention.
         :param dropout: Dropout rate for regularization.
         """
         super(Encoder, self).__init__()
         
-        self.attn_layer = MultiHeadAttention(in_size, num_heads)
-        self.linear = nn.Linear(in_size, out_size)
+        self.attn_layer = MultiHeadAttention(d_model, num_heads)
         self.relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
         
@@ -113,34 +111,31 @@ class Encoder(nn.Module):
         """
         Forward pass for Transformer Encoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, in_size).
+        :param x: Input tensor of shape (batch_size, seq_len, num_features).
         :return: Tuple containing:
-            - Encoded tensor of shape (batch_size, seq_len, out_size).
-            - Attention matrix of shape (batch_size, seq_length, in_size).
+            - Encoded tensor of shape (batch_size, seq_len, num_features).
+            - Attention matrix of shape (batch_size, seq_length, num_features).
         """
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
         x = x + attn_matrix
 
         x = self.dropout(x)
-        x = self.linear(x)
         x = self.relu(x)
         
         return x, attn_matrix
 
 class Decoder(nn.Module):
-    def __init__(self, in_size, out_size, num_heads, dropout):
+    def __init__(self, d_model, num_heads, dropout):
         """
         Transformer Decoder module with multi-head attention and feedforward layer.
         
-        :param in_size: Dimension of the input features.
-        :param out_size: Dimensionality of the output features.
+        :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads for multi-head attention.
         :param dropout: Dropout rate for regularization.
         """
         super(Decoder, self).__init__()
         
-        self.linear = nn.Linear(in_size, out_size)
-        self.attn_layer = MultiHeadAttention(out_size, num_heads)
+        self.attn_layer = MultiHeadAttention(d_model, num_heads)
         self.relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
         
@@ -148,13 +143,11 @@ class Decoder(nn.Module):
         """
         Forward pass for Transformer Decoder.
         
-        :param x: Input tensor of shape (batch_size, seq_len, hidden_dim).
+        :param x: Input tensor of shape (batch_size, seq_len, num_features).
         :return: Tuple containing:
-            - Decoded tensor of shape (batch_size, seq_len, out_size).
-            - Attention matrix of shape (batch_size, seq_length, out_size).
+            - Decoded tensor of shape (batch_size, seq_len, num_features).
+            - Attention matrix of shape (batch_size, seq_length, num_features).
         """
-        x = self.linear(x)
-
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
         x = x + attn_matrix
         
@@ -164,22 +157,21 @@ class Decoder(nn.Module):
         return x, attn_matrix
 
 class Transformer(nn.Module):
-    def __init__(self, in_size=3, hidden_dim=4, out_size=5, num_heads=1, dropout=0.5):
+    def __init__(self, in_size=3, out_size=5, num_heads=1, dropout=0.5):
         """
-        Transformer model for classification, combining an encoder with multi-head attention 
+        Transformer model for classification, combining an encoder-decoder with multi-head attention 
         and a classifier. The encoder captures complex dependencies in the input data, and 
         the classifier outputs the logits for classification.
 
         :param in_size: Size of the input features.
-        :param hidden_dim: Dimensionality of the model's internal representation.
         :param out_size: Size of the output classes.
         :param num_heads: Number of attention heads.
         :param dropout: Dropout rate for regularization.
         """
         super(Transformer, self).__init__()
         
-        self.encoder = Encoder(in_size, hidden_dim, num_heads, dropout)
-        self.decoder = Decoder(hidden_dim, in_size, num_heads, dropout)
+        self.encoder = Encoder(d_model=in_size, num_heads=num_heads, dropout=dropout)
+        self.decoder = Decoder(d_model=in_size, num_heads=num_heads, dropout=dropout)
         self.classifier = nn.Linear(in_size, out_size)
         self.init_weights()
 
