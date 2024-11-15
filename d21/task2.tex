@@ -22,12 +22,16 @@ We propose a task-agnostic framework for time-series data quality estimation, us
 \begin{enumerate}
     \item[(a)] Unsupervised machine learning with autoencoders, which compress the data and detect noise based on reconstruction errors.\\
     \vspace{-0.8cm}
-    \item[(b)] Supervised machine learning with a transformer model, which uses attention mechanisms to identify noisy segments in the data.\\
+    \item[(b)] Unsupervised machine learning with autoencoders, which compress the data and use attention mechanisms to identify noisy segments in the data.\\
     \vspace{-0.8cm}
-    \item[(c)] Statistical approaches which detect noise based on changes in data characteristics over time.
+    \item[(c)] Unsupervised machine learning with transformers, which predict the next sequence of data points and detect noise based on prediction error.\\
+    \vspace{-0.8cm}
+    \item[(d)] Supervised machine learning with transformers, which classify data points and use attention mechanisms to identify noisy segments in the data.\\
+    \vspace{-0.8cm}
+    \item[(e)] Statistical approaches which detect noise based on changes in data characteristics over time.
 \end{enumerate}
 
-To apply these techniques, we implement the following 8 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer, MNE Filtering, Cumulative Sum Control, Page-Hinkley Test and Kullback-Leibler Divergence. The last 3 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework.
+To apply these techniques, we implement the following 11 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer Classifier, Transformer Predictor, MNE Filtering, Cumulative Sum Control, Page-Hinkley Test, Kullback-Leibler Divergence, Principal Component Analysis and Adaptive Windowing. The last 5 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework.
 
 In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison.
 
