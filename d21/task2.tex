@@ -167,28 +167,18 @@ When applying the algorithm, an initial threshold value must be defined, which s
 The Page-Hinkley Test is particularly useful in MANOLO as it is sensitive to gradual shifts, which are common in EEG signals (i.e., a key aspect of the project's use case), due to cognitive fatigue, changes in alertness, or other slow-evolving processes. This method accumulates evidence over time, making it robust for detecting slower, cumulative shifts, rather than just abrupt changes.
 
 \subsubsection{Kullback-Leibler Divergence}
-...
 
+Kullback-Leibler Divergence (KLD) \cite{joyce2011kullback}, also known as relative entropy or l-divergence, is a fundamental equation that quantifies the proximity of two probability distributions. It measures, in bits, how close a probability distribution \( p \) is to a model distribution \( q \) \cite{shlens2014notes} \cite{vanerven2014renyi}, and is defined as:
 
+\begin{equation}
+D_{\text{KL}}(p \parallel q) = \sum_i p_i \log_2 \left( \frac{p_i}{q_i} \right)
+\end{equation}
 
+where \( p_i \) and \( q_i \) represent the probabilities of each outcome in the distributions \( p \) and \( q \), respectively. The Kullback-Leibler Divergence is not symmetric, meaning \( D_{\text{KL}}(p \parallel q) \neq D_{\text{KL}}(q \parallel p) \). The divergence \( D_{\text{KL}}(p \parallel q) \) is zero only when the distributions \( p \) and \( q \) are identical. In other words, this equation represents the average number of extra bits needed to encode samples from distribution \( p \) using an optimal code for distribution \( q \). 
 
+To implement KLD, the data gets divided into consecutive windows. The probability distribution of each window is then estimated, and the KLD between successive windows is computed. If the resulting divergence exceeds a predefined threshold, drift is detected.
 
-
-
-
-\subsubsection{Cumulative Sum Control}
-Tracks the cumulative sum of deviations from a target mean over time. Noise is detected when the cumulative sum of these deviations exceeds a threshold.
-
-\subsubsection{Page-Hinkley Test}
-Compares the cumulative mean of observed values to the global mean of the data. Noise is detected when the cumulative mean diverges from the global mean beyond a threshold.
-
-\subsubsection{Kullback-Leibler Divergence}
-Measures the difference between probability distributions of two consecutive data windows. Noise is estimated when the divergence exceeds a threshold.
-
-
-
-
-
+In general, KLD is widely used in statistics and pattern recognition, but it also finds applications in speech and image recognition \cite{hershey2007approximating}. In the context of MANOLO, KLD proves to be very efficient, as it quantifies the distance between probability distributions. This makes it particularly useful for detecting changes in the distribution of EEG data across consecutive time windows, which aligns with Bitbrain’s use case. Given that EEG signals can exhibit complex distributional shifts due to changing neural states, Kullback-Leibler Divergence is sensitive to such differences, flagging drift when the distribution of features shifts significantly.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % During the experiments, we focus on evaluating how well the decoder reconstructs the latent representations back into their original form. We compare the original signal with the decoded version, not only visually through plots but also by using various metrics to quantify performance. Since the testing data is quite large, we select one random batch for analysis. This batch is visualized using two subplots, one for each EEG feature, representing the signal for each channel separately.
