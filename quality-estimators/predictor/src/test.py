@@ -417,8 +417,10 @@ def test(data, criterion, model, visualize=False, estimate=False):
             X, Xn = X.to(device), Xn.to(device)
 
             X, t = separate(src=X, c=[0,1], t=[2])
-            Xn, _ = separate(src=Xn, c=[0,1], t=[2])
+            Xn, tn = separate(src=Xn, c=[0,1], t=[2])
+
             X = merge(c=X, t=t)
+            Xn = merge(c=Xn, t=tn)
 
             X_dec, attn_matrix = model(X)
             attn_matrices.append(attn_matrix)

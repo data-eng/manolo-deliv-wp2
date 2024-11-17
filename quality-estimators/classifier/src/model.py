@@ -159,9 +159,10 @@ class Decoder(nn.Module):
 class Transformer(nn.Module):
     def __init__(self, in_size=3, out_size=5, num_heads=1, dropout=0.5):
         """
-        Transformer model for classification, combining an encoder-decoder with multi-head attention 
-        and a classifier. The encoder captures complex dependencies in the input data, and 
-        the classifier outputs the logits for classification.
+        Transformer model for classification, combining an encoder-decoder architecture with 
+        multi-head attention and a classifier. The encoder captures complex dependencies in the 
+        input data, while the decoder refines the learned features for classification tasks. 
+        The final classifier produces logits for classification.
 
         :param in_size: Size of the input features.
         :param out_size: Size of the output classes.

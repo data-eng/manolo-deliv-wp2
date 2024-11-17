@@ -419,9 +419,10 @@ def test(data, criterion, model, visualize=False, estimate=False):
         for _, (X, _) in progress_bar:
             X = X.to(device)
 
-            X, _ = separate(src=X, c=[0,1], t=[2,4])
+            X, t = separate(src=X, c=[0,1], t=[2])
 
             if config['id'] == 'attn_ae':
+                X = merge(c=X, t=t)
                 X_dec, _, attn_matrix = model(X)
                 attn_matrices.append(attn_matrix)
             else:

@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 with open('config.yaml', 'r') as config_file:
     config = yaml.safe_load(config_file)
 
-def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ignore_outliers=False, visualize=False):
+def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, visualize=False):
     """
     Trains the model using the provided training data.
 
@@ -27,7 +27,6 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
     :param model: The model to be trained.
     :param optimizer: Optimizer to use for training.
     :param scheduler: Learning rate scheduler configuration.
-    :param ignore_outliers: Flag to indicate whether to ignore outlier values during training.
     :param visualize: Flag to indicate whether to visualize training progress.
     """
     model.to(device)
@@ -60,12 +59,10 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
         for _, (X, _) in enumerate(train_data):
             X = X.to(device)
 
-            X, _ = separate(src=X, c=[0,1], t=[2,3])
-
-            if ignore_outliers:
-                X[(X > 10) | (X < -10)] = 0
+            X, t = separate(src=X, c=[0,1], t=[2,3])
 
             if config['id'] == 'attn_ae':
+                X = merge(c=X, t=t)
                 X_dec, _, _ = model(X)
             else:
                 X_dec, _ = model(X)
@@ -87,12 +84,10 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, ig
             for _, (X, _) in enumerate(val_data):
                 X = X.to(device)
 
-                X, _ = separate(src=X, c=[0,1], t=[2,3])
-                
-                if ignore_outliers:
-                    X[(X > 10) | (X < -10)] = 0
+                X, t = separate(src=X, c=[0,1], t=[2])
 
                 if config['id'] == 'attn_ae':
+                    X = merge(c=X, t=t)
                     X_dec, _, _ = model(X)
                 else:
                     X_dec, _ = model(X)
@@ -183,7 +178,6 @@ def main():
           model=model,
           optimizer='Adam',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
-          ignore_outliers=False,
           visualize=True)
 
 if __name__ == '__main__':
