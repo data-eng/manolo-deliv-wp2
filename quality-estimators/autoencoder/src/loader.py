@@ -217,6 +217,7 @@ def combine_data(paths, name, seq_len=240):
 
         df['seq_id'] = (np.arange(len(df)) // seq_len) + 1
         df['night'] = int(os.path.basename(path).split('-')[1].split('.')[0])
+        df['time_norm'] = t
 
         rows_8 = df[df['majority'] == 8]
 
@@ -336,7 +337,7 @@ def create_datasets(dataframes, seq_len=7680):
     datasets = []
 
     X = ['HB_1', 'HB_2']
-    t = ['time', 'seq_id', 'night']
+    t = ['time_norm', 'time', 'seq_id', 'night']
     y = ['majority']
 
     logger.info('Creating datasets from dataframes.') 

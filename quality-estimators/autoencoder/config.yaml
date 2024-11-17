@@ -27,9 +27,9 @@
 id: attn_ae
 name: Attn_Autoencoder
 params:
- num_feats: 2
+ num_feats: 3
  latent_seq_len: 1 
  latent_num_feats: 8 
- num_heads: 2 
+ num_heads: 1 
  num_layers: 1
  dropout: 0.05

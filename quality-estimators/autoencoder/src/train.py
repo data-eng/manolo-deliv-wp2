@@ -59,7 +59,7 @@ def train(data, epochs, patience, lr, criterion, model, optimizer, scheduler, vi
         for _, (X, _) in enumerate(train_data):
             X = X.to(device)
 
-            X, t = separate(src=X, c=[0,1], t=[2,3])
+            X, t = separate(src=X, c=[0,1], t=[2])
 
             if config['id'] == 'attn_ae':
                 X = merge(c=X, t=t)
@@ -161,7 +161,7 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 
