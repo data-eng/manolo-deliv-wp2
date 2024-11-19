@@ -172,7 +172,7 @@ def main():
           lr=1e-4,
           criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
-          optimizer='Adam',
+          optimizer='AdamW',
           scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.95, 'patience': 3}},
           visualize=True)
 

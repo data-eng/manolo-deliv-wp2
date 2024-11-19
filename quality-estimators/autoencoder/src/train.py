@@ -161,7 +161,7 @@ def main():
 
     datapaths = split_data(dir=raw_dir, train_size=43, val_size=3, test_size=10)
     
-    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=False)
+    train_df, val_df, _ = get_dataframes(datapaths, seq_len=seq_len, exist=True)
 
     datasets = create_datasets(dataframes=(train_df, val_df), seq_len=seq_len)
 
@@ -176,8 +176,8 @@ def main():
           lr=1e-4,
           criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
-          optimizer='Adam',
-          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.99, 'patience': 3}},
+          optimizer='AdamW',
+          scheduler={"name": 'ReduceLROnPlateau',"params": {'factor': 0.95, 'patience': 3}},
           visualize=True)
 
 if __name__ == '__main__':

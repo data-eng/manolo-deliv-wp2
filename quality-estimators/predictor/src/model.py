@@ -92,16 +92,16 @@ class MultiHeadAttention(nn.Module):
 
         return output
 
-class Encoder(nn.Module):
+class Embedding(nn.Module):
     def __init__(self, d_model, num_heads, dropout):
         """
-        Transformer Encoder module with multi-head attention and feedforward layer.
+        Transformer Embedding module with multi-head attention and feedforward layer.
         
         :param d_model: Dimension of the input and output features.
         :param num_heads: Number of attention heads for multi-head attention.
         :param dropout: Dropout rate for regularization.
         """
-        super(Encoder, self).__init__()
+        super(Embedding, self).__init__()
         
         self.attn_layer = MultiHeadAttention(d_model, num_heads)
         self.relu = nn.LeakyReLU()
@@ -109,48 +109,16 @@ class Encoder(nn.Module):
         
     def forward(self, x):
         """
-        Forward pass for Transformer Encoder.
+        Forward pass for Transformer Embedding.
         
         :param x: Input tensor of shape (batch_size, seq_len, num_features).
         :return: Tuple containing:
-            - Encoded tensor of shape (batch_size, seq_len, num_features).
+            - Output tensor of shape (batch_size, seq_len, num_features).
             - Attention matrix of shape (batch_size, seq_length, num_features).
         """
         attn_matrix = self.attn_layer(Q=x, K=x, V=x)
         x = x + attn_matrix
 
-        x = self.dropout(x)
-        x = self.relu(x)
-        
-        return x, attn_matrix
-
-class Decoder(nn.Module):
-    def __init__(self, d_model, num_heads, dropout):
-        """
-        Transformer Decoder module with multi-head attention and feedforward layer.
-        
-        :param d_model: Dimension of the input and output features.
-        :param num_heads: Number of attention heads for multi-head attention.
-        :param dropout: Dropout rate for regularization.
-        """
-        super(Decoder, self).__init__()
-        
-        self.attn_layer = MultiHeadAttention(d_model, num_heads)
-        self.relu = nn.LeakyReLU()
-        self.dropout = nn.Dropout(dropout)
-        
-    def forward(self, x):
-        """
-        Forward pass for Transformer Decoder.
-        
-        :param x: Input tensor of shape (batch_size, seq_len, num_features).
-        :return: Tuple containing:
-            - Decoded tensor of shape (batch_size, seq_len, num_features).
-            - Attention matrix of shape (batch_size, seq_length, num_features).
-        """
-        attn_matrix = self.attn_layer(Q=x, K=x, V=x)
-        x = x + attn_matrix
-        
         x = self.dropout(x)
         x = self.relu(x)
         
@@ -159,9 +127,8 @@ class Decoder(nn.Module):
 class Transformer(nn.Module):
     def __init__(self, num_feats=3, num_heads=1, dropout=0.5):
         """
-        Transformer model for sequence-to-sequence prediction, combining an encoder and decoder 
-        with multi-head attention mechanisms. The encoder extracts features from the input sequence, 
-        while the decoder generates the output sequence based on the encoded information.
+        Transformer model for sequence-to-sequence prediction, combining an embedding layer with 
+        multi-head attention mechanisms. The embedding extracts features from the input sequence.
 
         :param num_feats: Number of features in the input data.
         :param num_heads: Number of attention heads.
@@ -169,8 +136,7 @@ class Transformer(nn.Module):
         """
         super(Transformer, self).__init__()
         
-        self.encoder = Encoder(d_model=num_feats, num_heads=num_heads, dropout=dropout)
-        self.decoder = Decoder(d_model=num_feats, num_heads=num_heads, dropout=dropout)         
+        self.embedding = Embedding(d_model=num_feats, num_heads=num_heads, dropout=dropout)      
     
     def forward(self, x):
         """
@@ -181,9 +147,6 @@ class Transformer(nn.Module):
             - Output tensor of shape (batch_size, seq_len, num_feats).
             - Attention matrix tensor of shape (batch_size, seq_length, num_feats).
         """
-        enc_x, enc_attn_matrix = self.encoder(x)
-        dec_x, dec_attn_matrix = self.decoder(enc_x)
-
-        attn_matrix = (enc_attn_matrix + dec_attn_matrix) / 2
+        x, attn_matrix = self.embedding(x)
         
-        return dec_x, attn_matrix
+        return x, attn_matrix
