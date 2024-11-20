@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from . import utils
 
-logger = utils.get_logger(level='DEBUG')
+logger = utils.get_logger(level='INFO')
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 with open('config.yaml', 'r') as config_file:
@@ -101,9 +101,9 @@ def suggest_thresholds(values):
     :param values: List of noise values for a specific channel.
     :return: Tuple of three thresholds based on percentiles.
     """
-    low = np.percentile(values, 25)
-    mid = np.percentile(values, 50)
-    high = np.percentile(values, 75)
+    low = np.percentile(values, 95)
+    mid = np.percentile(values, 97)
+    high = np.percentile(values, 99)
     
     return low, mid, high
 
@@ -181,7 +181,7 @@ def estimate_binary_noise():
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
         agg_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
-        df_avg.to_csv(agg_csv_path, index=False)
+        #df_avg.to_csv(agg_csv_path, index=False)
 
         logger.info(f"Saved aggregated data to {agg_csv_path} with {len(df_avg)} rows.")
 
@@ -193,7 +193,7 @@ def estimate_binary_noise():
         binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', 
                                  filename=f'bin_{id}{threshold_str}.csv')
 
-        df_avg.to_csv(binary_csv_path, index=False)
+        #df_avg.to_csv(binary_csv_path, index=False)
 
         logger.info(f"Saved binary aggregated data to {binary_csv_path} with {len(df_avg)} rows.")
 
@@ -223,7 +223,7 @@ def get_top_noisy_timesteps(type='agg'):
                 df_filtered = df[df[binary_noise_col] == 1]
 
             df_sorted = df_filtered.sort_values(by=noise_col, ascending=False)
-            
+ 
             total_rows = len(df_sorted)
             k_perc = int(total_rows * perc)
             logger.info(f"Estimator {id} - {noise_col}: Total rows = {total_rows}, Top {perc*100}% rows = {k_perc}.")
@@ -309,7 +309,7 @@ def compute_agreement():
                 est_2 = estimator_ids[j]
                 times_2 = set(dict[est_2][feature])
 
-                logger.info(f"Feature {feature} - Estimator {est_2}: Length of times_2 = {len(times_2)}")
+                logger.debug(f"Feature {feature} - Estimator {est_2}: Length of times_2 = {len(times_2)}")
                 
                 fscore_12 = get_fscore(times_1, times_2)
                 fscore_21 = get_fscore(times_2, times_1)
@@ -368,7 +368,7 @@ def main():
     #noise_dict = load_noise_data()
     #visualize_noise(dict=noise_dict)
 
-    #estimate_binary_noise()
+    estimate_binary_noise()
     topKs = get_top_noisy_timesteps(type='bin')
 
     agreement_dict = compute_agreement()
