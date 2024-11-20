@@ -17,23 +17,40 @@ In this research, we address this limitation by developing a flexible framework 
 
 \subsection{Proposed Methodology}
 
-We propose a task-agnostic framework for time-series data quality estimation, using a combination of machine learning-based and statistical approaches to detect noise and anomalies in data. The primary techniques used in this framework include:
+We propose a task-agnostic framework for time-series data quality estimation, using a combination of machine learning-based and statistical approaches to detect noise and anomalies in data. The techniques used in this framework estimate noise via:
 
 \begin{enumerate}
-    \item[(a)] Unsupervised machine learning with autoencoders, which compress the data and detect noise based on reconstruction errors.\\
-    \vspace{-0.8cm}
-    \item[(b)] Unsupervised machine learning with autoencoders, which compress the data and use attention mechanisms to identify noisy segments in the data.\\
-    \vspace{-0.8cm}
-    \item[(c)] Unsupervised machine learning with transformers, which predict the next sequence of data points and detect noise based on prediction error.\\
-    \vspace{-0.8cm}
-    \item[(d)] Supervised machine learning with transformers, which classify data points and use attention mechanisms to identify noisy segments in the data.\\
-    \vspace{-0.8cm}
-    \item[(e)] Statistical approaches which detect noise based on changes in data characteristics over time.
+    \item[(a)] \textbf{Reconstruction error:} Unsupervised machine learning using autoencoders, which compress data into a lower-dimensional representation and then reconstruct the original input.
+    \vspace{-0.4cm}
+    \item[(b)] \textbf{Prediction error:} Unsupervised machine learning with transformers, which predict the next sequence of data points.
+    \vspace{-0.4cm}
+    \item[(c)] \textbf{Attention matrix:} Supervised and unsupervised machine learning with transformers and autoencoders, which perform tasks such as classification, reconstruction and prediction.
+    \vspace{-0.4cm}
+    \item[(d)] \textbf{Statistical function:} Statistical methods that detect anomalies by analyzing changes in data characteristics over time.
 \end{enumerate}
 
-To apply these techniques, we implement the following 11 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer Classifier, Transformer Predictor, MNE Filtering, Cumulative Sum Control, Page-Hinkley Test, Kullback-Leibler Divergence, Principal Component Analysis and Adaptive Windowing. MNE Filtering is implemented using the \href{https://mne.tools/stable/index.html}{MNE} library, which provides tools for filtering and analyzing neurophysiological data. The last 5 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework.
+To apply these techniques, we implement the following 10 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer Classifier, Transformer Predictor, Cumulative Sum Control, Page-Hinkley Test, Kullback-Leibler Divergence, Principal Component Analysis and Adaptive Windowing. The last 5 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework. Table~ref{table:framework-summary} summarizes the categorization of each method in the framework across three dimensions: (1) whether the approach is supervised or unsupervised, (2) whether it falls under machine learning or statistical techniques, and (3) how noise is estimated (i.e., reconstruction error, prediction error, attention matrix, or statistical function).
+
+\begin{table}[ht]
+    \renewcommand{\arraystretch}{1.5}
+    \setlength{\tabcolsep}{12pt}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Approach & \multicolumn{2}{c|}{Machine Learning} & \multicolumn{2}{c|}{Statistical} \\ \cline{2-5} 
+             & Unsupervised & Supervised & Unsupervised & Supervised \\ \hline
+    Reconstruction Error & \parbox[c][2cm][c]{2.3cm}{\raggedright LSTM-AE\\Conv-LSTM-AE\\Attn-AE} & --- & --- & --- \\ \hline
+    Prediction Error     & Predictor & --- & --- & --- \\ \hline
+    Attention Matrix     & \parbox[c][1.5cm][c]{2.3cm}{\raggedright Attn-AE\\Predictor} & Classifier & --- & --- \\ \hline
+    Statistical Function & --- & --- & \parbox[c][3cm][c]{2.5cm}{\raggedright CUSUM\\PH-Test\\KL-Divergence\\PCA\\ADWIN} & --- \\ \hline
+    \end{tabular}
+    \label{framework-summary}
+    \caption{Categorization of methods based on noise estimation approach, learning type, and technique.}
+\end{table}
 
 In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison.
+
+To evaluate our noise estimations, we use 2 ground truth methods designed for task-specific noise estimation in EEG signals: MNE Filtering and the original Bitbrain estimation method. MNE Filtering is implemented using the \href{https://mne.tools/stable/index.html}{MNE} library, which provides tools for filtering and analyzing neurophysiological data. We treat Bitbrain's method as a black-box approach, to ensure that our task-agnostic estimations remain unbiased by the specifics of its implementation. Similarly, when using the MNE library, we treat it strictly as a tool, integrating it into our code without really accessing its internal methodology.
 
 \subsection{Machine Learning Approach}
 The general concept of using machine learning (ML) for noise estimation revolves around training models to solve specific tasks and then using their outputs during inference to estimate noise. These tasks may vary in nature — ranging from signal reconstruction and prediction to classification — but the core idea is that the model’s performance on these tasks can be used to infer the presence of noise.
@@ -91,7 +108,7 @@ We use the same \emph{BlendedLoss} function, as defined in Equation~\ref{eq:blen
 
 \begin{itemize}
     \item The first strategy defines noise as the reconstruction error, similar to the other two autoencoders.
-    \vspace{-0.2cm}
+    \vspace{-0.5cm}
     \item The second strategy defines noise based on the attention weights in the attention matrix. Attention mechanisms allow the model to assign varying levels of importance (i.e., attention weights) to different parts of the input sequence. The key idea is that the attention mechanism can distinguish between relevant and irrelevant time steps by analyzing how much focus the model places on them during the encoding and decoding process. When a time step receives a low attention weight, it suggests that the information at that moment is likely noisy and, therefore, unimportant for the reconstruction task.
 \end{itemize}
 
