@@ -16,13 +16,13 @@ To further validate the robustness of our proposed methods, we explore data augm
 We propose a task-agnostic framework for time-series data quality estimation, using a combination of machine learning-based and statistical approaches to detect noise and anomalies in data. The techniques used in this framework estimate noise via:
 
 \begin{enumerate}
-    \item[(a)] \textbf{Reconstruction error:} Unsupervised machine learning using autoencoders, which compress data into a lower-dimensional representation and then reconstruct the original input.
+    \item[(a)] \textbf{Reconstruction error:} unsupervised machine learning using autoencoders, which compress data into a lower-dimensional representation and then reconstruct the original input.
     \vspace{-0.4cm}
-    \item[(b)] \textbf{Prediction error:} Unsupervised machine learning with transformers, which predict the next sequence of data points.
+    \item[(b)] \textbf{Prediction error:} unsupervised machine learning with transformers, which predict the next sequence of data points.
     \vspace{-0.4cm}
-    \item[(c)] \textbf{Attention matrix:} Supervised and unsupervised machine learning with transformers and autoencoders, which perform tasks such as classification, reconstruction and prediction.
+    \item[(c)] \textbf{Attention matrix:} supervised and unsupervised machine learning with transformers and autoencoders, which perform tasks such as classification, reconstruction and prediction.
     \vspace{-0.4cm}
-    \item[(d)] \textbf{Statistical function:} Statistical methods that detect anomalies by analyzing changes in data characteristics over time.
+    \item[(d)] \textbf{Statistical function:} statistical methods that detect anomalies by analyzing changes in data characteristics over time.
 \end{enumerate}
 
 To apply these techniques, we implement the following 10 methods: LSTM Autoencoder, Convolutional LSTM Autoencoder, Attention-based Autoencoder, Transformer Classifier, Transformer Predictor, Cumulative Sum Control, Page-Hinkley Test, Kullback-Leibler Divergence, Principal Component Analysis and Adaptive Windowing. The last 5 statistical methods are implemented using the \href{https://github.com/IFCA-Advanced-Computing/frouros}{Frouros} framework. Table~ref{table:framework-summary} summarizes the categorization of each method in the framework across three dimensions: (1) whether the approach is supervised or unsupervised, (2) whether it falls under machine learning or statistical techniques, and (3) how noise is estimated (i.e., reconstruction error, prediction error, attention matrix, or statistical function).
@@ -61,7 +61,7 @@ To ensure robust model training and reliable outcomes, we rely on data preproces
 
 where $x$ represents the values of a particular feature, $\text{median}(x)$ is the median value of the feature, and $\text{IQR}(x)$ is the interquartile range, which measures the spread of the middle 50\% of the data. We use the median as a measure of central tendency because it is robust against extreme values, making it a more reliable indicator for our dataset, which exhibits low variability and where even small differences matter. Additionally, we use the interquartile range $\text{IQR} = Q_3 - Q_1$ to reduce the influence of outliers by focusing on the range within which the central portion of the data lies. This approach ensures that our normalization process allows the model to learn from the true patterns in the dataset.
 
-To process the input data, we split each 30-second segment of EEG data (7,680 samples) into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data.
+To process the input data, we split each 30-second segment of EEG data (7,680 samples) into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. Additionally, we notice that our dataset tends to overfit with more complex models due to its low variability and extreme outliers. To mitigate this, we use simple architectures with only a few layers, e.g. a single attention layer in the attention-based models. This approach avoids unnecessary complexity, ensuring more stable training and better generalization on the data.
 
 For all machine learning methods, we need to establish a common standard to determine what is considered noise and what is not. As the models output different value ranges, we need a policy to classify these outputs into binary values that indicate noise presence or absence. One such approach involves defining thresholds that act as a boundary between noise and clean data. For these methods, we define thresholds based on the 95th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise).
 
@@ -221,7 +221,7 @@ ADWIN is particularly effective for detecting both sudden and gradual changes in
 
 \subsection{Evaluation and Results}
 
-\subsubsection{MNE Filtering}
+\subsubsection{TODO: MNE Filtering}
 
 MNE filtering is a method used to remove unwanted frequencies from time-series data, typically EEG signals. It applies a bandpass filter to the data, allowing signals within a specific frequency range (e.g., 0.5 to 40 Hz) to pass through while reducing frequencies outside this range. This is important for eliminating noise, such as power line interference or muscle activity, that falls outside the range of interest. MNE acts as a smoothing or cleaning tool, refining the data by focusing on the frequencies that are relevant for analysis.
 
@@ -229,6 +229,7 @@ To estimate noise, MNE filtering works by first applying the bandpass filter to 
 
 For MNE filtering, the noise thresholding approach is consistent with the machine learning-based methods, using the 95th percentile to separate noise (1) from no noise (0).
 
+\subsubsection{TODO: Bitbrain Method}
 
 
 
