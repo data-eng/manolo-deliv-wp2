@@ -1,19 +1,15 @@
 % (M5-M24) Leader: NCSR "D"
 % CeADAR, UPC, ATOS, EVIDEN, FDI, INRIA, ARCADA, use case partners
 
-\subsection{Introduction}
-
-In this research, we aim to develop a task-agnostic framework for time-series data quality estimation. Towards this goal, we propose methods for anomaly and noise detection, which allow us to identify biased, noisy, inconsistent, or otherwise low-quality data, as well as data that may have been maliciously manipulated to contaminate the model during training.
-
-As a case study to validate our methods, we use the Bitbrain dataset, which consists of EEG signals collected from a headband across 128 recordings. This headband includes two EEG channels synchronized with medical-grade EEG devices. The signals are annotated by three experts, with each 30-second segment classified into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms.
-
-To further validate the robustness of our proposed methods, we explore data augmentation techniques, including adversarial machine learning methods that introduce controlled noise contamination into the dataset.
-
 \subsection{Problem Statement}
 
 The quality of time-series data plays a crucial role in the performance of machine learning models, yet existing methods often fail to effectively identify and handle noise in a task-agnostic manner. Traditional data quality estimation techniques are typically tailored to specific datasets, limiting their applicability to a wider range of applications. 
 
-In this research, we address this limitation by developing a flexible framework that estimates data quality, with respect to noise, anomalies, and malicious manipulation, across different time-series datasets, regardless of the specific task or domain. This approach is commonly referred to as task-agnostic data quality estimation.
+To address these challenges, we propose a task-agnostic framework for time-series data quality estimation. Towards this goal, we propose methods for anomaly and noise detection, which allow us to identify biased, noisy, inconsistent, or otherwise low-quality data, as well as data that may have been maliciously manipulated to contaminate the model during training. Our framework is task-agnostic, meaning it can be applied across different time-series datasets, regardless of the specific task or domain.
+
+As a case study to validate our methods, we use the Bitbrain dataset, which consists of EEG signals collected from a headband across 128 recordings. This headband includes two EEG channels synchronized with medical-grade EEG devices. The signals are annotated by three experts, with each 30-second segment classified into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms.
+
+To further validate the robustness of our proposed methods, we explore data augmentation techniques, including adversarial machine learning methods that introduce controlled noise contamination into the dataset.
 
 \subsection{Proposed Methodology}
 
