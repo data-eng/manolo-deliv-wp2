@@ -44,7 +44,7 @@ To apply these techniques, we implement the following 10 methods: LSTM Autoencod
     \caption{Categorization of methods based on noise estimation approach, learning type, and technique.}
 \end{table}
 
-In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison.
+In our analysis, we chose to estimate noise across 30-second segments of the EEG data, which, in the Bitbrain dataset, corresponds to 7,680 samples. Since each method outputs noise values in different scales, we transform these values into binary based on predefined thresholds per channel to establish a common ground for comparison. To define these thresholds, we need to have a sense of how much noise is typically present in the dataset. For example, in the Bitbrain dataset, which contains brain signals during sleep, we don't expect much noise—typically over 95\% of the data is clean.
 
 To evaluate our noise estimations, we use 2 ground truth methods designed for task-specific noise estimation in EEG signals: MNE Filtering and the original Bitbrain estimation method. MNE Filtering is implemented using the \href{https://mne.tools/stable/index.html}{MNE} library, which provides tools for filtering and analyzing neurophysiological data. We treat Bitbrain's method as a black-box approach, to ensure that our task-agnostic estimations remain unbiased by the specifics of its implementation. Similarly, when using the MNE library, we treat it strictly as a tool, integrating it into our code without really accessing its internal methodology.
 
@@ -63,7 +63,7 @@ where $x$ represents the values of a particular feature, $\text{median}(x)$ is t
 
 To process the input data, we split each 30-second segment of EEG data (7,680 samples) into 32 smaller chunks, resulting in 240 sequences per segment. Each sequence has a length of 240 time steps, with 2 features corresponding to the EEG channels. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. Additionally, we notice that our dataset tends to overfit with more complex models due to its low variability and extreme outliers. To mitigate this, we use simple architectures with only a few layers, e.g. a single attention layer in the attention-based models. This approach avoids unnecessary complexity, ensuring more stable training and better generalization on the data.
 
-For all machine learning methods, we need to establish a common standard to determine what is considered noise and what is not. As the models output different value ranges, we need a policy to classify these outputs into binary values that indicate noise presence or absence. One such approach involves defining thresholds that act as a boundary between noise and clean data. For these methods, we define thresholds based on the 95th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise).
+For all machine learning methods, we need to establish a common standard to determine what is considered noise and what is not. As the models output different value ranges, we need a policy to classify these outputs into binary values that indicate noise presence or absence. One such approach involves defining thresholds that act as a boundary between noise and clean data. For these methods, we define thresholds based on the 95th, 97th and 99th percentile of noise values for each channel. Values above the thresholds are set to 1 (indicating noise), while those below are set to 0 (indicating no noise).
 
 Noise estimation within this machine learning approach can be divided into two categories: label-based and label-free:
 
@@ -227,7 +227,7 @@ MNE filtering is a method used to remove unwanted frequencies from time-series d
 
 To estimate noise, MNE filtering works by first applying the bandpass filter to the data. The filtered signal, which retains the relevant neural activity, is compared to the original signal. The difference between the two signals is then considered as noise, representing unwanted components of the data that lie outside the targeted frequency range.
 
-For MNE filtering, the noise thresholding approach is consistent with the machine learning-based methods, using the 95th percentile to separate noise (1) from no noise (0).
+For MNE filtering, the noise thresholding approach is consistent with the machine learning-based methods, using the 95th, 97th and 99th percentile to separate noise (1) from no noise (0).
 
 \subsubsection{TODO: Bitbrain Method}
 
