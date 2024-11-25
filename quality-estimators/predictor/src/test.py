@@ -308,7 +308,7 @@ def collect_metrics(signals, num_bands=5, threshold=10):
 
     logger.info(f'Metrics saved to {fn}.')
 
-def estimate_rec_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+def estimate_rec_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time_norm', 'time', 'seq_id', 'night'], ['majority'])):
     """
     Estimate the quality of the model's predictions based on reconstruction error and save 
     the results to a CSV file.
@@ -351,7 +351,7 @@ def estimate_rec_quality(dataloader, signals, cols=(['HB_1', 'HB_2'], ['time', '
     path = utils.get_path('..', '..', 'data', 'proc', filename=f'estim_predictor_r.csv')
     df.to_csv(path, index=False)
 
-def estimate_attn_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+def estimate_attn_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time_norm', 'time', 'seq_id', 'night'], ['majority'])):
     """
     Estimate the quality of the model's predictions based on attention matrices and save 
     the results to a CSV file.

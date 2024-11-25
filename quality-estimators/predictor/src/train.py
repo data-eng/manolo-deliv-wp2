@@ -169,7 +169,7 @@ def main():
     train(data=dataloaders,
           epochs=1000,
           patience=50,
-          lr=1e-4,
+          lr=5e-5,
           criterion=utils.BlendedLoss(p=1.0, blend=0.8),
           model=model,
           optimizer='AdamW',

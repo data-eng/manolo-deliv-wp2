@@ -145,13 +145,13 @@ def estimate_binary_noise():
         if df8 is None:
             df8 = pd.DataFrame(columns=df.columns)
 
-        if id == 'lstm_ae' or id == 'conv_lstm_ae' or id == 'attn_ae' or id == 'transformer':
+        if id != 'mne' and id != 'cusum' and id != 'page_hinkley' and id != 'kl' and id != 'adwin' and id != 'pca':
             df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
 
         for p in passage['values']:
             df_p_avg = pd.DataFrame()
 
-            df_p = df[df[pname] == p]
+            df_p = df[df[pname] == p].sort_values(by='time')
 
             for idx, col in enumerate(noise_cols):
                 df_p_avg[col] = average_over_segments(df_p[col].tolist(), segment_size=window)
@@ -181,7 +181,7 @@ def estimate_binary_noise():
         logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
 
         agg_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
-        #df_avg.to_csv(agg_csv_path, index=False)
+        df_avg.to_csv(agg_csv_path, index=False)
 
         logger.info(f"Saved aggregated data to {agg_csv_path} with {len(df_avg)} rows.")
 
@@ -193,7 +193,7 @@ def estimate_binary_noise():
         binary_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', 
                                  filename=f'bin_{id}{threshold_str}.csv')
 
-        #df_avg.to_csv(binary_csv_path, index=False)
+        df_avg.to_csv(binary_csv_path, index=False)
 
         logger.info(f"Saved binary aggregated data to {binary_csv_path} with {len(df_avg)} rows.")
 
@@ -328,7 +328,7 @@ def visualize_agreement(dict):
     estimator_ids = config['estimators']
 
     num_features = len(dict)
-    fig, axes = plt.subplots(1, num_features, figsize=(8 * num_features, 6))
+    fig, axes = plt.subplots(1, num_features, figsize=(10 * num_features, 8))
 
     axes = [axes] if num_features == 1 else axes
 
@@ -341,7 +341,7 @@ def visualize_agreement(dict):
 
             agreement_matrix[idx_1, idx_2] = score
 
-        sns.heatmap(agreement_matrix, annot=True, fmt=".4f", cmap='RdBu',
+        sns.heatmap(agreement_matrix, annot=True, fmt=".2f", cmap='RdBu',
                     xticklabels=estimator_ids, yticklabels=estimator_ids,
                     cbar_kws={'label': 'Agreement Score'}, ax=ax)
         
@@ -369,10 +369,10 @@ def main():
     #visualize_noise(dict=noise_dict)
 
     estimate_binary_noise()
-    topKs = get_top_noisy_timesteps(type='bin')
+    #topKs = get_top_noisy_timesteps(type='bin')
 
-    agreement_dict = compute_agreement()
-    visualize_agreement(dict=agreement_dict)
+    #agreement_dict = compute_agreement()
+    #visualize_agreement(dict=agreement_dict)
 
 if __name__ == '__main__':
     main()

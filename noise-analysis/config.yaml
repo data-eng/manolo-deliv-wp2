@@ -21,14 +21,14 @@ window: 7680
 perc: 1
 
 thresholds: 
-  lstm_ae: [-0.05, 0.06]
-  conv_lstm_ae: [0.05, 0.08]
-  attn_ae_r: [-0.05, -0.01]
-  attn_ae_a: [1, 1]
-  classifier: [-13.77, -7.11]
-  predictor_r: [1, 1]
-  predictor_a: [1, 1]
-  mne: [-1.06, -0.30]
+  lstm_ae: [0.24, 0.12]
+  conv_lstm_ae: [0.07, 0.05]
+  attn_ae_r: [0.61, 0.72]
+  attn_ae_a: [0.31, 0.30]
+  classifier: [4.77, 0.96]
+  predictor_r: [0.90, 0.77]
+  predictor_a: [1.44, 1.86]
+  mne: [-1.05, -0.29]
   cusum: [0.5, 0.5]
   page_hinkley: [0.5, 0.5]
   kl: [0.5, 0.5]

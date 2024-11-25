@@ -12,7 +12,7 @@ logger.info(f'Device is {device}')
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-def estimate_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time', 'seq_id', 'night'], ['majority'])):
+def estimate_quality(dataloader, attn_matrices, cols=(['HB_1', 'HB_2'], ['time_norm', 'time', 'seq_id', 'night'], ['majority'])):
     """
     Estimate the quality of the model's predictions and save the results to a CSV file.
 
