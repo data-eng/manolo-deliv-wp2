@@ -1,0 +1,35 @@
+# LSTM AUTOENCODER CONFIGURATION #
+
+# id: lstm_ae
+# name: LSTM_Autoencoder
+# params:
+#  num_feats: 2
+#  latent_seq_len: 1 
+#  latent_num_feats: 8 
+#  hidden_size: 4
+#  num_layers: 1
+#  dropout: 0.05
+
+# CONVOLUTIONAL LSTM AUTOENCODER CONFIGURATION #
+
+# id: conv_lstm_ae
+# name: ConvLSTM_Autoencoder
+# params:
+#  num_feats: 2
+#  latent_seq_len: 1 
+#  latent_num_feats: 8
+#  hidden_size: 4
+#  num_layers: 1
+#  dropout: 0.05
+
+# ATTENTION AUTOENCODER CONFIGURATION #
+
+id: attn_ae
+name: Attn_Autoencoder
+params:
+ num_feats: 3
+ latent_seq_len: 1 
+ latent_num_feats: 8 
+ num_heads: 1 
+ num_layers: 1
+ dropout: 0.05
