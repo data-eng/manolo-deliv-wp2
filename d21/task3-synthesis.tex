@@ -1,10 +1,113 @@
-Data Synthesis intro
+\subsection{Introduction}\label{subsec:2.3_intro}
+The process of training AI models heavily relies on the quality of the datasets involved, including the quality of the samples, the quality of the annotations, and the amount of samples among other factors. Whilst the MANOLO data quality assessment module, addressed in the previous task in this workpackage, assesses data quality, an overall lack of data during training often leads to bias in model predictions as well as poor model performance at inference time. 
 
-\subsection{Technique One}
-\label{subsec:2.3_datsynth_tech1}
+The MANOLO submodule discussed in this section, the Data and Feature Synthetisation submodule, compiles a set of techniques to generate synthetic data in the form of new unseen samples or their equivalent extracted features. This allows the user to address the challenges stemming from a lack of data, whether increasing the overall number of training examples to increase data variability, generating data from a particular class to address class imbalance, or directly mitigating biasses in the dataset. 
 
-\subsection{Methodology}
+The first version of the deliverable reports the efforts undertaken towards data synthetisation through the experimentation with Invertible Neural Networks. These networks are trained on classification datasets, then, they can generate a new sample compatible with a given label, according to the learned parameters of the network. Section~\ref{subsec:2.3_datasynth_tech1} introduces the technique as it will be part of the MANOLO library, in the conditional version (cINNs). The initial cINNs implementation for the MANOLO data module allows the generation of samples from a dataset and the generative condition extends from a particular class to a style contained in the latent space.
 
-\subsection{Results}
+    %%%%%%%%%%%%%%%% Conditional Invertible Neural Networks  %%%%%%%%%%%%%%%%
+    \subsection{Conditional INNs}
+    \label{subsec:2.3_datasynth_tech1}
 
+        In this subsection we address data generation with the conditional invertible neural networks proposed by Ardizonne et al.~\cite{2019_arxiv_cinn}. Conditional Invertible Neural Networks (cINNs) are a variation of invertible neural networks that provide an efficient solution to conditional data generation. INNs need to be, by definition, bijective, which constrains their possible architectures, as batch normalization and pooling layers are not invertible. When conditional generation is introduced, these INNs are combined with an unconstrained NN for that task. The conditional neural network can be used as a processing unit too, which implies operations similar as those not invertible. INNs behave as a transport map between the input distribution and the latent distribution. In the case of computer vision, for instance, INNs map an image $\mathbf{x}$ from the image space (RGB representation) to one latent vector $\mathbf{z}$, without the need of a posterior, as is the case for Variational Autoencoders. This deliverable will show an initial exploration of class and style conditioning alternatives. These approaches allow the model to generate class conditioned images with a particular style living in the latent space.
+        
+        \subsubsection{Methodology}
 
+            This subsection describes the technical aspects of the approach selected as a basic introduction to background concepts underlying the INN implementation, the approach proposed in~\cite{2019_arxiv_cinn} to condition the sample generation with class labels, the adaptation we proposed to condition the style of the generated samples, and a description of the experimental setup used to obtain the results reported in the following subsection.
+         
+            \paragraph{Class-conditioned sample generation.} 
+            Sample generation with INNs, as with normalising flows [GLOW NeurIPS2018 - Kingma and Dhariwail], is based on the principle behind the change of variable statistics formula $p_{X}(X) = p_{Z}(f(X))|\det Df(X)|^{-1}$, where $p_{X}(X)$ and $p_{Z}(f(X))$ are the probability distributions from the input and the latent space respectively, $\det Df(X)$ is the determinant of the Jacobian of $f(X)$, and $f(X)$ is the model or mapping function that we are going to learn. We train this model, as is most commonly done, via maximum likelihood. Following the mathematical developments by Ardizonne et al.~\cite{2019_arxiv_cinn}, which include the prior conditioning of the model, this results in the minimization of three terms: the squared module of the model prediction, the logarithm of the Jacobian of the model weights, and a regularization to enforce a Gaussian space being learned. 
+                        
+            Class-conditioned sample generation relies on a prior introduced during training and inference to alter the mapping and constrict it to a particular region of the latent space, a region that belongs to the samples under the given condition. The prior used in our experiments consist of a one-hot-encoded vector, representing the semantic class of a sample, concatenated to the internal representations of the blocks that compose the INN. This is shown in Figure~\ref{fig:class_cond_gen},  where the input $z_i$ is a random Gaussian noise vector, the condition $c_i$ is a vector indicating the class ``3'' in this particular example, and the output $x_i$ is a newly generated image of a digit ``3''. By using different noise vectors as seeds for the generation of the samples, the model outputs different new samples all corresponding to the category indicated by the condition vector. 
+
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.80\columnwidth]{Images/schema_con_gen.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:class_cond_gen} Schematic.... class conditional image generation.}
+                \vskip -0.0in 
+            \end{figure}
+        
+            \paragraph{Style-and-class-conditioned sample generation.} 
+            Style-and-class-conditioned sample generation goes a step farther, assumes that the class condition is fixed, and conditions the sample generation to adhere to a particular style. We define the style by exploring the latent space learned by the INN and select a set of seed noise vectors near an area of interest, i.e. the noise vectors corresponding to a set of samples that exhibit the style we are interested in. Since different latent vectors result in different images being generated, by moving a random noise vector towards a region in the latent space where a particular set of samples belong, we condition the generation of samples. This is depicted Figure~\ref{fig:ciinn_latent_conditioning}. 
+            
+            To define the region of the latent space that contains the style we want, we define a style vector $z_s$ that represents the style we are interested in. We do this by manually selecting $K$ samples that share the particular style we want (bold, italic, faint writing styles in the MNIST example) and mapping them to the latent space, resulting in a latent style vector per sample $\{z_{s1}, z_{s2}, ..., z_{sK}\}$. Then we define the style vector as the centroid of the individual style vectors $z_{s} = 1/K \sum_{i} z_{si}$. Finally, we generate samples using the interpolation of $z_{s}$ with a random Gaussian noise vector $z_i$ as a conditioned seed vector $z_c = (1-t) z_i + t z_{s}$ that falls close to a region in the latent space that encodes a particular style (boldness in the example in Figure~\ref{fig:ciinn_latent_conditioning}). The strength of that interpolation modulates how close the $z_c$ vector is to the style vector $z_s$ and, consequently, how strong will the presence of the particular style be in the generated image.
+            
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.90\columnwidth]{Images/schematic_latent_space_cond_cinn.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:ciinn_latent_conditioning} Schematic.... conditioning the latent space with z\_i seeds}
+                \vskip -0.0in 
+            \end{figure}
+    
+            \paragraph{Experimental setup.} 
+            The sample generation functionality for the Data Inspection and Genration MANOLO submodule is currently developed and tested on the MNIST dataset~\cite{1998_IEEE_MNIST}. This is a small dataset, widely used in the research community that allows for faster and simpler exploration. MNIST contains 60000 black and white 28$\times$28 images of hand written digits group into ten different classes corresponding to the digits from zero to nine. The experiments presented in this section use the INN model  proposed in~\cite{2019_arxiv_cinn}, composed of 20 linear layers as implemented in the FrEIA library~\cite{freia}. Hence, the images are flattened into a 784 dimensional vector in the input of the model and then unflattened back at the output. The INN is trained on 256 samples batches with Adam optimizer and an learning rate of $1e-5$ that we reduced by a factor of 10 at epoch 20 and epoch 40 of a 60 epochs training. We are currently exploring the implementation of larger models including convolutional layers and aim to include this or alternative models that scale to larger datasets in a future report. Please refer to the future work section (link to the right section) for more details.
+
+        \subsubsection{Results}
+            \paragraph{Class-conditioned sample generation.} 
+            The experiments on class-conditional sample generation illustrate the ability of a cINN to generate samples from a given class. The network is trained to map samples from the image space $p_X$ to the latent space $p_Z$ conditioned to a particular class. Then, the learned model, when inverted, is able to map a randomly generated seed vector $z_i$, a Gaussian noise vector, to a new sample $x_i$ never seen by the model. To illustrate this, Figure~\ref{fig:exp_class_cond} shows several examples of images generated with a trained cINN. In particular, each column shows samples generated from a single seed vector and different conditions for the class that range from from 0 to 9. On the other hand, each row shows samples generated with a fixed class condition and different input seed vectors $z_i$.
+
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.20\columnwidth]{Images/empty_image.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:exp_class_cond} Schematic.... }
+                \vskip -0.0in 
+            \end{figure}
+
+            \paragraph{Style-and-class-conditioned generation.} 
+            The results from the class-conditional sample generation experiments use different seeds to generate different samples under the same class condition. Then, the results in this section demonstrate how we further condition the sample generation process to enforce a particular style to the newly generated samples. Figures~\ref{fig:exp_stle_1}, \ref{fig:exp_stle_3}, and~\ref{fig:exp_stle_1}, provide examples of style-and-class conditioned generated samples and the corresponding initial seeds. These figures help illustrate the generation process: the left-most column contains 10 samples manually selected that belong to a particular style, bold, italic, and xxxx respectively; then the following 10 columns correspond to the samples generated for the ten different class conditions (digits from zero to nine), and each row from top to bottom, correspond to an increasing level of style conditioning strength. The top row samples are generated from a completely random seed vector, the bottom row samples from the style vector $z_s$ obtained from the manually selected samples, and the rows in between interpolations of these vectors. The strength of the interpolation , and of the conditioning consequently, is defined by the parameter $t$ and in these results is linearly increased between zero and one. 
+
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.20\columnwidth]{Images/empty_image.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:exp_stle_1} Schematic.... }
+                \vskip -0.0in 
+            \end{figure}
+
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.20\columnwidth]{Images/empty_image.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:exp_stle_2} Schematic.... }
+                \vskip -0.0in 
+            \end{figure}
+
+            \begin{figure}
+                \vskip -0.2in 
+                \centering
+    
+                \includegraphics[width=0.20\columnwidth]{Images/empty_image.png} 
+                
+                \vspace{-2pt}
+                \caption{\label{fig:exp_stle_3} Schematic.... }
+                \vskip -0.0in 
+            \end{figure}
+
+        
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%% not reviewed.... still work to be done here 
+            \paragraph{Still to unfinished:}
+                \begin{enumerate}
+                    \item Preliminary tests with FashionMNIST - still to try out
+                    \item Conv-cINN? - so far they do not train well...
+                    \item can we move to CIFAR? - we would need to have the convINN running for this
+                \end{enumerate}
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -52,7 +52,7 @@
 %%
 \RequirePackage[%
   a4paper,
-  top=1in,   bottom=0.9in,     left=1in,    right=1in,
+  top=3cm, bottom=2cm, left=2cm, right=2cm,
   bindingoffset=0cm,
   head=1in,  headsep=0.3in,
   foot=1in,  footskip=0.4in ]{geometry}
@@ -206,24 +206,26 @@
 
 \RequirePackage{parskip}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
+\setlength{\parskip}{1em}
 
 \RequirePackage[compact]{titlesec}
 
 \newcommand{\sectionbreak}{\clearpage}
 
 \titleformat{\section}
-{\color{myblue}\normalfont\Large\bfseries}
+{\color{myblue}\normalfont\fontsize{20}{22}\selectfont\bfseries}
 {\color{myblue}\thesection}{1em}{}
 
 \titleformat{\subsection}
-{\color{myblue}\normalfont\bfseries}
+{\color{myblue}\normalfont\fontsize{16}{18}\selectfont}
 {\color{myblue}\thesubsection}{1em}{}
 
 \titleformat{\subsubsection}
-{\color{myblue}\normalfont}
+{\color{myblue}\normalfont\fontsize{14}{16}\selectfont}
 {\color{myblue}\thesubsubsection}{1em}{}
 
-\titlespacing\section{0pt}{0pt plus 0pt minus 0pt}{5pt plus 0pt minus 0pt}
-\titlespacing\subsection{0pt}{4pt plus 0pt minus 0pt}{0pt plus 0pt minus 0pt}
-\titlespacing\subsubsection{0pt}{0pt plus 0pt minus 0pt}{0pt plus 0pt minus 0pt}
+% {<left>}{<before-sep>}{<after-sep>}
+
+\titlespacing*\section{0pt}{11.1pt plus 1pt minus 1pt}{8pt plus 2pt minus 1pt}
+\titlespacing*\subsection{1.11cm}{11.1pt plus 1pt minus 1pt}{8pt plus 2pt minus 1pt}
+\titlespacing*\subsubsection{1.11cm}{11.1pt plus 1pt minus 1pt}{8pt plus 1pt minus 0pt}
