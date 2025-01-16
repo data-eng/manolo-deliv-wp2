@@ -21,6 +21,7 @@ librosa = "^0.10.2.post1"
 torch = "^2.0.1"
 seaborn = "^0.13.2"
 tqdm = "^4.66.2"
+pyrsistent = "^0.19"
 
 [build-system]
 requires = ["poetry-core"]
