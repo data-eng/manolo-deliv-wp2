@@ -1,11 +1,48 @@
 %(M5-M24) (Leader: NUIDUCD-CeADAR, support: NCSR
 %"D", FDI, Fraunhofer, INRIA)
+\subsection{Introduction}
+Considering the efficiency in AI dimension of the MANOLO project, tackling this task from the data perspective will, among other techniques, involve the development Data Distillation methods, which aim to create compact, high-fidelity data summaries from large datasets while retaining essential data patterns and dynamics.
 
 \subsection{Technique One}
+Our research into data distillation focused on distilling computer vision datasets, namely MNIST and CIFAR10. The MNIST dataset is a collection of 70,000 grayscale images of handwritten digits (0–9), while the CIFAR-10 dataset consists of 60,000 color images across 10 distinct classes (e.g., animals, vehicles). These datasets are commonly used for training and testing in image classification tasks.
 \label{subsec:2.3_datdist_tech1}
 
 \subsubsection{Methodology}
 
+One of the key goals of the MANOLO project is to enable efficient training and deployment of AI models across the Cloud-Edge Continuum (CEC), where computational resources are often constrained. This is where data distillation can align with MANOLO’s efficient AI goals by creating reduced datasets which preserve essential information, thus ensuring faster, lower-memory, and resource-efficient model training. Furthermore, since MANOLO’s techniques are intended for use with diverse data types, data distillation with agnostic techniques (e.g., clustering) will help standardise the data preparation activity across various use cases. 
+
+Our proposed data distillation methodology uses a combination of Variational Autoencoders (VAEs) and K-means clustering to reduce the size of computer vision datasets while maintaining high accuracy metrics when used for classification tasks. Variational Autoencoders are neural networks that encode input data into a compressed latent space, which captures the data's essential features. In our approach, we train a Variational Autoencoder on the dataset in order to generate such a latent space. After this, the latent space is clustered into N clusters, where N is the number of target classes in the dataset being distilled. Since the number of clusters are pre-determined, the clustering algorithm used to achieve this is K-means. Once the clustering process is complete, the centroid of each cluster is calculated and the distances from each latent space encoded sample to its corresponding cluster centroid is found. The measure used to calculate this is Euclidean distance. 
+
+In order to reduce the size of the dataset being distilled, the encoded samples with the shortest distances to their corresponding cluster are found and removed from the dataset. The logic behind this is that these samples are the easiest to classify and contribute the least amount of information to the training process. ...
+
 \subsubsection{Results}
 
+
+%
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{l|c|c|c|c|c|c|c}
+        \hline
+        \textbf{Metric} & \textbf{Full Dataset} & \textbf{10\%} & & & & & \\ 
+        \hline
+        
+        Accuracy & 
+ 0.9
+        & 
+        0.9  & & & & & \\
+        
+        Precision & 
+        0.9
+        & 
+        0.9  & & & & & \\
+
+        Recall & 1.3439 & \color{blue}{1.2631}  & & & & & \\ 
+ 
+        F1 Score & 1.3334 & \color{blue}{1.0186}  & & & & &\\ 
+ 
+    \end{tabular}
+    \caption{Comparison of Metrics for Blends 0.1 and 0.8. Metrics are expressed as differences between Raw and Decoded signals.}
+    \label{tab:dataset_distillation_results}
+\end{table}
+%
 

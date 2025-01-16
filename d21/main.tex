@@ -7,6 +7,8 @@
 \usepackage{hyperref}
 \usepackage{multirow}
 
+\usepackage{url}
+
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{\baselineskip}
 \graphicspath{{figures/}}
@@ -75,7 +77,7 @@
 \multicolumn{2}{l}{} \\
 \textcolor{white}{Name} &
 \textcolor{white}{Beneficiary} \\
-S. Konstantopoulos, N. Koliou & NCSR \\
+T. Boura, N. Koliou, C. Romesis, S. Konstantopoulos & NCSR \\
                               & NUIDUCD – CeADAR \\
                               & ARX.net \\
 D. Kogias, G. Dimitriou       & FDI \\
@@ -85,8 +87,8 @@ D. Kogias, G. Dimitriou       & FDI \\
 
 \noindent
 In case you want any additional information, or you want to consult
-with the authors of this document, please send your inquiries to:
-konstant@iit.demokritos.gr
+with the authors of this document, please send your inquiries to
+Stasinos Konstantopoulos, konstant@iit.demokritos.gr
 
 \vskip 3em
 
@@ -206,22 +208,24 @@ is structured as follows:
   emphasis, employing adversarial machine learning while considering
   associated models.
 \item Sections~\ref{sec:datdist} to~\ref{sec:featextr}:
-  Techniques for data distillation will be
-  explored here such that will provide a good foundation and a richer
-  dataset to support the research in the Hardware-aware Model Training
-  and Optimisation component. This will produce new derived
+  Techniques for data distillation will be explored here with the aim
+  of providing a good foundation and richer datasets to support the
+  research in the Hardware-aware Model Training and Optimisation
+  component. The outcome of this work is the generation of new derived
   (synthetic) data using methods for distillation via data compression
-  and hashing, feature extraction and synthesisation; and model
+  and hashing, feature extraction and synthesisation; as well as model
   inversion for synthesisation of data from labels. Data compression
-  will ensure the reduction of storage necessities as well as a
-  faster, while accurate, training pipelines and lighter
-  models. Feature extraction and synthesisation will allow us to
+  will lead to a reduction in storage requirements, as well as faster
+  training pipelines and lighter models, all while preserving
+  accuracy. Feature extraction and synthesisation will allow us to
   propose meta-data for meta learning tasks. The creation of synthetic
-  data from labels is a technique that will help us gather reliable
-  datasets from accurate pretrained architectures to keep a useful
-  repository for their application to posterior training processes
-  where data are not satisfactory for quality, quantity or
-  availability due to ethical reasons.
+  data from labels is a technique that will help in the construction
+  of reliable datasets from accurate pretrained architectures. This
+  will enable the creation of useful dataset repositories to be
+  utilized for posterior training processes, particularly for tasks
+  where existing datasets are not of a high enough standard, whether
+  this be due to poor quality, insufficient quantity or ethical
+  reasons.
 \end{itemize}
 
 \clearpage
@@ -240,19 +244,22 @@ is structured as follows:
 \input{task3-distillation}
 
 \clearpage
-\section{Data and Feature Synthetisation}
-\label{sec:datsynth}
-\input{task3-synthesis}
-
-\clearpage
 \section{Feature Extraction}
 \label{sec:featextr}
 \input{task3-extraction}
 
 \clearpage
+\section{Data and Feature Synthetisation}
+\label{sec:datsynth}
+\input{task3-synthesis}
+
+
+\clearpage
 \section{Conclusion}
 
-\bibliographystyle{plain}
+\clearpage
+\bibliographystyle{unsrt}
+\bibliography{biblio}
 \bibliography{refs}
 
 \end{document}
