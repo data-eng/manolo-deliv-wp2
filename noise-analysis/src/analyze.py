@@ -1,3 +1,4 @@
+from pyrsistent import l
 import yaml
 import warnings
 import numpy as np
@@ -94,16 +95,22 @@ def visualize_noise(dict, shift=2, outlier_threshold=50, dpi=600):
     plt.savefig(path, dpi=dpi)
     plt.close(fig)
 
-def suggest_thresholds(values):
+def suggest_thresholds(values, channel):
     """
     Calculate three meaningful thresholds based on noise values statistics.
 
     :param values: List of noise values for a specific channel.
     :return: Tuple of three thresholds based on percentiles.
     """
-    low = np.percentile(values, 95)
-    mid = np.percentile(values, 97)
-    high = np.percentile(values, 99)
+    if channel == "noise_HB_1":
+        low = np.percentile(values, 98.00)
+        mid = np.percentile(values, 98.61)
+        high = np.percentile(values, 99.00)
+
+    elif channel == "noise_HB_2":
+        low = np.percentile(values, 96.00)
+        mid = np.percentile(values, 96.71)
+        high = np.percentile(values, 97.00)
     
     return low, mid, high
 
@@ -129,6 +136,8 @@ def estimate_binary_noise():
 
     pname = passage['name']
 
+    all_data = {col: [] for col in noise_cols}
+
     for id in estimators:
         df_avg = pd.DataFrame()
 
@@ -142,11 +151,32 @@ def estimate_binary_noise():
         logger.info(f"Loaded CSV for {id} from {csv_path}.")
         logger.info(f"Unique {passage['name']}s in {id}.csv: {df[passage['name']].unique()}")
 
+        for col in noise_cols:
+            column_zeros = (df[col] == 0).sum()
+            logger.info(f"Total zeros in column {col}: {column_zeros} out of {len(df)} values.")
+
         if df8 is None:
             df8 = pd.DataFrame(columns=df.columns)
 
         if id != 'mne' and id != 'cusum' and id != 'page_hinkley' and id != 'kl' and id != 'adwin' and id != 'pca':
             df = pd.concat([df, df8], ignore_index=True).sort_values(by='time')
+
+        for p in passage['values']:
+            df_p = df[df[pname] == p].sort_values(by='time')
+
+            for col in noise_cols:
+                all_data[col].extend(df_p[col].tolist())
+        
+        logger.info(f"Aggregated data across passages for {id}.")
+
+        for idx, col in enumerate(noise_cols):
+            df_avg[col] = average_over_segments(df[col].tolist(), segment_size=window)
+
+            low_threshold, mid_threshold, high_threshold = suggest_thresholds(df_avg[col].tolist(), channel=col)
+
+            lows[col].append(low_threshold)
+            mids[col].append(mid_threshold)
+            highs[col].append(high_threshold)
 
         for p in passage['values']:
             df_p_avg = pd.DataFrame()
@@ -156,13 +186,10 @@ def estimate_binary_noise():
             for idx, col in enumerate(noise_cols):
                 df_p_avg[col] = average_over_segments(df_p[col].tolist(), segment_size=window)
 
-                low_threshold, mid_threshold, high_threshold = suggest_thresholds(df_p_avg[col].tolist())
-
-                lows[col].append(low_threshold)
-                mids[col].append(mid_threshold)
-                highs[col].append(high_threshold)
-
-                df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
+                if id in ['adwin_n0', 'adwin_n1', 'pca_n0', 'pca_n1']:
+                    df_p_avg[f"binary_{col}"] = [0 if val == 0 else 1 for val in df_p_avg[col].tolist()]
+                else:
+                    df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
             df_p_avg['id'] = np.arange(1, len(df_p_avg) + 1)
             df_p_avg[pname] = df_p[pname].iloc[0]
@@ -176,9 +203,9 @@ def estimate_binary_noise():
         mean_highs = {col: sum(highs[col]) / len(highs[col]) if highs[col] else 'N/A' for col in highs}
 
         logger.info(f"Suggested thresholds for {id}:")
-        logger.info(f"Low: [{mean_lows['noise_HB_1']:.2f}, {mean_lows['noise_HB_2']:.2f}]")
-        logger.info(f"Mid: [{mean_mids['noise_HB_1']:.2f}, {mean_mids['noise_HB_2']:.2f}]")
-        logger.info(f"High: [{mean_highs['noise_HB_1']:.2f}, {mean_highs['noise_HB_2']:.2f}]")
+        logger.info(f"Low: [{mean_lows['noise_HB_1']:.10f}, {mean_lows['noise_HB_2']:.10f}]")
+        logger.info(f"Mid: [{mean_mids['noise_HB_1']:.10f}, {mean_mids['noise_HB_2']:.10f}]")
+        logger.info(f"High: [{mean_highs['noise_HB_1']:.10f}, {mean_highs['noise_HB_2']:.10f}]")
 
         agg_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', filename=f'agg_{id}.csv')
         df_avg.to_csv(agg_csv_path, index=False)
@@ -357,6 +384,66 @@ def visualize_agreement(dict):
 
     logger.info(f"Saved agreement heatmap to {path}.")
 
+def noise_as_lines():
+    """
+    Plot the noise values for each feature (noise_HB_1 and noise_HB_2) as lines.
+    One figure with two subplots for each feature.
+    Three lines for each estimator (one for each binary CSV file).
+    Adds a slight vertical shift to separate lines for better visibility.
+    """
+    noise_cols = ['noise_HB_1', 'noise_HB_2']
+    
+    colors = [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
+        '#bcbd22', '#17becf', '#8B0000', '#FF6347', '#FFD700', '#98FB98', '#6495ED', '#DC143C'
+    ]
+  
+    vertical_shift = 0.05
+    
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    
+    for i, col in enumerate(noise_cols):
+        ax = axes[i]
+        
+        for idx, estimator in enumerate(estimators):
+            threshold = thresholds[estimator]
+
+            threshold_str = f'_{ "_".join(map(str, threshold))}' if threshold is not None else ''
+            bin_csv_path = utils.get_path('..', '..', 'quality-estimators', 'data', 'proc', 
+                                 filename=f'bin_{estimator}{threshold_str}.csv')
+            
+            if os.path.exists(bin_csv_path):
+                df = pd.read_csv(bin_csv_path)
+                
+                df = df.sort_values(by=['night', 'id'])
+                
+                noise_values = df[col].values
+
+                zero_count = (noise_values == 0).sum()
+                total_count = len(noise_values)
+                zero_ratio = zero_count / total_count
+                logger.info(f"Feature '{col}', Estimator '{estimator}': {zero_count}/{total_count} values are exactly zero ({zero_ratio:.2%}).")
+                
+                shifted_noise_values = noise_values + (vertical_shift * idx)
+                
+                ax.plot(shifted_noise_values, label=estimator, color=colors[idx], linewidth=2)
+                
+            else:
+                logger.warning(f"CSV file for {estimator} not found: {bin_csv_path}")
+        
+        ax.set_title(f'Noise values for {col}')
+        ax.set_xlabel('Time (rows)')
+        ax.set_ylabel(f'Noise ({col})')
+        ax.legend(loc='upper right')
+        ax.grid(True)
+    
+    output_path = utils.get_path('..', 'static', filename='noise_values_line_plot.png')
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close(fig)
+    
+    logger.info(f"Saved noise line plot to {output_path}.")
+
 def main():
     """
     Main function to execute the noise analysis workflow.
@@ -368,11 +455,13 @@ def main():
     #noise_dict = load_noise_data()
     #visualize_noise(dict=noise_dict)
 
-    estimate_binary_noise()
-    #topKs = get_top_noisy_timesteps(type='bin')
+    #estimate_binary_noise()
+    topKs = get_top_noisy_timesteps(type='bin')
 
-    #agreement_dict = compute_agreement()
-    #visualize_agreement(dict=agreement_dict)
+    agreement_dict = compute_agreement()
+    visualize_agreement(dict=agreement_dict)
+
+    noise_as_lines()
 
 if __name__ == '__main__':
     main()
