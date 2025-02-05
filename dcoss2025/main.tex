@@ -100,7 +100,23 @@ Detecting these anomalies is crucial for maintaining data consistency, protectin
 Traditional approaches often struggle to provide satisfactory results for time series anomaly detection due to the large volume of data and its non-stationary characteristics \cite{zhou_anomaly_2021}. To address these limitations, recent advancements in unsupervised machine-learning anomaly detection algorithms have gained significant attention in the research community \cite{audibert_deep_2022,geiger_tadgan:_2020}.
 These methods aim to capture amplitude and shape anomalies, considering the temporal dependencies and relationships between variables in multivariate time series data \cite{choi_deep_2021}. Among the most noticeable approaches are methods based on LSTM, Autoencoders, and Transformers. These methods can be broadly divided into two categories: forecasting error-based and reconstruction error-based methods. Forecasting error-based approaches aim to detect anomalies by comparing the actual values with the predicted values \cite{yuan2024novelddpmbasedensembleapproach}. Reconstruction error-based methods, on the other hand, use techniques like LSTM to reconstruct the time series and identify anomalies based on the reconstruction error.
 
-However, it is essential to note that no single family of methods consistently outperforms others across all scenarios \cite{audibert_deep_2022}. In pursuit of advancing research in more reliable and robust methods for detecting anomalies in time-series data, this study explores the utilization of attention mechanisms as a primary indicator for identifying anomalies within time-series. Attention layers within machine learning models can estimate noise by assuming that lower attention values indicate noisy or, more generally, inconsistent data. Attention mechanisms excel at capturing long-term dependencies and contextual relationships, which are critical for identifying subtle or context-dependent anomalies. For instance, in a multivariate time series, attention may discern whether a sudden change in one variable is anomalous when viewed in the context of other variables. Additionally, the interpretability of attention scores may provide insights into the model’s reasoning, enabling practitioners to better understand the nature of detected anomalies.
+However, it is essential to note that no single family of methods
+consistently outperforms others across all scenarios
+\cite{audibert_deep_2022}. In pursuit of advancing research in more
+reliable and robust methods for detecting anomalies in time-series
+data, this study explores the utilization of attention mechanisms as a
+primary indicator for identifying anomalies within
+time-series. Attention layers within machine learning models can
+estimate noise by assuming that lower attention values indicate noisy
+or, more generally, inconsistent data. Attention mechanisms excel at
+capturing long-term dependencies and contextual relationships, which
+are critical for identifying subtle or context-dependent
+anomalies. For instance, in a multivariate time series, attention may
+discern whether a sudden change in one variable is anomalous when
+viewed in the context of other variables. Additionally, the
+interpretability of attention scores may provide insights into the
+model's reasoning, enabling practitioners to better understand the
+nature of detected anomalies.
 
 
 
@@ -140,9 +156,19 @@ Despite their effectiveness, AE-based methods also have limitations since	determ
 
 The literature review reveals that reconstruction and prediction errors are widely used as key indicators for anomaly detection in time-series data due to their intuitive appeal and straightforward implementation. However, these approaches have several limitations that can impact their performance, particularly in complex real-world scenarios.
 
-One major limitation of reconstruction error is its reliance on the model's ability to learn standard patterns during training accurately. If the training data is contaminated with anomalies or fails to capture the full spectrum of normal behavior, the model may inadvertently learn to reconstruct anomalies or miss subtle deviations. Additionally, reconstruction-based methods often struggle to detect contextual anomalies, where an observation may be anomalous only in specific temporal or multivariate contexts. For example, a high-temperature reading might be expected in the summer but anomalous in the winter, and reconstruction models may overlook such contextual nuances.
+One major limitation of reconstruction error is its reliance on the
+model's ability to learn standard patterns during training
+accurately. If the training data is contaminated with anomalies or
+fails to capture the full spectrum of normal behavior, the model may
+inadvertently learn to reconstruct anomalies or miss subtle
+deviations. Additionally, reconstruction-based methods often struggle
+to detect contextual anomalies, where an observation may be anomalous
+only in specific temporal or multivariate contexts. For example, a
+high-temperature reading might be expected in the summer but anomalous
+in the winter, and reconstruction models may overlook such contextual
+nuances.
 
-Similarly, prediction error, which measures deviations between predicted and actual values, can be susceptible to noise and non-stationarity in time-series data. In highly dynamic systems, normal variations may result in significant prediction errors, leading to false positives. Moreover, models relying on prediction error often assume that future patterns can be reliably forecasted based on past observations, an assumption that may not hold in volatile or chaotic systems. Additionally, both approaches tend to struggle with identifying collective anomalies—patterns spanning multiple time steps that may individually appear normal but collectively indicate irregularity.
+Similarly, prediction error, which measures deviations between predicted and actual values, can be susceptible to noise and non-stationarity in time-series data. In highly dynamic systems, normal variations may result in significant prediction errors, leading to false positives. Moreover, models relying on prediction error often assume that future patterns can be reliably forecasted based on past observations, an assumption that may not hold in volatile or chaotic systems. Additionally, both approaches tend to struggle with identifying collective anomalies---patterns spanning multiple time steps that may individually appear normal but collectively indicate irregularity.
 
 These limitations highlight the need for more robust, context-aware approaches beyond raw reconstruction or prediction errors, integrating additional signals such as attention mechanisms.
 This study explores the efficacy of attention mechanisms in addressing existing limitations in anomaly detection. Specifically, it considers two methodologies that utilize Autoencoders and Transformers, incorporating multi-head attention mechanisms. These methodologies are task-agnostic, enabling the detection of anomalies in time-series data based on the computed attention values. The performance of these approaches is evaluated against advanced baseline methods, such as standard Autoencoders and Transformers, employing reconstruction and prediction error metrics for effective anomaly detection alongside other relevant conventional methods.
@@ -184,9 +210,9 @@ Signal Processing& \parbox[c]{2.3cm}{\raggedright MNE} \\
 \end{table}
 
 The state-of-the-art machine learning and conventional methods serve as baseline methods against which attention-based methods are assessed.
-Whereas conventional methods aim to detect noise through deviations of time-series data from estimated patterns, machine-learning methods follow an indirect approach. The considered models are trained to solve specific tasks — ranging from signal reconstruction and prediction to classification — and during inference, noise is detected in segments tied with higher reconstruction error, prediction error, or attention values.
+Whereas conventional methods aim to detect noise through deviations of time-series data from estimated patterns, machine-learning methods follow an indirect approach. The considered models are trained to solve specific tasks---ranging from signal reconstruction and prediction to classification---and during inference, noise is detected in segments tied with higher reconstruction error, prediction error, or attention values.
 
-To balance the models’ focus on both the amplitude and trends of the time-series data, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted ($\hat{x}$) and target values ($x$):
+To balance the models' focus on both the amplitude and trends of the time-series data, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted ($\hat{x}$) and target values ($x$):
 %
 \begin{equation}
 \text{Loss} =
@@ -195,7 +221,12 @@ To balance the models’ focus on both the amplitude and trends of the time-seri
 \label{eq:blended_loss}
 \end{equation}
 %
-where $p$ is the power parameter that controls the sensitivity of the loss to the differences and $b$ the \emph{blend factor} that controls the trade-off between learning the overall trend (median error) and closely following local patterns (mean error). A systematic investigation of various blend values within the range [0.1, 0.8] reveals the impact on the model's performance in data reconstruction.
+where $p$ is the power parameter that controls the sensitivity of the
+loss to the differences and $b$ the \emph{blend factor} that controls
+the trade-off between learning the overall trend (median error) and
+closely following local patterns (mean error). A systematic
+investigation of various blend values within the range [0.1, 0.8]
+reveals the impact on the model's performance in data reconstruction.
 
 Data normalization is required for attention-based and baseline machine-learning methods to ensure robust model training and reliable outcomes. The median and
 \emph{interquartile range (IQR)} have been considered instead of the mean and
@@ -224,7 +255,17 @@ The LSTM-AE estimates noise by measuring the reconstruction error between the or
 \paragraph{Attention-based Autoencoder (AbAE)} This method consists of an Autoencoder that combines convolutional layers with a multi-head attention mechanism to reconstruct time-series data from a lower-dimensional latent representation. The convolutional layers help extract spatial features from the input data, while the attention mechanism is used to model temporal dependencies. This allows the model to focus on important time steps and capture long-term patterns without the need for recurrent layers like LSTM. Multi-head attention lets the model focus on different parts of the input sequence simultaneously. The attention mechanism computes a weighted sum of the input features with the weights learned during training. This enables the model to emphasize specific features and temporal patterns, assisting in identifying noise or anomalies that differ from normal time-series behavior.
 \paragraph{Transformer Predictor (TP)} This method utilizes a  Transformer that uses multi-head attention for time-series forecasting. It consists of a sequence-to-sequence architecture, with multi-head attention layers in both the encoder and decoder components. The encoder captures temporal dependencies in the input sequence, while the decoder predicts the next sequence based on these encoded features. The attention mechanism enables the model to focus on relevant time steps, improving its ability to capture long-term dependencies and trends.
 
-This method allows noise estimation through prediction error, i.e. the difference between the model’s predicted output and observed values. When the model predicts the next time step in the sequence, a significant difference between the predicted and actual values suggests that the input data may be noisy. This is because the Transformer model is designed to learn patterns and trends in the data, and irregular and unpredictable noise disrupts this learning process. As a result, more significant prediction errors typically correspond to noisy data, which the model struggles to predict accurately.
+This method allows noise estimation through prediction error, i.e. the
+difference between the model's predicted output and observed
+values. When the model predicts the next time step in the sequence, a
+significant difference between the predicted and actual values
+suggests that the input data may be noisy. This is because the
+Transformer model is designed to learn patterns and trends in the
+data, and irregular and unpredictable noise disrupts this learning
+process. As a result, more significant prediction errors typically
+correspond to noisy data, which the model struggles to predict
+accurately.
+
 
 \subsection{Attention-Based Approaches}
 
@@ -312,9 +353,33 @@ In this analysis, EEG signals collected from a headband with two EEG channels sy
 
 As a ground-truth method to evaluate the results of the proposed noise estimation methods, the original estimation method used by the headband manufacturer is considered. This method consists of task-specific algorithms to automatically estimate noise and evaluate the overall quality of EEG signals, identifying the artifacts in recordings made using the wearable textile headband.
 
-\subsection{Noise estimation methods training and set-up} To train the machine learning models, the available recordings were split into training (43 recordings), validation (3 recordings), and testing subsets (10 recordings). Noise estimation is performed using the test dataset. For the training configuration, we set the batch size to 512 and trained the models for a maximum of 1000 epochs. To prevent overfitting, we employ early stopping with patience of 30 epochs, meaning that if the validation loss does not improve for 30 consecutive epochs, training will stop. We set the learning rate to 1e−4 and use the Adam optimizer to adjust the model weights. Additionally, we implement a ReduceLROnPlateau scheduler to adjust the learning rate dynamically based on the validation loss. If the validation loss plateaus, the scheduler reduces the learning rate to help the model continue improving.
+\subsection{Noise estimation methods training and set-up}
 
-To process the input data, we split each 30-second segment of EEG data – that consists of 7,680 EEG records per channel - into 32 smaller consecutive chunks, each consisting of a sequence of 240 EEG records per channel. This structure allows the model to focus on both the short- and long-term temporal dependencies within the data. Additionally, since the available dataset tends to overfit with more complex models due to its low variability and extreme outliers, simple architectures with only a few layers, e.g. a single attention layer in the attention-based models, where considered. This approach avoids unnecessary complexity, ensuring more stable training and better generalization on the data.
+To train the machine learning models, the available recordings were
+split into training (43 recordings), validation (3 recordings), and
+testing subsets (10 recordings). Noise estimation is performed using
+the test dataset. For the training configuration, we set the batch
+size to 512 and trained the models for a maximum of 1000 epochs. To
+prevent overfitting, we employ early stopping with patience of 30
+epochs, meaning that if the validation loss does not improve for 30
+consecutive epochs, training will stop. We set the learning rate to
+1e-4 and use the Adam optimizer to adjust the model
+weights. Additionally, we implement a ReduceLROnPlateau scheduler to
+adjust the learning rate dynamically based on the validation loss. If
+the validation loss plateaus, the scheduler reduces the learning rate
+to help the model continue improving.
+
+To process the input data, we split each 30-second segment of EEG
+data---that consists of 7,680 EEG records per channel---into 32
+smaller consecutive chunks, each consisting of a sequence of 240 EEG
+records per channel. This structure allows the model to focus on both
+the short and long-term temporal dependencies within the
+data. Additionally, since the available dataset tends to overfit with
+more complex models due to its low variability and extreme outliers,
+simple architectures with only a few layers, e.g. a single attention
+layer in the attention-based models, where considered. This approach
+avoids unnecessary complexity, ensuring more stable training and
+better generalization on the data.
 
 Fig.~\ref{fig:Fig2} depicts the architecture of the Autoencoders developed for noise estimation on the examined test case. Input to the encoders is a sequence of 240 EEG records for both channels. Input data passes through an encoder and is compressed into a latent representation of size (1X8), where the first dimension represents a single compressed time step, and the second dimension represents eight learned features. The decoder then takes this compressed representation and attempts to reconstruct the original data, capturing both trends and amplitudes. 
 
@@ -375,7 +440,25 @@ The table illustrates that in 3 out of 10 recordings (3, 7, and 10), both channe
 
 Table~\ref{tab3} and Table~\ref{tab4} present the Precision and Recall metrics, respectively, for the evaluated methods across the seven test recordings (1, 2, 4, 5, 6, 8, and 9) where an artifact was detected by the manufacturer. All values are expressed as percentages.
 
-The Precision metric in Table~\ref{tab3} denotes the percentage of actual segments identified as having artifacts relative to the total segments predicted to contain artifacts. However, this metric fails to convey information regarding missed artifacts—specifically, those not identified by the anomaly detection methodologies. This aspect is quantified through the Recall metric (Table~\ref{tab4}), which indicates the ratio of segments predicted to have artifacts against the total number of actual segments containing artifacts. For instance, the PCA method exhibits a precision of 100\% from the data obtained during the HB1 test recording 1, yet it only achieves a recall of 11.11\%. This discrepancy arises because the PCA method successfully detected a singular artifact characterized by noise, deemed a noisy artifact; thus, the precision remains at 100\%. However, it failed to identify the additional eight noisy segments (refer to Table~\ref{tab2}), resulting in a significantly reduced recall of approximately 11\%. Instances where there are empty cells signify scenarios where the respective method did not identify any artifacts. Consequently, precision cannot be ascertained, and recall is recorded as 0\%.
+The Precision metric in Table~\ref{tab3} denotes the percentage of
+actual segments identified as having artifacts relative to the total
+segments predicted to contain artifacts. However, this metric fails to
+convey information regarding missed artifacts---specifically, those not
+identified by the anomaly detection methodologies. This aspect is
+quantified through the Recall metric (Table~\ref{tab4}), which
+indicates the ratio of segments predicted to have artifacts against
+the total number of actual segments containing artifacts. For
+instance, the PCA method exhibits a precision of 100\% from the data
+obtained during the HB1 test recording 1, yet it only achieves a
+recall of 11.11\%. This discrepancy arises because the PCA method
+successfully detected a singular artifact characterized by noise,
+deemed a noisy artifact; thus, the precision remains at
+100\%. However, it failed to identify the additional eight noisy
+segments (refer to Table~\ref{tab2}), resulting in a significantly
+reduced recall of approximately 11\%. Instances where there are empty
+cells signify scenarios where the respective method did not identify
+any artifacts. Consequently, precision cannot be ascertained, and
+recall is recorded as 0\%.
 
 In this application, our primary objective is to identify as many segments as possible that contain artifacts while allowing for some tolerance regarding detecting noisy segments. The principal aim should be to reduce the number of instances requiring the application of reliable yet non-automated anomaly detection methods. Consequently, the key performance metric to prioritize is Recall.
 
@@ -383,7 +466,7 @@ From the results presented in Table~\ref{tab3} and Table~\ref{tab4}, we conclude
 
 Due to this reasoning, we applied the selected methodologies to the same dataset while extending the segment duration from 30 seconds to 2, 5, and 10 minutes. Table~\ref{tab5}, Table~\ref{tab6}, and Table~\ref{tab7} illustrate the resulting recall values of the selected methods, respectively. 
 
-One initial conclusion drawn is that across all methods analyzed, the detection of anomalies is significantly enhanced when the duration of the time-window assigned to each segment is increased. However, this improvement comes at the expense of broader time-windows during which the detected anomalies may actually occur — a consideration that necessitates careful evaluation. 
+One initial conclusion drawn is that across all methods analyzed, the detection of anomalies is significantly enhanced when the duration of the time-window assigned to each segment is increased. However, this improvement comes at the expense of broader time-windows during which the detected anomalies may actually occur---a consideration that necessitates careful evaluation. 
 
 The primary conclusions are drawn through a comparative analysis of the performance of the evaluated methodologies. The introduced concept of utilizing attention mechanisms as a critical metric for anomaly detection appears to be promising. Across all segment durations (30 seconds, 2 minutes, 5 minutes, and 10 minutes), the Recall metrics for the AbAE\_att and TP\_att methods, which identify anomalies based on their attention matrix values, surpass those of their counterparts, AbAE\_err and TP\_err, which detect anomalies via reconstruction or prediction errors.
 
@@ -392,7 +475,7 @@ The performance of attention-based methods is generally comparable to, if not su
 
 
 \begin{table*}[htbp]
-\caption{Precision of the considered methods regarding the manufacturer’s anomaly detection}
+\caption{Precision of the considered methods regarding the manufacturer's anomaly detection}
     \centering
     \renewcommand{\arraystretch}{1.3}
     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
@@ -417,7 +500,7 @@ The performance of attention-based methods is generally comparable to, if not su
 \end{table*}
 
 \begin{table*}[htbp]
-\caption{Recall of the considered methods regarding the manufacturer’s anomaly detection}
+\caption{Recall of the considered methods regarding the manufacturer's anomaly detection}
     \centering
     \renewcommand{\arraystretch}{1.3}
     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
@@ -442,7 +525,7 @@ MNE	&		&		&	100	&		&		&		&		&		&		&		&		&	1.33	&		&		\\
 \end{table*}
 
 \begin{table*}[htbp]
-\caption{Recall (2min) of the considered methods regarding the manufacturer’s anomaly detection}
+\caption{Recall (2min) of the considered methods regarding the manufacturer's anomaly detection}
     \centering
     \renewcommand{\arraystretch}{1.3}
     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
@@ -469,7 +552,7 @@ MNE	&	55.56	&		&	100	&		&		&		&		&	33.33	&		&		&		&	5.30	&		&		\\
 
 
 \begin{table*}[htbp]
-\caption{Recall (5min) of the considered methods regarding the manufacturer’s anomaly detection}
+\caption{Recall (5min) of the considered methods regarding the manufacturer's anomaly detection}
     \centering
     \renewcommand{\arraystretch}{1.3}
     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
@@ -496,7 +579,7 @@ MNE	&	100	&		&	100	&		&		&		&		&	11.11	&		&		&		&	12.58	&		&		\\
 \end{table*}
 
 \begin{table*}[htbp]
-\caption{Recall (10min) of the considered methods regarding the manufacturer’s anomaly detection}
+\caption{Recall (10min) of the considered methods regarding the manufacturer's anomaly detection}
     \centering
     \renewcommand{\arraystretch}{1.3}
     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
