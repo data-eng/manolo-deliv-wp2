@@ -8,13 +8,16 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
-\usepackage{tabularx}
+
+\usepackage{booktabs} % for professional tables
+\usepackage{colortbl}
+\usepackage{subcaption}
+\usepackage{multirow}
+
 \usepackage{textcomp}
 \usepackage{xcolor}
-\usepackage{multirow}
 \usepackage[colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black]{hyperref}
 \usepackage{array}
-\usepackage{colortbl}
 
 \DeclareUnicodeCharacter{2212}{-}
 
@@ -418,9 +421,18 @@ The statistical methods are implemented using the Frouros\footnote{Documentation
 
 %%%%%%%%%%%%
 \section{EVALUATION AND RESULTS}
-Table~\ref{tab2} presents the number of artifacts identified through the estimation methodology employed by the headband manufacturer across the ten recordings utilized to assess the anomaly detection techniques. Specifically, it delineates the total count of 30-second segments within which a minimum of one artifact is detected by the headband manufacturer for each of the ten recordings, as recorded by each EEG channel (designated as HB1 and HB2).
+\label{sec:results}
+%%%%%%%%%%%%
 
-\begin{table}[htbp]
+Table~\ref{tab2} presents the number of artifacts identified through
+the estimation methodology employed by the headband manufacturer
+across the ten recordings utilized to assess the anomaly detection
+techniques. Specifically, it delineates the total count of 30-second
+segments within which a minimum of one artifact is detected by the
+headband manufacturer for each of the ten recordings, as recorded by
+each EEG channel (designated as HB1 and HB2).
+
+\begin{table}[bt]
 \caption{Number of segments with artifacts on the testing recordings according to the headband manufacturer}
     \centering
     \renewcommand{\arraystretch}{1.3} % Adjust row height
@@ -437,6 +449,10 @@ Table~\ref{tab2} presents the number of artifacts identified through the estimat
 \end{table}
 
 The table illustrates that in 3 out of 10 recordings (3, 7, and 10), both channels detect no artifacts. In another 3 recordings (4, 8, and 9), only one segment is found contaminated with noise by both channels, except in recording 4, where the noise is identified solely by the HB1 channel. For the other two recordings (1 and 2), noisy segments are almost unanimously detected by both channels. Additionally, in recording 6, only the HB2 channel identifies noise in several segments, suggesting a potential issue with the corresponding sensor.
+
+
+\input{tab_results}
+
 
 Table~\ref{tab3} and Table~\ref{tab4} present the Precision and Recall metrics, respectively, for the evaluated methods across the seven test recordings (1, 2, 4, 5, 6, 8, and 9) where an artifact was detected by the manufacturer. All values are expressed as percentages.
 
@@ -473,296 +489,6 @@ The primary conclusions are drawn through a comparative analysis of the performa
 The performance of attention-based methods is generally comparable to, if not superior to, that of other state-of-the-art techniques, such as LSTM-AE and C-LSTM-AE. A similar conclusion can be derived from comparing the Recall values of the examined attention-based methods with those of baseline methods, including PCA and MNE. However, it is evident that the TP\_att method significantly outperforms the AbAE\_att method.
 
 
-
-\begin{table*}[htbp]
-\caption{Precision of the considered methods regarding the manufacturer's anomaly detection}
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-    % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-    \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-        \cline{2-15}
-        & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-        \hline
-        Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-        \hline
-        LSTM-AE   &       &  5.26 &       &       &       &       &       &       &  6.90 &       &  3.23 &  6.06 &       &         \\
-        C-LSTM-AE &       &       &       & 11.11 &       &       &       &       &       &       &       &       &       &         \\
-        AbAE\_err &       &       &       &       &       &       &       &       &       &       &       &       &       &         \\
-        TP\_err   &       &       &       &       &       &       &       &       &       &       &       &       &       &         \\
-        AbAE\_att &       &  4.44 &       &       &       &       &       &       &       &       &       & 20.00 &       &         \\
-        TP\_att   &       &  4.76 &       &       &       &       &       &  0.67 &  4.79 &       &  1.60 & 13.07 &       &         \\
-        PCA       &       &       &       &  100  &       &  100  &       & 66.67 &  0.91 &       & 23.59 & 41.18 &  100  &         \\
-        MNE       &       &       & 0.11  &       &       &       &       &       &       &       &       & 40.00 &       &         \\
-        \hline
-    \end{tabularx}
-    \label{tab3}
-\end{table*}
-
-\begin{table*}[htbp]
-\caption{Recall of the considered methods regarding the manufacturer's anomaly detection}
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-    % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-    \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-        \cline{2-15}
-        & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-        \hline
-        Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-        \hline
-        LSTM-AE	&		&	1.75	&		&		&		&		&		&		&	3.57	&		&	3.85	&	1.33	&		&		\\
-C-LSTM-AE	&		&		&		&	3.70	&		&		&		&		&		&		&		&		&		&		\\
-AbAE\_err	&		&		&		&		&		&		&		&		&		&		&		&		&		&		\\
-TP\_err	&		&		&		&		&		&		&		&		&		&		&		&		&		&		\\
-AbAE\_att	&		&	3.51	&		&		&		&		&		&		&		&		&		&	0.66	&		&		\\
-TP\_att	&		&	1.75	&		&		&		&		&		&	11.11	&	14.29	&		&	7.69	&	15.23	&		&		\\
-PCA	&	11.11	&		&		&	85.19	&		&	100	&		&	22.22	&	3.57	&		&	96.15	&	4.64	&	100	&		\\
-MNE	&		&		&	100	&		&		&		&		&		&		&		&		&	1.33	&		&		\\
-        \hline
-    \end{tabularx}
-    \label{tab4}
-\end{table*}
-
-\begin{table*}[htbp]
-\caption{Recall (2min) of the considered methods regarding the manufacturer's anomaly detection}
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-    % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-    \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-        \cline{2-15}
-        & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-        \hline
-        Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-        \hline
-        LSTM-AE	&		&	7.02	&	100	&		&		&		&		&		&	14.29	&		&	15.39	&	5.96	&	100	&		\\
-C-LSTM-AE	&		&		&		&	22.22	&		&		&	100	&		&		&		&		&		&		&		\\
-AbAE\_err	&		&	3.51	&		&		&		&		&		&		&		&		&		&	2.65	&		&		\\
-TP\_err	&		&		&		&		&		&		&		&		&		&		&		&		&		&		\\
-AbAE\_att	&		&	7.02	&		&	11.11	&		&		&	100	&		&		&		&		&	2.65	&		&		\\
-TP\_att	&		&	7.02	&		&		&		&		&		&	33.33	&	58.93	&		&	46.15	&	60.93	&	100	&	100	\\
-PCA	&	22.22	&		&		&	85.19	&		&	100	&	100	&	22.22	&	5.36	&		&	96.15	&	8.61	&	100	&	100	\\
-MNE	&	55.56	&		&	100	&		&		&		&		&	33.33	&		&		&		&	5.30	&		&		\\
-
-        \hline
-    \end{tabularx}
-    \label{tab5}
-\end{table*}
-
-
-\begin{table*}[htbp]
-\caption{Recall (5min) of the considered methods regarding the manufacturer's anomaly detection}
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-    % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-    \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-        \cline{2-15}
-        & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-        \hline
-        Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-        \hline
-        LSTM-AE	&		&	17.54	&		&		&		&		&		&		&	37.50	&		&	34.62	&	21.85	&		&		\\
-C-LSTM-AE	&		&		&		&	29.63	&		&		&	100	&	11.11	&		&		&		&	1.33	&		&		\\
-AbAE\_err	&		&	14.04	&		&		&		&		&		&		&		&		&		&	3.31	&		&		\\
-TP\_err	&		&		&		&		&		&		&		&		&		&		&		&		&		&		\\
-AbAE\_att	&		&	17.54	&	100	&	22.22	&		&		&	100	&		&		&		&		&	5.96	&		&		\\
-TP\_att	&		&	19.30	&		&		&		&		&		&	100	&	100	&		&	100	&	84.11	&	100	&	100	\\
-PCA	&	88.89	&		&		&	85.19	&		&	100	&	100	&	88.89	&	26.79	&		&	96.15	&	20.53	&	100	&	100	\\
-MNE	&	100	&		&	100	&		&		&		&		&	11.11	&		&		&		&	12.58	&		&		\\
-
-
-        \hline
-    \end{tabularx}
-    \label{tab6}
-\end{table*}
-
-\begin{table*}[htbp]
-\caption{Recall (10min) of the considered methods regarding the manufacturer's anomaly detection}
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-    % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-    \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-        \cline{2-15}
-        & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-        \hline
-        Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-        \hline
-        LSTM-AE	&		&	36.84	&	100	&	11.11	&		&		&		&		&	64.29	&		&	42.31	&	41.72	&	100	&		\\
-C-LSTM-AE	&		&		&		&	66.67	&		&		&	100	&	100	&		&		&		&	1.33	&		&		\\
-AbAE\_err	&		&	31.58	&		&		&		&		&		&		&		&		&		&	5.30	&		&		\\
-TP\_err	&		&		&		&		&		&		&		&		&		&		&		&		&		&		\\
-AbAE\_att	&		&	35.09	&	100	&	88.89	&		&		&	100	&		&		&		&		&	8.61	&		&		\\
-TP\_att	&		&	38.60	&		&	3.70	&		&		&		&	100	&	100	&		&	100	&	90.07	&	100	&	100	\\
-PCA	&	100	&		&		&	85.19	&		&	100	&	100	&	100	&	62.50	&		&	96.15	&	40.40	&	100	&	100	\\
-MNE	&	100	&		&	100	&		&		&		&		&	100	&		&		&		&	23.18	&		&		\\
-
-
-
-        \hline
-    \end{tabularx}
-    \label{tab7}
-\end{table*}
-
-
-% \begin{table*}[htbp]
-% \caption{Recall of the considered methods regarding the MNE filtering approach}
-%     \centering
-%     \renewcommand{\arraystretch}{1.3}
-%     \setlength{\tabcolsep}{6pt} % Adjust cell spacing
-%     % \begin{tabular}{p{1.75cm}|r|r|r|r|r|r|r|r|r|r|r|r|r|r}
-%     \begin{tabularx}{\textwidth}{p{1.75cm}|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X|>{\raggedleft\arraybackslash}X}
-%         \cline{2-15}
-%         & \multicolumn{7}{c|}{\textbf{HB1}} & \multicolumn{7}{c|}{\textbf{HB2}} \\
-%         \hline
-%         Test Recording & 1 & 2 & 4 & 5 & 6 & 8 & 9 & 1 & 2 & 4 & 5 & 6 & 8 & 9 \\
-%         \hline
-%         LSTM-AE	&		&		&	21.01	&		&		&		&		&		&		&	48.32	&		&	80.00	&		&		\\
-% C-LSTM-AE	&		&		&	10.50	&		&		&		&		&	100	&		&	17.75	&		&		&		&		\\
-% AbAE\_err	&		&		&		&		&		&		&		&		&		&	2.10	&		&		&		&		\\
-% TP\_err	&		&		&		&		&		&		&		&		&		&	2.10	&		&		&		&		\\
-% AbAE\_att	&		&		&	46.22	&		&		&		&		&		&		&	14.71	&		&	20.00	&		&		\\
-% TP\_att	&		&		&	25.21	&		&		&		&		&	100	&		&	97.90	&		&	100	&		&		\\
-% PCA	&	100	&		&	0.95	&		&		&		&		&	100	&		&	3.05	&		&	80.00	&		&		\\
-
-
-
-
-%         \hline
-%     \end{tabularx}
-%     \label{tab8}
-% \end{table*}
-
-
-\label{sec:results}
-%%%%%%%%%%%%
-
-
-% \begin{table*}[htbp]
-% \centering
-% \begin{tabular}{c|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc}
-% \hline
-% \multirow{1}{*}{Night} 
-% & \multicolumn{2}{c|}{ML1} & \multicolumn{2}{c|}{ML2} & \multicolumn{2}{c|}{ML3} & \multicolumn{2}{c|}{ML4} 
-% & \multicolumn{2}{c|}{ML5} & \multicolumn{2}{c|}{ML6} & \multicolumn{2}{c|}{ML7} 
-% & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S3} & \multicolumn{2}{c|}{S4} & \multicolumn{2}{c|}{S5} \\ \cline{2-25}
-% \hline
-
-% 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 25 & 6.56 & 36.84 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 27 & 0.5 & 100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 28 & 1.67 & 11.11 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 29 & 0 & -100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 31 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 32 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-
-% \hline
-% \end{tabular}
-% \vspace{1em}
-% \caption{Precision (left) and Recall (right) values for each estimator (ML1-ML7, S1-S5) across nights for the HB1 channel, evaluated using the Bitbrain method.}
-% \label{tab:precision_recall}
-% \end{table*}
-
-% \begin{table*}[htbp]
-% \centering
-% \begin{tabular}{c|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc}
-% \hline
-% \multirow{1}{*}{Night} 
-% & \multicolumn{2}{c|}{ML1} & \multicolumn{2}{c|}{ML2} & \multicolumn{2}{c|}{ML3} & \multicolumn{2}{c|}{ML4} 
-% & \multicolumn{2}{c|}{ML5} & \multicolumn{2}{c|}{ML6} & \multicolumn{2}{c|}{ML7} 
-% & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S3} & \multicolumn{2}{c|}{S4} & \multicolumn{2}{c|}{S5} \\ \cline{2-25}
-% \hline
-
-% 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 25 & 6.56 & 36.84 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 27 & 0.5 & 100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 28 & 1.67 & 11.11 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 29 & 0 & -100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 31 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 32 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-
-% \hline
-% \end{tabular}
-% \vspace{1em}
-% \caption{Precision (left) and Recall (right) values for each estimator (ML1-ML7, S1-S5) across nights for the HB2 channel, evaluated using the Bitbrain method.}
-% \label{tab:precision_recall}
-% \end{table*}
-
-% \begin{table*}[htbp]
-% \centering
-% \begin{tabular}{c|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc}
-% \hline
-% \multirow{1}{*}{Night} 
-% & \multicolumn{2}{c|}{ML1} & \multicolumn{2}{c|}{ML2} & \multicolumn{2}{c|}{ML3} & \multicolumn{2}{c|}{ML4} 
-% & \multicolumn{2}{c|}{ML5} & \multicolumn{2}{c|}{ML6} & \multicolumn{2}{c|}{ML7} 
-% & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S3} & \multicolumn{2}{c|}{S4} & \multicolumn{2}{c|}{S5} \\ \cline{2-25}
-% \hline
-
-% 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 25 & 6.56 & 36.84 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 27 & 0.5 & 100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 28 & 1.67 & 11.11 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 29 & 0 & -100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 31 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 32 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-
-% \hline
-% \end{tabular}
-% \vspace{1em}
-% \caption{Precision (left) and Recall (right) values for each estimator (ML1-ML7, S1-S5) across nights for the HB1 channel, evaluated using the MNE filtering method.}
-% \label{tab:precision_recall}
-% \end{table*}
-
-% \begin{table*}[htbp]
-% \centering
-% \begin{tabular}{c|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc|cc}
-% \hline
-% \multirow{1}{*}{Night} 
-% & \multicolumn{2}{c|}{ML1} & \multicolumn{2}{c|}{ML2} & \multicolumn{2}{c|}{ML3} & \multicolumn{2}{c|}{ML4} 
-% & \multicolumn{2}{c|}{ML5} & \multicolumn{2}{c|}{ML6} & \multicolumn{2}{c|}{ML7} 
-% & \multicolumn{2}{c|}{S1} & \multicolumn{2}{c|}{S2} & \multicolumn{2}{c|}{S3} & \multicolumn{2}{c|}{S4} & \multicolumn{2}{c|}{S5} \\ \cline{2-25}
-% \hline
-
-% 3 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 25 & 6.56 & 36.84 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 27 & 0.5 & 100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 28 & 1.67 & 11.11 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 29 & 0 & -100 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 31 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-% 32 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 
-
-% \hline
-% \end{tabular}
-% \vspace{1em}
-% \caption{Precision (left) and Recall (right) values for each estimator (ML1-ML7, S1-S5) across nights for the HB2 channel, evaluated using the MNE filtering method.}
-% \label{tab:precision_recall}
-% \end{table*}
 
 \section{CONCLUSIONS AND FUTURE WORK}
 \label{sec:conc}
