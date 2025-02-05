@@ -1952,7 +1952,7 @@ FUNCTION {format.doi}
       this.status.std
       cap.yes 'status.cap :=
       name.doi.prefix " " *
-      "DOI: \href{https://doi.org/" doi * "}{" * doi * "}" *
+      "DOI: \href{https://doi.org/" doi * "}{\nolinkurl{" * doi * "}}" *
       punct.no 'this.status.punct :=
       punct.period 'prev.status.punct :=
       space.normal 'this.status.space :=
