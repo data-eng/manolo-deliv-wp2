@@ -7,6 +7,8 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from sklearn.metrics import precision_score, recall_score
+
 from . import utils
 
 logger = utils.get_logger(level='INFO')
@@ -139,7 +141,7 @@ def estimate_binary_noise():
     all_data = {col: [] for col in noise_cols}
 
     for id in estimators:
-        df_avg = pd.DataFrame()
+        df_avg, df_avg_sug = pd.DataFrame(), pd.DataFrame()
 
         threshold = thresholds[id]
 
@@ -170,9 +172,9 @@ def estimate_binary_noise():
         logger.info(f"Aggregated data across passages for {id}.")
 
         for idx, col in enumerate(noise_cols):
-            df_avg[col] = average_over_segments(df[col].tolist(), segment_size=window)
+            df_avg_sug[col] = average_over_segments(all_data[col], segment_size=window)
 
-            low_threshold, mid_threshold, high_threshold = suggest_thresholds(df_avg[col].tolist(), channel=col)
+            low_threshold, mid_threshold, high_threshold = suggest_thresholds(df_avg_sug[col].tolist(), channel=col)
 
             lows[col].append(low_threshold)
             mids[col].append(mid_threshold)
@@ -186,10 +188,11 @@ def estimate_binary_noise():
             for idx, col in enumerate(noise_cols):
                 df_p_avg[col] = average_over_segments(df_p[col].tolist(), segment_size=window)
 
-                if id in ['adwin_n0', 'adwin_n1', 'pca_n0', 'pca_n1']:
+                """if id in ['adwin', 'pca', 'kl', 'page_hinkley', 'cusum']:
                     df_p_avg[f"binary_{col}"] = [0 if val == 0 else 1 for val in df_p_avg[col].tolist()]
                 else:
-                    df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
+                    """
+                df_p_avg[f"binary_{col}"] = [utils.binary(val, threshold[idx]) for val in df_p_avg[col].tolist()]
 
             df_p_avg['id'] = np.arange(1, len(df_p_avg) + 1)
             df_p_avg[pname] = df_p[pname].iloc[0]
@@ -444,6 +447,92 @@ def noise_as_lines():
     
     logger.info(f"Saved noise line plot to {output_path}.")
 
+def compare_with_mne():
+    """
+    Compare the results each estimator with the ground thruth MNE estimations. Calculate precision and 
+    recall for noise features (noise_HB_1 and noise_HB_2) and save the results as CSV tables.
+
+    :return: A dictionary containing the results for each estimator, with precision and recall values.
+    """
+    bins_dir = utils.get_dir('..', '..', 'quality-estimators', 'data', 'proc','bins')
+    result_dir = utils.get_dir('..', '..', 'quality-estimators', 'data', 'proc', 'bins' ,'results')
+    
+    estimators = [
+        "adwin", "attn_ae_a", "attn_ae_r", "classifier", "conv_lstm_ae",
+        "cusum", "kl", "lstm_ae", "page_hinkley", "pca", "predictor_a", "predictor_r"
+    ]
+    
+    bin_files = [
+        f for f in os.listdir(bins_dir)
+        if f.endswith('_10.csv') and 'mne' not in f
+    ]
+    
+    results = {}
+    
+    for bin_file in bin_files:
+        estimator_name = next((est for est in estimators if f"_{est}_" in bin_file), None)
+        print("The name of the estimator is: ", estimator_name)
+        print("Bin file is: ", bin_file)
+        
+        if estimator_name is None:
+            print(f"Warning: Estimator name not found in the file {bin_file}. Skipping.")
+            continue
+
+        mne_file = f'bin_mne_0.6744791667_0.2682291667_10.csv'
+        mne_df = pd.read_csv(os.path.join(bins_dir, mne_file))
+        
+        bin_df = pd.read_csv(os.path.join(bins_dir, bin_file))
+  
+        estimator_results = []
+        
+        for night in bin_df['night'].unique():
+            bin_night_df = bin_df[bin_df['night'] == night]
+            mne_night_df = mne_df[mne_df['night'] == night]
+
+            night_precisions = []
+            night_recalls = []
+
+            for col in ['noise_HB_1', 'noise_HB_2']:
+                true_labels = mne_night_df[col]
+                pred_labels = bin_night_df[col]
+                
+                tp = np.sum((true_labels == 1) & (pred_labels == 1))
+                fp = np.sum((true_labels == 0) & (pred_labels == 1))
+                
+                if tp + fp == 0:
+                    precision = -200
+                else:
+                    precision = precision_score(true_labels, pred_labels, zero_division=0)
+
+                fn = np.sum((true_labels == 1) & (pred_labels == 0))
+                if tp + fn == 0:
+                    recall = -100
+                else:
+                    recall = recall_score(true_labels, pred_labels, zero_division=0)
+                
+                night_precisions.append(precision)
+                night_recalls.append(recall)
+            
+            estimator_results.append({
+                'N': night,
+                'P1': night_precisions[0],
+                'R1': night_recalls[0],
+                'P2': night_precisions[1],
+                'R2': night_recalls[1],
+                'P': sum(night_precisions) / len(night_precisions),
+                'R': sum(night_recalls) / len(night_recalls)
+            })
+        
+        estimator_df = pd.DataFrame(estimator_results)
+
+        estimator_df = estimator_df[~estimator_df['N'].isin([26, 30, 33])]
+        
+        result_path = os.path.join(result_dir, f'{estimator_name}_results.csv')
+        estimator_df.to_csv(result_path, index=False)
+        results[estimator_name] = estimator_df
+        
+    return results
+
 def main():
     """
     Main function to execute the noise analysis workflow.
@@ -452,16 +541,17 @@ def main():
     extracts the top 100*k% noisy timesteps, computes the agreement percentages
     between estimator pairs for each feature, and visualizes these agreements as heatmaps.
     """
-    #noise_dict = load_noise_data()
-    #visualize_noise(dict=noise_dict)
+    noise_dict = load_noise_data()
+    visualize_noise(dict=noise_dict)
 
-    #estimate_binary_noise()
+    estimate_binary_noise()
     topKs = get_top_noisy_timesteps(type='bin')
 
     agreement_dict = compute_agreement()
     visualize_agreement(dict=agreement_dict)
 
     noise_as_lines()
+    compare_with_mne()
 
 if __name__ == '__main__':
     main()
