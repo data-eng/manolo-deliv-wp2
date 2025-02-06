@@ -455,18 +455,18 @@ def compare_with_mne():
     :return: A dictionary containing the results for each estimator, with precision and recall values.
     """
     bins_dir = utils.get_dir('..', '..', 'quality-estimators', 'data', 'proc','bins')
-    result_dir = utils.get_dir('..', '..', 'quality-estimators', 'data', 'proc', 'bins' ,'results')
+    result_dir = utils.get_dir('..', '..', 'quality-estimators', 'data', 'proc', 'bins' ,'temp')
     
     estimators = [
         "adwin", "attn_ae_a", "attn_ae_r", "classifier", "conv_lstm_ae",
         "cusum", "kl", "lstm_ae", "page_hinkley", "pca", "predictor_a", "predictor_r"
     ]
-    
+
     bin_files = [
         f for f in os.listdir(bins_dir)
         if f.endswith('_10.csv') and 'mne' not in f
     ]
-    
+
     results = {}
     
     for bin_file in bin_files:
@@ -530,6 +530,9 @@ def compare_with_mne():
         result_path = os.path.join(result_dir, f'{estimator_name}_results.csv')
         estimator_df.to_csv(result_path, index=False)
         results[estimator_name] = estimator_df
+
+        print(f"Displaying results for estimator: {estimator_name}")
+        print(estimator_df)
         
     return results
 
