@@ -24,7 +24,7 @@
 
 # ATTENTION AUTOENCODER CONFIGURATION #
 
-id: attn_ae
+id: attn_ae_gpu
 name: Attn_Autoencoder
 params:
  num_feats: 3
