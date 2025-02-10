@@ -180,9 +180,15 @@ the emperiment results (Section~\ref{sec:results}) and conclude
 
 
 %%%%%%%%%%%%
-\section{Related work}
+\section{Backrgound}
 \label{sec:bg}
 %%%%%%%%%%%%
+
+
+%%%%%%%%%%%%
+\subsection{Prediction/reconstruction Error}
+%%%%%%%%%%%%
+
 
 LSTM networks are well-suited for time-series anomaly detection due to their ability to learn temporal dependencies and capture them in a low-dimensional state representation \cite{HOJJATI2024106106,10744017}. LSTMs can be combined with other techniques, such as encoder-decoder architectures and hybrid approaches, to improve detection capabilities further \cite{SGUEGLIA2022170}, \cite{HOJJATI2024106106}. For example, encoder-decoder-based LSTMs can optimize detection abilities in high-dimensional data spaces by learning a compressed representation of normal data and identifying anomalies based on reconstruction errors \cite{SGUEGLIA2022170,aerospace6110117}. Hybrid approaches can combine the benefits of LSTMs with other methods, such as incorporating a predictor and detector component to divide tasks effectively \cite{SGUEGLIA2022170}.
 However, LSTM-based methods also have limitations since they can be computationally intensive and time-consuming to train, especially with long time series data, while  \cite{8926446,HOJJATI2024106106}. 
@@ -209,21 +215,24 @@ At the core of the Transformer architecture lies the self-attention mechanism, w
 %
 Where \( Q \), \( K \), and \( V \) are the query, key, and value matrices, respectively.
 
-
 %%%%%%%%%%%%
-\subsection{PROBLEM STATEMENT AND PROPOSED APPROACH}
+\subsection{Problem Statement}
 %%%%%%%%%%%%
 
-The literature review reveals that reconstruction and prediction errors are widely used as key indicators for anomaly detection in time-series data due to their intuitive appeal and straightforward implementation. However, these approaches have several limitations that can affect their performance, particularly in complex real-world scenarios.
+The literature review reveals that reconstruction and prediction
+errors are widely used as key indicators for anomaly detection in
+time-series data due to their intuitive appeal and straightforward
+implementation. However, these approaches do not take into account
+differences in the nature of what is considered an anomaly for each
+use case.
 
-One major limitation of reconstruction error is its reliance on the
-model's ability to learn standard patterns during training
-accurately. If the training data is contaminated with anomalies or
-fails to capture the full spectrum of normal behavior, the model may
-inadvertently learn to reconstruct anomalies or miss subtle
-deviations. Additionally, reconstruction-based methods often struggle
-to detect contextual anomalies, where an observation may be anomalous
-only in specific temporal or multivariate contexts. For example, a
+As we framed our work in a context where there is no anomaly
+supervision, it follows that it is also not possible to select
+training data that is not contaminated with anomalies. This means that
+the model may inadvertently learn to reconstruct anomalies.
+Additionally, reconstruction-based methods often struggle to detect
+contextual anomalies, where an observation may be anomalous only in
+specific temporal or multivariate contexts. For example, a
 high-temperature reading might be expected in the summer but anomalous
 in the winter, and reconstruction models may overlook such contextual
 nuances.
@@ -232,45 +241,47 @@ Similarly, prediction error, which measures deviations between predicted and act
 % Additionally, both approaches tend to struggle with identifying collective anomalies---patterns spanning multiple time steps that may individually appear normal but collectively indicate irregularity.
 
 These limitations highlight the need for more robust, context-aware approaches beyond raw reconstruction or prediction errors, integrating additional signals such as attention mechanisms.
+
+
+
+
+
+%%%%%%%%%%%%
+\section{Methodology}
+\label{sec:method}
+%%%%%%%%%%%%
+
+
+
 This study explores the efficacy of attention mechanisms in addressing existing limitations in anomaly detection. Specifically, it considers two methodologies that utilize Autoencoders and Transformers, incorporating multi-head attention mechanisms. 
 % These methodologies are task-agnostic, enabling the detection of anomalies in time-series data based on the computed attention values. 
 The performance of these approaches is evaluated against advanced baseline methods, such as standard Autoencoders and Transformers, employing reconstruction and prediction error metrics for effective anomaly detection alongside other relevant conventional methods.
 
 
-
-%%%%%%%%%%%%
-\section{METHODOLOGY OF THE INVESTIGATION PROCESS}
-\label{sec:method}
-%%%%%%%%%%%%
-
 To investigate the validity of the proposed approach, several methods for anomaly and noise detection are considered, ranging from attention-based methods to state-of-the-art machine learning approaches, as well as anomaly detection conventional methods.
 
 Table~\ref{tab1} lists the anomaly detection methods considered, together with the core approach each method uses to estimate noise. Four methods: the LSTM Autoencoder (LSTM-AE), the Convolutional LSTM Autoencoder (C-LSTM-AE), the Attention-based Autoencoder (AbAE\_err), and the Transformer Predictor (TP\_err) are state-of-the-art machine-learning approaches for anomaly detection on time series considered in this work. These methods detect anomalies through reconstruction or prediction error. Two methods encompass the proposed idea of detecting noise based on the estimated values of the attention matrix. These are the Attention-based Autoencoder (AbAE\_att) and Transformer Predictor (TP\_att), similar to the aforementioned methods where reconstruction or prediction error is not used as an indicator of noise. Additionally, two more methods: the Principal Component Analysis (PCA), and the MNE filtering, are also state-of-the-art conventional methods for time series anomaly detection.
 
-\begin{table}[htbp]
-\caption{CONSIDERED ANOMALY DETECTION METHODS}
-\begin{center}
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Noise estimation via}&\textbf{\textit{Method}}\\
-\cline{1-2} 
-\multicolumn{2}{c}{Baseline Machine-Learning Approaches} \\
-\hline
-Reconstruction Error& \parbox[c][1cm][c]{2.3cm}{\raggedright LSTM-AE\\C-LSTM-AE\\AbAE\_err} \\ \hline
-Prediction Error& \parbox[c]{2.3cm}{\raggedright TP\_err} \\ \hline
-\multicolumn{2}{c}{Attention-Based Approaches} \\
-\hline
-Attention Matrix& \parbox[c][1cm][c]{2.3cm}{\raggedright AbAE\_att\\TP\_att\\TC} \\ \hline
-\multicolumn{2}{c}{Baseline conventional Approaches} \\
-\hline
-Statistical Function& \parbox[c] {2.3cm}{\raggedright PCA} \\
-Signal Processing& \parbox[c]{2.3cm}{\raggedright MNE} \\
-\hline
-
-\end{tabular}
-\label{tab1}
-\end{center}
+\begin{table}[bt]
+\centering
+\caption{Methods under comparison.}
+\label{tab:methods1}
+\begin{tabular}{lp{5cm}}
+\toprule
+Acronym          & Description \\
+\midrule
+\textit{LSTM}    & aaa  \\
+\textit{C-LSTM}  & Convolutional LSTM \\
+\textit{AE\_err} & Autoencoder reconstruction error \\
+\textit{TP\_err} & Transformer reconstruction error \\
+\textit{AE\_att} & Autoencoder attention \\
+\textit{TP\_att} & Transformer attention \\
+\textit{PCA}     & Principle component analysis \\
+\textit{MNE}     & IIR filter \\
+\bottomrule
+\end{tabular} 
 \end{table}
+
 
 The state-of-the-art machine learning and conventional methods serve as baseline methods against which attention-based methods are assessed.
 Whereas conventional methods aim to detect noise through deviations of time-series data from estimated patterns, machine-learning methods follow an indirect approach. The considered models are trained to solve specific tasks---ranging from signal reconstruction and prediction to classification---and during inference, noise is detected in segments tied with higher reconstruction error, prediction error, or attention values.
@@ -408,7 +419,7 @@ In this domain, an artifact is denoted as any component of the EEG signal not di
 %     % \vskip -0.0in 
 % \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[tb]
     \centering
     \begin{minipage}[b]{0.45\textwidth}
         \centering
@@ -477,7 +488,7 @@ Conv1D layers operate directly on the sequence of hidden states produced by the 
 
 Fig.~\ref{fig:Fig2} depicts the AbAE\_att architecture for noise estimation on the examined test case. The input to the encoder consists of a sequence of 240 EEG records for both channels, along with a same-size sequence of time representation. The input data passes through the encoder and is compressed into a latent representation of size \( 1 \times 8 \), where the first dimension represents a single compressed time step, and the second dimension corresponds to eight learned features. This is achieved by applying multi-head attention to the input data, followed by a dropout layer for regularization, and a convolutional layer for dimensionality reduction. The decoder then processes this compressed representation using the reverse architecture (transposed convolution, dropout, and attention) to reconstruct the original data, capturing both trends and amplitudes.
 
-\begin{figure}
+\begin{figure}[tb]
     % \vskip -0.2in 
     \centering
     \includegraphics[width=1\columnwidth]{images/Fig2.png}  
@@ -488,7 +499,7 @@ Fig.~\ref{fig:Fig2} depicts the AbAE\_att architecture for noise estimation on t
 Fig.~\ref{fig:Fig3} illustrates the TP\_att architecture for noise estimation on the examined test case. The input consists of a sequence of 240 EEG records for both channels, along with a same-size sequence of time representation. This data passes through the embedding layer, which applies multi-head attention to capture key temporal patterns. The output is then processed with dropout regularization and passed through a LeakyReLU activation function to introduce non-linearity.
 
 
-\begin{figure}
+\begin{figure}[tb]
     % \vskip -0.2in 
     \centering
     \includegraphics[width=0.65\columnwidth]{images/Fig3.png}
@@ -502,7 +513,7 @@ The machine-learning methods, as well as the statistical method MNE filtering, i
 
 
 %%%%%%%%%%%%
-\section{EVALUATION AND RESULTS}
+\section{Evaluation and Results}
 \label{sec:results}
 %%%%%%%%%%%%
 
@@ -514,21 +525,22 @@ segments within which a minimum of one artifact is detected by the
 headband manufacturer for each of the ten recordings, as recorded by
 each EEG channel (designated as HB1 and HB2). The true-error rate is the percentage of segments found with artifacts among all segments of the corresponding recording, and in the remaining of the paper acts as a recording identifier. 
 
+
 \begin{table}[bt]
-\caption{Number of segments with artifacts on the testing recordings according to the headband manufacturer}
-    \centering
-    \renewcommand{\arraystretch}{1.3} % Adjust row height
-    \begin{tabular}{c|c|c|c|c|c|c|c|c|c|c}
-        \hline
-        % \textbf{Test Recording} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \textbf{6} & \textbf{7} & \textbf{8} & \textbf{9} & \textbf{10} \\
-        % \hline
-        HB1 & 0 & 57 & 27 & 9 & 1 & 1 & 1 & 0 & 0 & 0 \\
-        HB2 & 151 & 56 & 26 & 9 & 1 & 1 & 0 & 0 & 0 & 0 \\
-        \hline
-        \parbox[c][1cm][c]{2cm}{true-error rate\\(recording ID)} & 14 & 5 & 3 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\                
-        \hline
-    \end{tabular}
-    \label{tab2}
+\caption{Absolute number and percentage of segments with artifacts in
+  each channel and recording session.}
+\centering
+\renewcommand{\arraystretch}{1.3} % Adjust row height
+\begin{tabular}{lrrrr}
+\toprule
+RecID &  A         &  B       &  C & D \\
+\midrule
+HB1   &   0        & 57 (5\%) & 27 (3\%) & 9 (1\%) \\
+
+HB2   & 151 (14\%) & 56 (5\%) & 26 (3\%) & 9 (1\%) \\
+\bottomrule
+\end{tabular}
+\label{tab2}
 \end{table}
 
 The table illustrates that in 3 out of 10 recordings, both channels detect no artifacts. In another 3 recordings, only one segment is found contaminated with noise. In three recordings, noisy segments are almost unanimously detected by both channels. Finally, in one recording, only the HB2 channel identifies noise in several segments, suggesting a potential issue with the corresponding sensor.
@@ -570,7 +582,7 @@ The performance of attention-based methods is generally comparable to, if not su
 
 
 
-\section{CONCLUSIONS AND FUTURE WORK}
+\section{Conclusions and Future Work}
 \label{sec:conc}
 This paper investigates the innovative application of attention mechanisms within machine learning models as pivotal indicators for anomaly detection in time-series datasets. Two methodologies, namely an Autoencoder and a Transformer, are examined, with their performances benchmarked against conventional techniques and other advanced machine-learning approaches. The efficacy of the proposed methodology is assessed utilizing EEG signals sourced from wearable sleep-monitoring devices measuring Precision and Recall against a manufacturer's established ground truth methodology. The findings indicate that attention-based approaches, particularly the Transformer Predictor, exhibit promising capabilities in identifying anomalies, particularly with extended time windows for analysis. The study concludes that attention mechanisms significantly enhance anomaly detection in streaming data environments.
 

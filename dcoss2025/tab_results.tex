@@ -1,8 +1,14 @@
 
 \begin{table*}[btp]
 \centering
-\caption{F2 score, precision and recall on examined test case under the various length segments
-\newline(precision and recall are given, respectively, in parenthesis. when absent, they have the same value as the F2 score)}  
+\caption{F-score, precision and recall on for different segment length.
+  The F-score is calculated for $\beta=2$, emphasising recall over
+  precision, as it approproate in out setting.
+  Precision and recall, respectively, are given in parenthesis; When
+  absent, it denoes that they are within three percentile points of
+  the F2 score.
+  Empty cells denote that the respective method did not mark any segment
+  as noise, which implies that recall is 0\% and precision is undefined.}  
 \label{tab:results}
 \begin{sc}
 
@@ -14,7 +20,7 @@
 \begin{tabular}{lp{\tbq}ccccccc}
       & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
-RecID & 14 & 5 &  3 & 1 & 14 & 5 & 3 & 1  \\
+RecID &  A & B &  C & D &  A & B & C & D  \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
 LSTM  &    &\textbf{2\%}&   &   &\tbfs612          &\tbfs{7}{4}{4}&\tbfs{3}{4}{4} &     \\
 C-LSTM&    &        &\tbmv{11}44&   &          &          &               &     \\
@@ -41,7 +47,7 @@ MNE      &    &        &    &   &\tbfs{40}12      &          &               &  
 \begin{tabular}{lp{\tbq}ccccccc}
           & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
-RecID & 14 & \hskip -0.5cm 5 & \hskip -0.5cm 3 & 1 & 14 & 5 & 3 & 1  \\
+RecID &  A & \hskip -0.5cm B & \hskip -0.5cm C & D & A & B & C & D  \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
 LSTM	 &    &\tbmv6{18}{13}&       &   &\tbfs{12}{22}{19} &\tbms8{38}{22} &\tbms3{35}{11} &    \\
 C-LSTM&    &             &\tbmv{10}{30}{21}& &\tbfs211  &               &               &\tbms1{11}4  \\
@@ -70,7 +76,7 @@ MNE	&    &              &       &\tbfs{82}{100}{96}
 \begin{tabular}{lp{\tbq}ccccccc}
           & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
-RecID & 14 & 5 & \hskip -0.5cm 3 & 1 & 14 & 5 & 3 & 1  \\
+RecID & A & B & \hskip -0.5cm C & D & A & B & C & D \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
 LSTM	  &   &\tbmv7{37}{19}&\tbmv2{11}5&   &\tbfs{12}{42}{28} &\tbfs7{64}{25} &\tbfs2{42}9    &    \\ 
 C-LSTM &   &             &\tbmv{11}{67}{34}&&\tbfs111        &               &               & \tbfs5{100}{21} \\
