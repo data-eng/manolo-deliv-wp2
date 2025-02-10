@@ -185,41 +185,76 @@ the emperiment results (Section~\ref{sec:results}) and conclude
 %%%%%%%%%%%%
 
 
-%%%%%%%%%%%%
-\subsection{Prediction/reconstruction Error}
-%%%%%%%%%%%%
+One of the main frameworks in sequence processing are
+\emph{recurrent neural networks} where the sequence is presented to
+the network one token at a time and the network maintains a
+\emph{hidden state} which distills the information needed from past
+tokens to provide a context for the processing of the current token.
+One of the most successful recurrent architectures is the
+\emph{Long Short-Term Memory (LSTM)} where trainable \emph{gates}
+control the flow of information to and from the hidden state
+\cite{hochreiter-schmidhuber:1997}. This allows LSTM to capture long
+temporal dependencies in a low-dimensional state representation
+\cite{HOJJATI2024106106,10744017}.
 
+LSTMs are often combined with other techniques, such as convolution
+and encoder-decoder architectures. Encoder-decoder LSTMs, in
+particular, learn a compressed representation of the data. When
+training the decoder to reconstruct the original sequence back
+(which is known as \emph{autoencoding}), the compressive encoding is
+trained to drop information that is not detrimental for the loss
+estimation. Anomalies (in the sense of patterns not encountered during
+training) can then be identified by higher reconstruction error
+\cite{SGUEGLIA2022170,aerospace6110117}.
+Reconstruction error over autoencoding has been used extensively for
+anomaly detection in various architecture besides LSTM
+\cite{10.1145/3691338}, and its limitations are well-understood:
+Autoencoders struggle with high-dimensional data, as it is up to the
+system designer to find the layer widths (effectively, the level of
+compression) that drop the correct amount of information.
+Further, autoencoders are limited with the respect to the kind of
+information they drop: Since this decision is driven by a loss that
+compares the reconstructed sequences against the input sequence, a
+commonly occuring pattern will be retained even when it is an anomaly
+in a given context.
 
-LSTM networks are well-suited for time-series anomaly detection due to their ability to learn temporal dependencies and capture them in a low-dimensional state representation \cite{HOJJATI2024106106,10744017}. LSTMs can be combined with other techniques, such as encoder-decoder architectures and hybrid approaches, to improve detection capabilities further \cite{SGUEGLIA2022170}, \cite{HOJJATI2024106106}. For example, encoder-decoder-based LSTMs can optimize detection abilities in high-dimensional data spaces by learning a compressed representation of normal data and identifying anomalies based on reconstruction errors \cite{SGUEGLIA2022170,aerospace6110117}. Hybrid approaches can combine the benefits of LSTMs with other methods, such as incorporating a predictor and detector component to divide tasks effectively \cite{SGUEGLIA2022170}.
-However, LSTM-based methods also have limitations since they can be computationally intensive and time-consuming to train, especially with long time series data, while  \cite{8926446,HOJJATI2024106106}. 
-% Additionally, despite their ability to mitigate the vanishing gradient problem, it can still occur, particularly with very long sequences, hindering the learning of long-term dependencies.
-their performance can also be sensitive to hyperparameter settings, making tuning for optimal performance a challenge.
-
-Autoencoders (AEs) are another popular approach for anomaly detection. They operate by learning a compressed representation of normal data and then reconstructing the input. Anomalies are detected based on the reconstruction error, which is expected to be higher for abnormal data points \cite{10.1145/3444690}, \cite{10.1007/978-3-030-73100-7_60}. Among the various types of Autoencoders that exist, are:
-Denoising Autoencoders \cite{s23052844,10.1145/3691338},
-Robust Deep Autoencoders \cite{10.1145/3691338},
-Variational Autoencoders (VAEs) \cite{9523565},
-Contractive Autoencoders  \cite{SGUEGLIA2022170},
-and Variational Quasi-Recurrent Autoencoders (VQRAEs) \cite{8079887}.
-
-Despite their effectiveness, AE-based methods also have limitations since determining the optimal threshold for the reconstruction error to classify anomalies can be challenging. In addition, AEs can struggle with high-dimensional data and are sensitive to noise, requiring techniques like feature selection, dimensionality reduction, or denoising to improve performance.
- 
-Transformers, the widely known attention-based autoencoders, have recently emerged as promising alternatives for solving time-series problems. While it may seem natural to apply them to time-series anomaly detection, the literature in this area remains limited. Unlike LSTMs, which process data sequentially to capture temporal dependencies, Transformers use self-attention mechanisms to model relationships across the entire sequence in parallel. This parallelization accelerates training and enhances scalability. It also mitigates the vanishing gradient problem in LSTMs by allowing gradients to flow directly across the entire sequence, rather than being propagated step by step \cite{vaswani2023attentionneed}. However, due to their very parallel nature, Transformers do not inherently capture the temporal order of elements in the sequence. To address this, positional encodings are added to the input data, enabling the model to learn and preserve the temporal relationships between elements.
-
-At the core of the Transformer architecture lies the self-attention mechanism, which enables the model to assign different levels of importance to elements in the input sequence. Each time step in a sequence is transformed into three vectors: Query (\(Q\)), Key (\(K\)), and Value (\(V\)), which are obtained through learned weight matrices. The attention mechanism computes a similarity score between the query and key vectors for all elements in the sequence, determining how much each element should contribute to the final representation of the current element. These scores are then scaled by the square root of the key vector's dimensionality to prevent excessively large values that could hinder learning. A softmax function normalizes these scores into attention weights, which are used to compute a weighted sum of the value vectors. The output is a set of contextualized representations where each time step contains information aggregated from the entire sequence, improving the model’s ability to detect subtle and long-range dependencies, as summarized in Equation~\ref{eq:attention}.
+Besides recurency, the other major approach to sequence-processing is
+the \emph{Transformer} architecture. Transformers are autoencoders
+based on the \emph{self-attention} mechanism \cite{vaswani-etal:2017}.
+Unlike LSTMs and other recurrent architectures, Transformers receive
+the complete sequence as input and model relationships across the
+entire sequence. This allows gradients to flow directly across the
+entire sequence, rather than being propagated step by step, making it
+easier to discover long-distance dependencies.
 %
-\begin{equation}
-    \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
-    \label{eq:attention}
-\end{equation}
+At the core of the Transformer architecture lies the self-attention
+mechanism, which enables the model to assign different levels of
+importance to elements in the input sequence
+based on the value of \emph{any other element in the sequnce.}
+Specifically, Transformers learn three sets of weights which are
+applied to the input to get three vectors: the \emph{query (Q)}, the
+\emph{key (K)}, and the \emph{Value (V)}.
+The attention mechanism computes the \emph{similarity score} $QK^T$
+which is a $n\times n$ matrix that determines the contribution of each
+element in the final representation of each other element. The
+similarity score is scaled and softmax'ed into a matrix of weights,
+which are applied to the value vector. This yields the representation
 %
-Where \( Q \), \( K \), and \( V \) are the query, key, and value matrices, respectively.
+$\mathrm{softmax}\left(QK^T / \mathrm{sqrt}(d_k)\right)\cdot V$
+%
+where each element contains information aggregated from the entire
+sequence, improving the model's ability to detect long-range dependencies.
+
+
 
 %%%%%%%%%%%%
-\subsection{Problem Statement}
+\section{Research Methodology}
+\label{sec:method}
 %%%%%%%%%%%%
 
-The literature review reveals that reconstruction and prediction
+\subsection{Research Hypothesis}
+
+As discussed in the previous section, reconstruction and prediction
 errors are widely used as key indicators for anomaly detection in
 time-series data due to their intuitive appeal and straightforward
 implementation. However, these approaches do not take into account
@@ -237,50 +272,221 @@ high-temperature reading might be expected in the summer but anomalous
 in the winter, and reconstruction models may overlook such contextual
 nuances.
 
-Similarly, prediction error, which measures deviations between predicted and actual values, can be susceptible to noise and non-stationarity in time-series data. In highly dynamic systems, normal variations may result in significant prediction errors, leading to false positives. Moreover, models relying on prediction error often assume that future patterns can be reliably forecasted based on past observations, an assumption that may not hold in volatile or chaotic systems. 
-% Additionally, both approaches tend to struggle with identifying collective anomalies---patterns spanning multiple time steps that may individually appear normal but collectively indicate irregularity.
+Similarly, prediction error, which measures deviations between
+predicted and actual values, can be susceptible to noise and
+non-stationarity in time-series data. In highly dynamic systems,
+normal variations may result in significant prediction errors, leading
+to false positives. Moreover, models relying on prediction error often
+assume that future patterns can be reliably forecasted based on past
+observations, an assumption that may not hold in volatile or chaotic
+systems.
 
-These limitations highlight the need for more robust, context-aware approaches beyond raw reconstruction or prediction errors, integrating additional signals such as attention mechanisms.
+On the other hand, the attention mechanism offers an alternative,
+currently unexplored, way to extract indications about what parts of
+the sequence are anomalies. The hypothesis is that the part of the
+sequence that receives the least attention while performing a task
+relevant to the use case, then is this part is an anomaly. The
+intuition is that neural networks will happily overfit the data
+when they are given enough parameters to do so. Such a network might
+not be good to actually perform the task, but is good at recognizing
+two ways in which a sub-sequence is anomalous: (a) it does not follow
+any pattern that was boosted (gradient-wise) by the training;
+(b) it follows a pattern that is inconsistent, it is sometimes
+associated with one class on the task and sometimes with an another,
+so it alternates between being boosted and penalized by the loss
+function, again resulting in low attention.
 
+To investigate this hypothesis, we experimented with several methods
+for anomaly and noise detection ranging from attention-based methods
+to state-of-the-art machine learning approaches, as well as
+conventional anomaly detection methods. These are listed in
+Table~\ref{tab1} and described in more detail in the remainder of this
+sectiom.
 
-
-
-
-%%%%%%%%%%%%
-\section{Methodology}
-\label{sec:method}
-%%%%%%%%%%%%
-
-
-
-This study explores the efficacy of attention mechanisms in addressing existing limitations in anomaly detection. Specifically, it considers two methodologies that utilize Autoencoders and Transformers, incorporating multi-head attention mechanisms. 
-% These methodologies are task-agnostic, enabling the detection of anomalies in time-series data based on the computed attention values. 
-The performance of these approaches is evaluated against advanced baseline methods, such as standard Autoencoders and Transformers, employing reconstruction and prediction error metrics for effective anomaly detection alongside other relevant conventional methods.
-
-
-To investigate the validity of the proposed approach, several methods for anomaly and noise detection are considered, ranging from attention-based methods to state-of-the-art machine learning approaches, as well as anomaly detection conventional methods.
-
-Table~\ref{tab1} lists the anomaly detection methods considered, together with the core approach each method uses to estimate noise. Four methods: the LSTM Autoencoder (LSTM-AE), the Convolutional LSTM Autoencoder (C-LSTM-AE), the Attention-based Autoencoder (AbAE\_err), and the Transformer Predictor (TP\_err) are state-of-the-art machine-learning approaches for anomaly detection on time series considered in this work. These methods detect anomalies through reconstruction or prediction error. Two methods encompass the proposed idea of detecting noise based on the estimated values of the attention matrix. These are the Attention-based Autoencoder (AbAE\_att) and Transformer Predictor (TP\_att), similar to the aforementioned methods where reconstruction or prediction error is not used as an indicator of noise. Additionally, two more methods: the Principal Component Analysis (PCA), and the MNE filtering, are also state-of-the-art conventional methods for time series anomaly detection.
 
 \begin{table}[bt]
 \centering
 \caption{Methods under comparison.}
-\label{tab:methods1}
-\begin{tabular}{lp{5cm}}
+\label{tab1}
+\begin{tabular}{lp{4cm}p{2cm}}
 \toprule
-Acronym          & Description \\
+\emph{Acronym}   & \emph{Architecture}& \emph{Detection}  \\
 \midrule
-\textit{LSTM}    & aaa  \\
-\textit{C-LSTM}  & Convolutional LSTM \\
-\textit{AE\_err} & Autoencoder reconstruction error \\
-\textit{TP\_err} & Transformer reconstruction error \\
-\textit{AE\_att} & Autoencoder attention \\
-\textit{TP\_att} & Transformer attention \\
-\textit{PCA}     & Principle component analysis \\
-\textit{MNE}     & IIR filter \\
+\textit{LSTM}    & LSTM Autoencoder   & Reconstruction  \\
+\textit{C-LSTM}  & Convolutional LSTM Autoencoder
+                                      & error  \\
+\textit{AE\_err} & Attention-based Autoencoder
+                                      &   \\
+\midrule
+\textit{TP\_err} & Transformer Predictor
+                                      & Prediction error  \\
+\midrule
+\textit{AE\_att} & Attention-based Autoencoder
+                                      & Attention \\
+\textit{TP\_att} & Transformer Predictor &  \\
+\midrule
+\textit{PCA}     & \multicolumn{2}{l}{Principle component analysis} \\
+\textit{MNE}     & \multicolumn{2}{l}{IIR filter} \\
 \bottomrule
 \end{tabular} 
 \end{table}
+
+
+\subsection{Reconstruction and Prediction Error}
+
+The \emph{LSTM Autoencoder (LSTM)} uses a sequence-to-sequence
+architecture with LSTM layers for both encoding and decoding. The
+encoder compresses the input into a fixed-size latent representation
+by processing the input sequence and retaining the final hidden state
+of the LSTM. This is achieved using an LSTM layer, followed by a
+dropout layer for regularization, and a fully-connected layer for
+dimensionality reduction. The decoder then processes this compressed
+representation using the reverse architecture (FC, dropout, and LSTM)
+to reconstruct the original data.
+
+In this architecture, fully connected (FC) layers process the final
+hidden state of the LSTM (the last timestep in the sequence) as a
+single, comprehensive representation of the entire input
+sequence. This output is then projected into a lower-dimensional
+latent space through a linear transformation. While this approach is
+computationally efficient, it assumes that the LSTM's final hidden
+state sufficiently captures all relevant temporal dependencies. As a
+result, it can struggle to retain fine-grained temporal details,
+especially for data like EEG signals, where localized patterns are
+crucial.
+
+The \emph{Convolutional LSTM Autoencoder (C-LSTM)} enhances feature
+extraction by combining LSTM layers with convolutional layers. The
+key difference between the LSTM and C-LSTM architectures lies in how
+dimensionality reduction is achieved in the encoder and decoder: the
+first uses fully connected (FC) layers, while the latter uses
+Conv1D layers. These operate directly on the sequence of hidden states
+produced by the LSTM. By applying a kernel across the temporal
+dimension, they extract localized patterns and dependencies within the
+sequence. This convolutional operation integrates information from
+multiple timesteps, creating a more nuanced and structured
+representation. After convolution, the output is reduced to a
+lower-dimensional latent space, where temporal features are preserved
+and compactly encoded. This method emphasizes localized temporal
+dynamics while reducing dimensionality.
+
+The \emph{Attention-based Autoencoder (AE\_err)}
+combines convolutional layers with an attention mechanism to
+reconstruct the input data, again using the convolutional layers to
+capture local features while replacing LSTM with attention to capture
+long-term patterns.
+
+Fig.~\ref{fig:Fig2} illustrates this architecture. The input to the
+encoder consists of a sequence of 240 measurements from two
+simultaneous channels, along with a same-size sequence of time
+representation. The input data passes through the encoder and is
+compressed into a latent representation of size \( 1 \times 8 \),
+where the first dimension represents a single compressed time step,
+and the second dimension corresponds to eight learned features. This
+is achieved by applying multi-head attention to the input data,
+followed by a dropout layer for regularization, and a convolutional
+layer for dimensionality reduction. The decoder then processes this
+compressed representation using the reverse architecture (transposed
+convolution, dropout, and attention) to reconstruct the original data,
+capturing both trends and amplitudes.
+
+\begin{figure}[tb]
+    % \vskip -0.2in 
+    \centering
+    \includegraphics[width=1\columnwidth]{images/Fig2.png}  
+    \caption{\label{fig:Fig2} AE\_err/AE\_att architecture.}
+    % \vskip -0.0in 
+\end{figure}
+
+In all three autoencoding systems, anomaly detection is based on the
+assumption that the compressed latent representation preserves only
+recurring, periodic fluctuations and trends. Atypical spikes, often
+caused by noise, do not cause enough loss to be worth the space to
+represent them (in terms of nodes in the latent representation).
+Therefore, the level of anomaly is estimated as the reconstruction
+error, the difference between the original input sequence and the
+sequence decoded from the latent representation.
+
+The \emph{Transformer Predictor (TP\_err)} method utilizes a
+Transformer that uses multi-head attention for time-series
+forecasting. It consists of a sequence-to-sequence architecture, with
+multi-head attention layers in both the encoder and decoder
+components. The encoder captures temporal dependencies in the input
+sequence, while the decoder predicts the next sequence based on these
+encoded features.
+
+Fig.~\ref{fig:Fig3} illustrates this architecture. The input consists
+of a sequence of 240 measurements from two simultaneous channels,
+along with a same-size sequence of time representation. This data
+passes through the embedding layer, which applies multi-head attention
+to capture key temporal patterns. The output is then processed with
+dropout regularization and passed through a LeakyReLU activation
+function to introduce non-linearity.
+
+
+\begin{figure}[tb]
+    % \vskip -0.2in 
+    \centering
+    \includegraphics[width=0.65\columnwidth]{images/Fig3.png}
+    \caption{\label{fig:Fig3} TP\_err/TP\_att architecture.}
+    % \vskip -0.0in 
+\end{figure}
+
+The TP\_err method estimates noise through prediction error, i.e. the
+difference between the model's predicted output and observed
+values. When the model predicts the next time step in the sequence, a
+significant difference between the predicted and actual values
+suggests that the input data may be noisy.
+
+
+
+\subsection{Attention-Based Detection}
+
+The exact same architectures as in AE\_err and TP\_err above are also used
+for the respective attention-based detection methods
+\emph{Attention-based Autoencoder (AbAE\_att)} and \emph{Transformer
+Predictor (TP\_att)}, except that now anomaly is estimated by the
+attention weights.
+
+The key idea is that when a part of the sequence receives a low
+attention weight, it suggests that the information at that moment is
+likely noisy and, therefore, unimportant for the task.
+
+
+\subsection{Conventional Approaches}
+
+Alongside machine learning methods, conventional techniques provide a
+reliable alternative for detecting noise in time-series data and are
+commonly utilized. Among the various conventional methods proposed by
+many researchers over the years, a statistical method and a
+signal-processing technique have been considered for this work.
+
+\emph{Principal Component Analysis (PCA)} is a linear dimensionality
+reduction technique. It analyzes a data table where observations are
+described by quantitative dependent inter-correlated variables. With
+PCA, the important information is extracted from the table and
+represented in a new set of orthogonal variables, called principal
+components \cite{bro2014principal}. The similarity patterns of the
+observations and the variables can then be depicted as points on maps
+\cite{abdi2010principal}.
+
+\emph{Multinomial Noise Exponential filtering (MNE)} is a method used
+to remove unwanted frequencies from time-series data, typically EEG
+signals. It applies a bandpass filter to the data, allowing signals
+within a specific frequency range to pass through while reducing
+frequencies outside this range. MNE Filtering is implemented using the
+MNE python library, which provides tools for filtering and analyzing
+neurophysiological data.
+
+
+
+
+%%%%%%%%%%%%
+\section{EXPERIMENT SETUP}
+\label{sec:exp}
+%%%%%%%%%%%%
+
+
 
 
 The state-of-the-art machine learning and conventional methods serve as baseline methods against which attention-based methods are assessed.
@@ -317,93 +523,8 @@ and IQR is a measure of statistical dispersion that represents the spread of the
 In the case of conventional methods, no normalization is applied to data since these methods require raw data that preserves the characteristics of the original signal.
 
 
-\subsection{Baseline Machine-Learning Approaches}
-
-\paragraph{LSTM Autoencoder (LSTM-AE)}
-This method implements an LSTM-based Autoencoder that uses Long Short-Term Memory (LSTM) layers to reconstruct time-series data from a lower-dimensional latent representation. 
-
-The key idea behind this autoencoding approach is to compress the input signal while preserving the essential features and then reconstruct it from the compressed representation. The LSTM layers in the encoder are meant to capture the temporal patterns and dependencies inherent in the time-series data. 
-% These temporal dependencies are crucial for accurately modeling time-series data, especially when it exhibits long-range correlations over time. 
-The decoder is responsible for reconstructing the original data from the latent representation, preserving only the essential, non-noisy information throughout the compression process. This reconstruction aims to minimize information loss and maintain fidelity to the original dataset. 
-
-The LSTM-AE estimates noise by measuring the reconstruction error between the original and the reconstructed time-series. During training, the model learns to compress and reconstruct the input signal with minimal error. The goal is for the model to capture the common patterns and trends in the data, such as periodic fluctuations or typical time-series behavior. When the model encounters atypical spikes, often caused by noise, it struggles to reconstruct these anomalies due to their deviation from the learned patterns. As a result, the reconstruction error for these segments is elevated, indicating the presence of noise.
-
-\paragraph{Convolutional LSTM Autoencoder (C-LSTM-AE)} This method is similar to LSTM-AE, with the difference that it consists of an Autoencoder that combines convolutional and LSTM layers to reconstruct time-series data from a lower-dimensional latent representation. The convolutional layers capture local features in the data, while the LSTM layers capture long-range temporal dependencies. 
-% This hybrid architecture is expected to effectively process spatiotemporal data, which contain both spatial (local) and temporal (long-range) patterns.
-\paragraph{Attention-based Autoencoder (AbAE\_err)} This method consists of an Autoencoder that combines convolutional layers with a multi-head attention mechanism to reconstruct time-series data from a lower-dimensional latent representation. The convolutional layers help extract spatial features from the input data, while the attention mechanism is used to model temporal dependencies. This allows the model to focus on important time steps and capture long-term patterns without the need for recurrent layers like LSTM. Multi-head attention lets the model focus on different parts of the input sequence simultaneously. The attention mechanism computes a weighted sum of the input features with the weights learned during training. This enables the model to emphasize specific features and temporal patterns, assisting in identifying noise or anomalies that differ from normal time-series behavior.
-\paragraph{Transformer Predictor (TP\_err)} This method utilizes a Transformer that uses multi-head attention for time-series forecasting. It consists of a sequence-to-sequence architecture, with multi-head attention layers in both the encoder and decoder components. The encoder captures temporal dependencies in the input sequence, while the decoder predicts the next sequence based on these encoded features. 
-% The attention mechanism enables the model to focus on relevant time steps, improving its ability to capture long-term dependencies and trends.
-
-This method allows noise estimation through prediction error, i.e. the difference between the model's predicted output and observed values. When the model predicts the next time step in the sequence, a significant difference between the predicted and actual values suggests that the input data may be noisy. 
-% This is because the Transformer model is designed to learn patterns and trends in the data, and irregular and unpredictable noise disrupts this learning process. As a result, more significant prediction errors typically
-% correspond to noisy data, which the model struggles to predict accurately.
 
 
-\subsection{Attention-Based Approaches}
-
-\paragraph{Attention-based Autoencoder (AbAE\_att)} This is the same AbAE considered as a baseline Machine-Learning approach, with the difference that noise detection is based on the attention weights in the attention matrix. Attention mechanisms allow the model to assign varying levels of importance (i.e., attention weights) to different parts of the input sequence. The key idea is that the attention mechanism can distinguish between relevant and irrelevant time steps by analyzing how much focus the model places on them during the encoding and decoding process. When a time step receives a low attention weight, it suggests that the information at that moment is likely noisy and, therefore, unimportant for the reconstruction task.
-
-\paragraph{Transformer Predictor (TP\_att)} This is the same TP considered as a baseline Machine-Learning, with the difference that, here the TP focuses attention on different parts of the input sequence. Noisy segments make it harder for the model to detect consistent patterns and, as a result, tend to receive lower attention weights. On the other hand, time steps that align well with the learned patterns and trends in the sequence typically receive higher attention values.
-
-% \paragraph{Transformer Classifier (TC)} This method consists of a Transformer that uses a multi-head attention to classify time-series data. The model architecture includes an encoder and a decoder, with multi-head attention layers in each component to capture temporal dependencies and refine learned features across the input sequence. The encoder captures complex relationships in the input data while the decoder further processes these features for classification. The attention mechanism enables the model to focus on key time steps in the sequence, helping it identify the most relevant temporal information for predicting classes. Finally, a feedforward classifier layer produces the predicted classes based on the features processed by the encoder and decoder.
-
-% This classifier uses Cross-Entropy loss for training, which measures the dissimilarity between the predicted probability distribution and the actual distribution. This loss function is commonly used for classification problems to penalize the model based on how confident and accurate its predictions are. To tackle the problem of imbalanced data across all classes, a weighted version of the cross-entropy loss is considered, described by \eqref{eq:weighted_cross_entropy_loss}. This approach adjusts the influence of each class in the loss calculation, helping the model learn across all class distributions, regardless of their prevalence in the dataset.
-
-% \begin{equation}
-%     \text{Loss} = -\sum_{i=1}^{N} w_{y_i} \cdot \log(p_{y_i})
-%     \label{eq:weighted_cross_entropy_loss}
-% \end{equation}
-% %
-% where \(N\) is the total number of samples, \(y_i\) represents the true class label for the \(i\)-th sample, \(p_{y_i}\) is the predicted probability for the true class, and \(w_{y_i}\) is the weight assigned to the class \(y_i\).
-
-% The TC estimates noise by scrutinizing the attention weights within the attention matrix, employing a methodology akin to that established in AbAE. Within the Transformer architecture, the attention mechanism quantitatively prioritizes various time steps in the input sequence. A detailed analysis of these attention weights facilitates the identification of time steps deemed noisy, as they frequently exhibit diminished attention weights. The foundational principle posits that the classifier can generate robust and confident predictions when the data is pristine and well-defined. Conversely, noise tends to diverge from distinct class distributions, hindering the model's capacity to assign class labels to noisy instances unequivocally.
-
-\subsection{Conventional Approaches} Alongside machine learning methods, conventional techniques provide a reliable alternative for detecting noise in time-series data and are commonly utilized. Among the various conventional methods proposed by many researchers over the years, a statistical method and a signal-processing technique have been considered for this work.
-
-
-% \paragraph{Cumulative Sum Control Chart (CUSUM)} This is a sequential analysis technique commonly used in statistical quality control to monitor change detection \cite{basseville1993detection} by identifying moments when the probability distribution of a stochastic process or time series shifts. Unlike approaches that independently analyze measurements at specified times, CUSUM accumulates information from both current and past samples \cite{ncss2024}. Thanks to this cumulative property, CUSUM proves to be more efficient \cite{nelson1984shewhart} compared to simpler methods such as Shewhart charts \cite{koshti2011cusum}.
-% CUSUM is represented through the following equation:
-
-% \begin{equation}
-% S_m = \sum_{i=1}^{m} (\tilde{x}_i - \hat{\mu}_0) \quad \text{or} \quad S'_m = \frac{1}{\sigma_{\tilde{x}}} \sum_{i=1}^{m} (\tilde{x}_i - \hat{\mu}_0),
-% \end{equation}
-% where: $m$ is the sample number, $\hat{\mu}_0$ is the estimated in-control mean, and $\sigma_{\tilde{x}}$ is the known or estimated standard deviation of the sample means.
-
-% In the context of the present work, CUSUM is applied due to its capability to detect abrupt changes. By continuously monitoring cumulative deviations from the baseline, CUSUM facilitates rapid detection of this kind of changes.
-% These properties make CUSUM a strong candidate for noise detection tasks, where, according to the literature, it has shown highly promising results \cite{artyushenko2021modeling}, \cite{volovach2021detection}, \cite{tam2009theoretical}, \cite{yi2021adaptive}.
-
-% \paragraph{Page-Hinkley Test} The Page-Hinkley Test is a sequential analysis technique used to detect abrupt changes \cite{sebastiao2017supporting} in the mean value of a signal or data stream over time, which may indicate noise or data drift. Additionally, the Page-Hinkley Test is used to monitor the performance of industrial processes \cite{mouss2004test} or assess the efficiency of learning models \cite{ali2023understanding}.
-% When applying the algorithm, an initial threshold value must be defined, which serves as a reference point. If a change in the mean exceeds this threshold, the change is considered significant. Furthermore, a decision function must be defined, which applies the Page-Hinkley technique by evaluating the data and returning 1 if a change is detected, and 0 if no change is detected.
-
-% The Page-Hinkley Test is beneficial for anomalies related to gradual shifts since it accumulates evidence over time, making it robust for detecting slower, cumulative shifts rather than just abrupt changes.
-
-% \paragraph{Kullback-Leibler Divergence (KLD)} This technique, also known as relative entropy or l-divergence, quantifies the proximity of two probability distributions \cite{joyce2011kullback}. It measures, in bits, how close a probability distribution \( p \) is to a model distribution \( q \) \cite{shlens2014notes}, \cite{vanerven2014renyi}, and is defined as:
-
-% \begin{equation}
-% D_{\text{KL}}(p \parallel q) = \sum_i p_i \log_2 \left( \frac{p_i}{q_i} \right)
-% \end{equation}
-
-% where \( p_i \) and \( q_i \) represent the probabilities of each outcome in the distributions \( p \) and \( q \), respectively. The KLD is not symmetric, meaning \( D_{\text{KL}}(p \parallel q) \neq D_{\text{KL}}(q \parallel p) \). The divergence \( D_{\text{KL}}(p \parallel q) \) is zero only when the distributions \( p \) and \( q \) are identical. In other words, this equation represents the average number of extra bits needed to encode samples from distribution \( p \) using an optimal code for distribution \( q \). To implement KLD, the data gets divided into consecutive windows. The probability distribution of each window is then estimated, and the KLD between successive windows is computed. If the resulting divergence exceeds a predefined threshold, drift is detected.
-
-% In general, KLD is widely used in statistics and pattern recognition, but it also finds applications in speech and image recognition \cite{hershey2007approximating}.
-
-\paragraph{Principal Component Analysis (PCA)} PCA is a linear dimensionality reduction technique. It analyzes a data table where observations are described by quantitative dependent inter-correlated variables. With PCA, the important information is extracted from the table and represented in a new set of orthogonal variables, called principal components \cite{bro2014principal}. The similarity patterns of the observations and the variables can then be depicted as points on maps \cite{abdi2010principal}.
-
-% PCA is frequently used when a large number of variables have a high degree of correlation with one another, and it is preferable to reduce them to an independent set. Specifically, the variable created as a linear combination of the original variables that accounts for the greatest amount of variance is the first principal component of a set of p variables. After the effect of the first component is eliminated, the second principal component explains the greatest amount of the variance in what remains, and the process can continue through p iterations until all of the variance is explained \cite{jolliffe2016principal}, \cite{shao2014prototype}.
-
-% \paragraph{Adaptive Windowing (ADWIN)} ADWIN is a technique that allows for handling concept drift and distribution changes when learning from data sequences that may change over time \cite{bifet2007learning}, \cite{sun2016online}. ADWIN maintains a variable-length window of recent data points, ensuring that the data distribution remains stable. To detect any changes, this window is subdivided into two sub-windows ($W_0$ and $W_1$). To determine whether a change has occurred, ADWIN compares the averages of $W_0$ and $W_1$. If the equality of the distributions is no longer maintained, concept drift is detected, and $W_0$ is replaced by $W_1$, with a new $W_1$ initialized.
-
-% ADWIN uses a significance value \(\delta \in (0,1)\) to assess whether the two sub-windows correspond to the same distribution. If the absolute difference between the means of $W_0$ and $W_1$ exceeds a predefined threshold, an alarm is triggered. 
-
-% ADWIN is particularly effective for detecting both sudden and gradual changes in data streams due to its dynamic adjustment of the window size. Additionally, ADWIN is well-suited for cases that often exhibit unpredictable shifts. Its ability to adaptively resize the window makes it ideal for handling such changes without relying on predefined parameters.
-
-\paragraph{Multinomial Noise Exponential filtering (MNE)} MNE filtering is a method used to remove unwanted frequencies from time-series data, typically EEG signals. It applies a bandpass filter to the data, allowing signals within a specific frequency range to pass through while reducing frequencies outside this range. MNE Filtering is implemented using the MNE python library, which provides tools for filtering and analyzing neurophysiological data. 
-
-
-%%%%%%%%%%%%
-\section{EXPERIMENT SETUP}
-\label{sec:exp}
-%%%%%%%%%%%%
 
 This study employs a case analysis to validate the efficacy of the proposed noise estimation methods. The focus is detecting noise within electroencephalographic (EEG) signals, recorded via headbands utilized during slumber to monitor various stages of the user's sleep cycle.
 \subsection{Test case description} One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
@@ -478,36 +599,10 @@ layer in the attention-based models, where considered. This approach
 avoids unnecessary complexity, ensuring more stable training and
 better generalization on the data.
 
-The LSTM-AE uses a sequence-to-sequence architecture with LSTM layers for both encoding and decoding. The encoder compresses the input into a fixed-size latent representation by processing the input sequence and retaining the final hidden state of the LSTM. This is achieved using an LSTM layer, followed by a dropout layer for regularization, and a fully-connected layer for dimensionality reduction. The decoder then processes this compressed representation using the reverse architecture (FC, dropout, and LSTM) to reconstruct the original data.
-
-In this architecture, fully connected (FC) layers process the final hidden state of the LSTM (the last timestep in the sequence) as a single, comprehensive representation of the entire input sequence. This output is then projected into a lower-dimensional latent space through a linear transformation. While this approach is computationally efficient, it assumes that the LSTM’s final hidden state sufficiently captures all relevant temporal dependencies. As a result, it can struggle to retain fine-grained temporal details, especially for data like EEG signals, where localized patterns are crucial.
-
-The C-LSTM-AE enhances feature extraction by combining LSTM layers with convolutional layers. The key difference between the LSTM-AE and C-LSTM-AE architectures lies in how dimensionality reduction is achieved in the encoder and decoder: the first uses fully connected (FC) layers, while the latter uses convolutional layers. Both techniques aim to map the input data into a lower-dimensional latent space.
-
-Conv1D layers operate directly on the sequence of hidden states produced by the LSTM. By applying a kernel across the temporal dimension, they extract localized patterns and dependencies within the sequence. This convolutional operation integrates information from multiple timesteps, creating a more nuanced and structured representation. After convolution, the output is reduced to a lower-dimensional latent space, where temporal features are preserved and compactly encoded. This method is particularly effective for sequential data like EEG, as it emphasizes localized temporal dynamics while reducing dimensionality.
-
-Fig.~\ref{fig:Fig2} depicts the AbAE\_att architecture for noise estimation on the examined test case. The input to the encoder consists of a sequence of 240 EEG records for both channels, along with a same-size sequence of time representation. The input data passes through the encoder and is compressed into a latent representation of size \( 1 \times 8 \), where the first dimension represents a single compressed time step, and the second dimension corresponds to eight learned features. This is achieved by applying multi-head attention to the input data, followed by a dropout layer for regularization, and a convolutional layer for dimensionality reduction. The decoder then processes this compressed representation using the reverse architecture (transposed convolution, dropout, and attention) to reconstruct the original data, capturing both trends and amplitudes.
-
-\begin{figure}[tb]
-    % \vskip -0.2in 
-    \centering
-    \includegraphics[width=1\columnwidth]{images/Fig2.png}  
-    \caption{\label{fig:Fig2} AbAE\_att architecture for noise estimation on the examined test case.}
-    % \vskip -0.0in 
-\end{figure}
-
-Fig.~\ref{fig:Fig3} illustrates the TP\_att architecture for noise estimation on the examined test case. The input consists of a sequence of 240 EEG records for both channels, along with a same-size sequence of time representation. This data passes through the embedding layer, which applies multi-head attention to capture key temporal patterns. The output is then processed with dropout regularization and passed through a LeakyReLU activation function to introduce non-linearity.
 
 
-\begin{figure}[tb]
-    % \vskip -0.2in 
-    \centering
-    \includegraphics[width=0.65\columnwidth]{images/Fig3.png}
-    \caption{\label{fig:Fig3} TP\_att architecture for noise estimation on the examined test case.}
-    % \vskip -0.0in 
-\end{figure}
 
-% The statistical methods are implemented using the Frouros\footnote{Documentation and source code are available at the official GitHub repository: \url{https://github.com/IFCA-Advanced-Computing/frouros}} open-source Python library designed for drift detection in machine learning systems.
+
 
 The machine-learning methods, as well as the statistical method MNE filtering, implemented in this study are publicly available \href{https://github.com/your-repo}{here} to ensure reproducibility and support further research. Regarding the statistical method PCA, it is implemented using the Frouros\footnote{Documentation and source code are available \href{https://github.com/IFCA-Advanced-Computing/frouros}{here}. Access to the specific code designed and parametrized for this paper can be discussed with the authors from Four Dot Infinity upon request.} open-source Python library for drift detection in machine learning systems.
 
