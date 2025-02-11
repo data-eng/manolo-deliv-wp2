@@ -721,6 +721,13 @@ important factor in sequence processing \cite{Lee_2021}.
 
 Table~\ref{tab:results} presents F-score, Precision, and Recall
 metrics for the evaluated methods on all three evaluation setups.
+%
+Since all methods give a numerical estimation and not a binary
+decision, a threshold was established. The threshold was calculated
+on the training data as the number that makes 1\% of the data come out
+as noise. This is the only piece of prior domain knowledge shared by
+all learners.
+%
 F-score is calculated for $\beta=2$, in order
 place more weight on recall than precision. This is due to fact that
 the dataset is very unbalanced and noise instances are rare, even in
@@ -743,54 +750,36 @@ The first observation is that by comparing the three sub-tables we can
 immediatelly see that the three windows behave as expected, with
 results improving with longer windows. By comparing horizontally from
 right to left we also see that results improve as noise gets
-denser,\footnote{Note that HB1-A is out-of-order in this respect, as
+denser.\footnote{Note that HB1-A is out-of-order in this respect, as
   it has no noise.}
-we we cannot speculate on whether the top-to-bottom improvement
+We cannot speculate on whether the top-to-bottom improvement
 is due to the longer context or due to denser positives. But either
 way, we have clear indications about how task difficulty scales across
 the table.
 
-further evidence that 
+What is directly relevant for our hypothesis are the comparisons
+between
+(a) attention-based anomaly detection (AE\_att and TP\_att) against
+the error-based anomaly detection from the same models (AE\_err and
+TP\_err), and (b) models trained on the sleep stage task (TP) against
+autoencoded models (AE).
+TP\_att generally outperforms all four TP/AE\_err/att combinations,
+although autoencoding proved better on HB1-C (primarily LSTM and
+secondarily AE\_att) with the gap becoming more pronounced on the
+denser setups. 
+Although the conditions present in HB1-C are worth investigating,
+the results show that the ideas presented here are validated and
+promising.
 
-From the results presented in Table~\ref{tab3}, we conclude that all
-considered methods exhibited sub-optimal performance. However, PCA
-demonstrated relatively high recall values in two recordings. One
-plausible explanation for this observation could be the selected
-time-window of 30 seconds that defines the examined segment. The
-efficacy of anomaly detection methods in time series analysis may be
-significantly influenced by the length of the time series, as
-supported by existing literature.
-
-Due to this reasoning, we applied the selected methodologies to the
-same dataset while extending the segment duration from 30 seconds to 5
-and 10 minutes. Table~\ref{tab4} and Table~\ref{tab5} present the
-resulting F2 scores, Precision, and Recall values of the selected
-methods for the 5 and 10-minute windows, respectively.
-
-One initial conclusion drawn is that across all methods analyzed, the
-detection of anomalies is significantly enhanced when the duration of
-the time-window assigned to each segment is increased. However, this
-improvement comes at the expense of broader time-windows during which
-the detected anomalies may actually occur---a consideration that
-necessitates careful evaluation.
-
-The primary conclusions are drawn through a comparative analysis of
-the performance of the evaluated methodologies. The introduced concept
-of utilizing attention mechanisms as a critical metric for anomaly
-detection appears to be promising. Across all segment durations (30
-seconds, 5 minutes, and 10 minutes), the F2 and Recall metrics for the
-AE\_att and TP\_att methods, which identify anomalies based on their
-attention matrix values, surpass those of their counterparts,
-AE\_err and TP\_err, which detect anomalies via reconstruction or
-prediction errors, in all but one recording.
-
-The performance of attention-based methods is generally comparable to,
-if not superior, that of other state-of-the-art techniques, such as
-LSTM and C-LSTM. A similar conclusion can be derived from
-comparing the F2 scores and Recall values of the examined
-attention-based methods with those of baseline methods, including PCA
-and MNE. However, it is evident that the TP\_att method significantly
-outperforms the AE\_att method.
+What is also noteworthy is that TP\_att outperforms the
+task-calibrated conventional methods on HB2-A and HB2-B.
+Regarding HB2-A it is worth investigating whether the transformer has
+`discovered' the lack of correlation between HB1-A and HB2-A on noisy
+segments.
+Regarding HB2-B, a possible explanation is that TP\_att is more robust
+to noise density considerably above the hard-wired 1\%: it suffers
+the unavoidable precision loss just as all methods, but it gets a
+comparatively higher F-score through perfect recall.
 
 
 
