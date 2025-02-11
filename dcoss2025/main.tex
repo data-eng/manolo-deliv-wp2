@@ -726,12 +726,13 @@ metrics for the evaluated methods on all three evaluation setups.
 %
 Since all methods give a numerical estimation and not a binary
 decision, a threshold was established. The threshold was calculated
-on the training data as the number that makes 1\% of the data come out
+on the training data, separately for each method,
+as the threshol that makes 1\% of the training data come out
 as noise. This is the only piece of prior domain knowledge shared by
 all learners.
 %
-F-score is calculated for $\beta=2$, in order
-place more weight on recall than precision. This is due to fact that
+F-score is calculated for $\beta=2$, in order place
+more weight on recall than precision. This is due to the fact that
 the dataset is very unbalanced and noise instances are rare, even in
 the 10min-window setup. F-score is adapted accordingly to reflect
 that recall is harder to achieve than precision.
