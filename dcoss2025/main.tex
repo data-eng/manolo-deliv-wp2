@@ -105,7 +105,7 @@ AI, Machine learning, Transformers, Robustness, Time-Series, anomaly detection, 
 
 The term \emph{anomaly} is used in time series processing to indicate
 a wide range of deviations and encompasses not only unforeseen events
-in the observed system but also transient problems in the obervation
+in the observed system but also transient problems in the observation
 mechanism. Indicatively, across various domains, an anomaly in the
 observation data can be attributed to a cyberattack, a disease, a
 faulty subsystem or, on the other hand, to a sensor momentarily
@@ -138,7 +138,7 @@ general-purpose approach (or even paradigm) that works best across
 domains and applications and performance depends on the use case and
 the nature of the encountered anomalies; Deep learning methods appear
 in general superior, but conventional approaches (mostly PCA) can also
-in some cases perform. To adress this, in this article we explore a
+in some cases perform. To address this, in this article we explore a
 novel idea that aims to involve the use case into the training of the
 anomaly detection model in a way that the system \emph{adapts itself}
 to different use cases. In other words, instead of aiming at
@@ -149,7 +149,7 @@ The core of the idea is that anomaly detection is a pre-processing
 step for some sequence processing task. We operate under the
 assumption that there is supervision for this downstream task,
 although there is no supervision for what constitutes an anomaly.
-We then make the following reseach hypothesis:
+We then make the following research hypothesis:
 \emph{Anomalies are the parts of the sequence that have the property
 that ignoring them gives superior performance despite the fact that
 decisions are made from fewer datapoints.}
@@ -161,7 +161,7 @@ class during that period; a successful classifier would learn to
 ignore such bursts as the same pattern maps to any class. As another
 example, a successful model for predicting upcoming network traffic
 would learn to ignore some kinds of bursts (although they might
-indicate a cyberattack) and leanr to emphesise `normal' bursts
+indicate a cyberattack) and learn to emphasize `normal' bursts
 (that indicate, for instance, the start of working hours).
 
 Our contribution is the formulation of a methodology for leveraging
@@ -174,7 +174,7 @@ methodology (Section~\ref{sec:method}), which we evaluate on
 an EEG dataset where we have supervision for both a downstream task
 (sleep stage prediction) \emph{and} carefully curated anomaly
 annotations (Section~\ref{sec:exp}). We then present and discuss
-the emperiment results (Section~\ref{sec:results}) and conclude
+the experimental results (Section~\ref{sec:results}) and conclude
 (Section~\ref{sec:conc}).
 
 
@@ -188,7 +188,7 @@ the emperiment results (Section~\ref{sec:results}) and conclude
 One of the main frameworks in sequence processing are
 \emph{recurrent neural networks} where the sequence is presented to
 the network one token at a time and the network maintains a
-\emph{hidden state} which distills the information needed from past
+\emph{hidden state} which distils the information needed from past
 tokens to provide a context for the processing of the current token.
 One of the most successful recurrent architectures is the
 \emph{Long Short-Term Memory (LSTM)} where trainable \emph{gates}
@@ -212,14 +212,14 @@ anomaly detection in various architecture besides LSTM
 Autoencoders struggle with high-dimensional data, as it is up to the
 system designer to find the layer widths (effectively, the level of
 compression) that drop the correct amount of information.
-Further, autoencoders are limited with the respect to the kind of
+Further, Autoencoders are limited with the respect to the kind of
 information they drop: Since this decision is driven by a loss that
 compares the reconstructed sequences against the input sequence, a
-commonly occuring pattern will be retained even when it is an anomaly
+commonly occurring pattern will be retained even when it is an anomaly
 in a given context.
 
-Besides recurency, the other major approach to sequence-processing is
-the \emph{Transformer} architecture. Transformers are autoencoders
+Besides recurrency, the other major approach to sequence-processing is
+the \emph{Transformer} architecture. Transformers are Autoencoders
 based on the \emph{self-attention} mechanism \cite{vaswani-etal:2017}.
 Unlike LSTMs and other recurrent architectures, Transformers receive
 the complete sequence as input and model relationships across the
@@ -230,7 +230,7 @@ easier to discover long-distance dependencies.
 At the core of the Transformer architecture lies the self-attention
 mechanism, which enables the model to assign different levels of
 importance to elements in the input sequence
-based on the value of \emph{any other element in the sequnce.}
+based on the value of \emph{any other element in the sequence.}
 Specifically, Transformers learn three sets of weights which are
 applied to the input to get three vectors: the \emph{query (Q)}, the
 \emph{key (K)}, and the \emph{Value (V)}.
@@ -253,6 +253,7 @@ sequence, improving the model's ability to detect long-range dependencies.
 %%%%%%%%%%%%
 
 \subsection{Research Hypothesis}
+\label{sec:method:hypothesis}
 
 As discussed in the previous section, reconstruction and prediction
 errors are widely used as key indicators for anomaly detection in
@@ -301,7 +302,7 @@ for anomaly and noise detection ranging from attention-based methods
 to state-of-the-art machine learning approaches, as well as
 conventional anomaly detection methods. These are listed in
 Table~\ref{tab1} and described in more detail in the remainder of this
-sectiom.
+section.
 
 
 \begin{table}[bt]
@@ -475,7 +476,7 @@ to remove unwanted frequencies from time-series data, typically EEG
 signals. It applies a bandpass filter to the data, allowing signals
 within a specific frequency range to pass through while reducing
 frequencies outside this range. MNE Filtering is implemented using the
-MNE python library, which provides tools for filtering and analyzing
+MNE python library, which provides tools for filtering and analysing
 neurophysiological data.
 
 
@@ -488,46 +489,11 @@ neurophysiological data.
 
 
 
-
-The state-of-the-art machine learning and conventional methods serve as baseline methods against which attention-based methods are assessed.
-Whereas conventional methods aim to detect noise through deviations of time-series data from estimated patterns, machine-learning methods follow an indirect approach. The considered models are trained to solve specific tasks---ranging from signal reconstruction and prediction to classification---and during inference, noise is detected in segments tied with higher reconstruction error, prediction error, or attention values.
-
-To balance the models' focus on both the amplitude and trends of the time-series data, we define a custom loss function, called \emph{BlendedLoss}. This function combines the median and mean of the powered absolute differences between the predicted values ($\hat{x}$) and the target values ($x$):
-%
-\begin{equation}
-\text{Loss} =
-  (1 - b)\cdot\mathrm{median}(\lvert \hat{x} - x \rvert^p) +
-  b\cdot\mathrm{mean}(\lvert \hat{x} - x \rvert^p)
-\label{eq:blended_loss}
-\end{equation}
-%
-where $p$ is the power parameter that controls the sensitivity of the
-loss to differences and $b$ the \emph{blend factor} that controls
-the trade-off between learning the overall trend (median error) and
-closely following local patterns (mean error).
-% A systematic
-% investigation of various blend values within the range [0.1, 0.8]
-% reveals the impact on the model's performance in data reconstruction.
-
-Data normalization is required for attention-based and baseline machine-learning methods to ensure robust model training and reliable outcomes. The median and \emph{interquartile range (IQR)} are used instead of the mean and standard deviation, respectively, to improve robustness against outliers. The median measures central tendency and is resistant to extreme values,
-% making it a more reliable indicator for datasets with low variability, where even small differences matter. Additionally, 
-and IQR is a measure of statistical dispersion that represents the spread of the middle 50\% of a dataset and reduces the influence of outliers by focusing on the range within which the central portion of the data lies. Data scaling is performed using statistics derived from the entire dataset instead of relying on per-batch calculations. This approach ensures that the statistics are consistent across the full dataset, enhancing the reliability of the scaling process. 
-% For a particular feature of a time-series $x$, its normalized value $x_{\text{norm}}$ is given:
-
-% \begin{equation}
-%     x_{\text{norm}} = \frac{x - \mathrm{median}(x)}{\mathrm{IQR}(x)} \label{eq:robust_norm}
-% \end{equation}
-
-% where $\mathrm{median}(x)$ and $\mathrm{IQR}(x)$ are the feature's median value and IQR respectively.
-
-In the case of conventional methods, no normalization is applied to data since these methods require raw data that preserves the characteristics of the original signal.
-
-
-
-
-
 This study employs a case analysis to validate the efficacy of the proposed noise estimation methods. The focus is detecting noise within electroencephalographic (EEG) signals, recorded via headbands utilized during slumber to monitor various stages of the user's sleep cycle.
-\subsection{Test case description} One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
+
+\subsection{Test case description}
+
+One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
 
 In this domain, an artifact is denoted as any component of the EEG signal not directly produced by human brain activity, making the system register noise that contaminates the neural EEG data. The ability to recognize these artifacts is the first step in removing them. EEG artifacts can be classified depending on their origin, which can be physiological or external to the human body (technical/non-physiological). Fig.~\ref{fig:Fig1} shows some examples of EEG signals contaminated with noise.
 
@@ -571,54 +537,54 @@ In this analysis, EEG signals collected from a headband with two EEG channels sy
 
 As a ground-truth method to evaluate the results of the proposed noise estimation methods, the original estimation method used by the headband manufacturer is considered. This method consists of task-specific algorithms to automatically estimate noise and evaluate the overall quality of EEG signals, identifying the artifacts in recordings made using the wearable textile headband.
 
-\subsection{Noise estimation methods training and set-up}
+
+\subsection{Data Pre-preocessing}
+
+Data normalization is required for the machine learning methods to
+ensure robust model training and reliable outcomes. It is performed
+using statistics derived from the entire training dataset instead of
+relying on per-batch calculations. The median and
+\emph{interquartile range (IQR)} are used instead of the mean and
+standard deviation, respectively, to improve robustness against
+outliers. The median measures central tendency and is resistant to
+extreme values, and IQR is a measure of statistical dispersion that
+represents the spread of the middle 50\% of a dataset and reduces the
+influence of outliers by focusing on the range within which the
+central portion of the data lies.
+
+% For a particular feature of a time-series $x$, its normalized value $x_{\text{norm}}$ is given:
+
+% \begin{equation}
+%     x_{\text{norm}} = \frac{x - \mathrm{median}(x)}{\mathrm{IQR}(x)} \label{eq:robust_norm}
+% \end{equation}
+
+% where $\mathrm{median}(x)$ and $\mathrm{IQR}(x)$ are the feature's median value and IQR respectively.
+
+PCA and MNE require raw data that preserves the characteristics of the
+original signal, so no normalization is applied for these methods.
 
 To train the machine learning models, the available recordings were
-split into training (43 recordings), validation (3 recordings), and
-testing subsets (10 recordings). Noise estimation is performed using
-the test dataset. For the training configuration, we set the batch
-size to 512 and trained the models for a maximum of 1000 epochs. To
-prevent overfitting, we employ early stopping with patience of 30
-epochs, meaning that if the validation loss does not improve for 30
-consecutive epochs, training will stop. We set the learning rate to
-1e-4 and use the Adam optimizer to adjust the model
-weights. Additionally, we implement a ReduceLROnPlateau scheduler to
-adjust the learning rate dynamically based on the validation loss. If
-the validation loss plateaus, the scheduler reduces the learning rate
-to help the model continue improving.
+randomly split into training (43 recordings), validation (3
+recordings), and testing subsets (10 recordings). Among the testing
+recordings, six had zero or one noisy segments are not reported here
+as it makes little sense to compare methods on having identified a
+single datapoint. For the record, only PCA identified the noisy
+segment in only one of the segments.
 
-To process the input data, we split each 30-second segment of EEG
-data---that consists of 7,680 EEG records per channel---into 32
-smaller consecutive chunks, each consisting of a sequence of 240 EEG
-records per channel. This structure allows the model to focus on both
-the short and long-term temporal dependencies within the
-data. Additionally, since the available dataset tends to overfit with
-more complex models due to its low variability and extreme outliers,
-simple architectures with only a few layers, e.g. a single attention
-layer in the attention-based models, where considered. This approach
-avoids unnecessary complexity, ensuring more stable training and
-better generalization on the data.
+Table~\ref{tab2} gives the absolute and relative noise density for the
+remaining four recordings, arranged in descending order.
+Specifically, the table gives the count of 30-second segments within
+which at least one artifact is annotated as noise in the ground-truth
+labelling. Note that recordings are \emph{not} of equal length.
 
-
-
-
-
-
-The machine-learning methods, as well as the statistical method MNE filtering, implemented in this study are publicly available \href{https://github.com/your-repo}{here} to ensure reproducibility and support further research. Regarding the statistical method PCA, it is implemented using the Frouros\footnote{Documentation and source code are available \href{https://github.com/IFCA-Advanced-Computing/frouros}{here}. Access to the specific code designed and parametrized for this paper can be discussed with the authors from Four Dot Infinity upon request.} open-source Python library for drift detection in machine learning systems.
-
-
-%%%%%%%%%%%%
-\section{Evaluation and Results}
-\label{sec:results}
-%%%%%%%%%%%%
-
-Table~\ref{tab2} presents the number of artifacts identified through
-the estimation methodology employed by the headband manufacturer
-across the ten recordings utilized to assess the anomaly detection
-techniques, arranged in descending order of the true-error rate based on the HB2 measurements. Specifically, it delineates the total count of 30-second
-segments within which a minimum of one artifact is detected by the
-headband manufacturer for each of the ten recordings, as recorded by
-each EEG channel (designated as HB1 and HB2). The true-error rate is the percentage of segments found with artifacts among all segments of the corresponding recording, and in the remaining of the paper acts as a recording identifier. 
+What is noteworthy is that Recording~A has considerably different
+noise rates between the two channels. Since the signals from the
+two channels are heavily correlated, this presents an opportunity
+for the machine learning methods to demonstrate learning a
+comparative model that exploits the fact that the noisy parts of
+HB2 are not correlated to their corresponding parts in HB1. However
+this is a difficult theory to construct, since it requires
+`discovering' correlation first.
 
 
 \begin{table}[bt]
@@ -638,50 +604,222 @@ HB2   & 151 (14\%) & 56 (5\%) & 26 (3\%) & 9 (1\%) \\
 \label{tab2}
 \end{table}
 
-The table illustrates that in 3 out of 10 recordings, both channels detect no artifacts. In another 3 recordings, only one segment is found contaminated with noise. In three recordings, noisy segments are almost unanimously detected by both channels. Finally, in one recording, only the HB2 channel identifies noise in several segments, suggesting a potential issue with the corresponding sensor.
 
+
+\subsection{Training Process and Hyper-parameters}
+
+The implementations of the methods in Table~\ref{tab1} that we used in
+our experiments are publicly available. Our implementation of the
+machine learning methods have been reposited in Zenodo.\footnote{To preserve
+  anonymity the Zenodo record is not published but left as a draft;
+  reviewers can access it at
+  \url{https://zenodo.org/records/14842198?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjNjMWE3YTg3LTM4MzgtNGNlMC1hNDE4LTJjMWJlMjU5YjA3NyIsImRhdGEiOnt9LCJyYW5kb20iOiJiODVmNmVhMDE1NjczMThjNjI2MTI1ODQyZTExOWIxMiJ9.o4gCR2U_bkKruC97ZdexHkU7iVI2q28Cx_0tD8xkPjGyjoPdWNqsASLj62O0hhfdoFxliJFKKrQdrAWVoeLcXw}}
+PCA is implemented using the
+Frouros\footnote{Documentation and source code are available at
+  \url{https://github.com/IFCA-Advanced-Computing/frouros}.
+\ifnum\anon=0
+  Access to the specific code designed and parametrized for this
+  paper can be discussed with the authors from Four Dot Infinity.
+\fi
+}
+open-source Python library for drift detection.
+MNE is used as implemented and configured in the `MNE Tools' Python
+package for exploring, visualizing, and analyzing human
+neurophysiological data.\footnote{Available from \url{https://mne.tools} and Pypi.}
+MNE is an IIR filter with pre-configured cut-offs specifically
+targeting EEG data.
+
+To process the data with the \emph{AE} and \emph{TP} methods, we split
+each 30-second segment of EEG data (3840 samples per channel) into 16
+smaller chunks of 240 samples each. This point is moot for \emph{LSTM},
+\emph{C-LSTM}, \emph{PCA} and \emph{MNE}.
+
+The Autoencoder methods are trained on sequence reconstruction. The
+Predictor methods are trained on predicting sleep stage.
+%
+To balance the autoencoders' focus on both the amplitude and trends of the
+time-series data, we define a custom loss function, called
+\emph{BlendedLoss}. This function combines the median and mean of the
+powered absolute differences between the predicted values ($\hat{x}$)
+and the target values ($x$):
+%
+$$
+\text{Loss} =
+  (1 - b)\cdot\mathrm{median}(\lvert \hat{x} - x \rvert^p) +
+  b\cdot\mathrm{mean}(\lvert \hat{x} - x \rvert^p)
+$$
+%
+where $p$ is the power parameter that controls the sensitivity of the
+loss to differences and $b$ the \emph{blend factor} that controls
+the trade-off between learning the overall trend (median error) and
+closely following local patterns (mean error).
+% A systematic
+% investigation of various blend values within the range [0.1, 0.8]
+% reveals the impact on the model's performance in data reconstruction.
+
+Revisiting our research hypothesis, we expect methods trained on
+predicting sleep stage to outperform methods trained on autoencoding
+since they have access to task-specifc labels. More generally our
+methods are ordered as follows in terms of task-specific knowledge
+they have access to:
+%
+\begin{enumerate}
+\item \emph{MNE} is specifically, expertly designed to detect noise in
+  EEG signals and has proven to be very effective on this task.
+  \emph{PCA} is a general-purpose drift detection method, but for
+  the purposes of this paper has been carefully calibrated on the
+  training data to look for `drifts' that have the expected duration
+  before returning to the previous data distribution.
+\item \emph{AE\_att} and \emph{TP\_att} implement our hypothesis that
+  the attention mechanism can exploit supervision unrelated to anomaly
+  detection to automatically extract task-specific knowledge of
+  anomalies.
+\item \emph{LSTM}, \emph{C-LSTM}, \emph{AE\_err} and \emph{TP\_err}
+  are general-purpose autoencoders with minimal access to task-specific
+  knowledge in the form of a task-specific loss function.
+\end{enumerate}
+%
+This ordering reflects our prior expectation regarding their relative
+performance.
+
+For the training configuration, we set the batch size to 512 and
+trained the models for a maximum of 1000 epochs with patience of 30
+epochs, meaning that if the validation loss does not improve for 30
+consecutive epochs, training will stop. We set the learning rate to
+1e-4 and use the Adam optimizer to adjust the model
+weights. Additionally, we implement a ReduceLROnPlateau scheduler to
+adjust the learning rate dynamically based on the validation loss. If
+the validation loss plateaus, the scheduler reduces the learning rate
+to push the model to fit finer patterns.
+
+%Since dataset has low variability and extreme outliers, even the
+%relatively small networks we used are able to overfit; Which we
+%consider a positive quality, as argued in
+%Section~\ref{sec:method:hypothesis}.
+
+
+%%%%%%%%%%%%
+\section{Results and Discussion}
+\label{sec:results}
+%%%%%%%%%%%%
+
+We prepared three validation/testing setups. In the first setup
+validation and testing scores are calculated on the original 30-sec
+segments where each segments is annotated as `noise' if it includes at
+least one sample marked as `noise' in the ground-truth annotation.
+In the 5min and 10min-window setups segments evaluation was performed
+on 5min and 10min windows. If a method reports noise on any part of
+the window and the groud truth also annotates as noisy any part of the
+window, the window counts as a true positive. Obviously, these are
+easier tasks than the original 30-sec segmentation on two
+grounds: (a) positives get less sparse so task becomes less of a
+needle-in-a-haystack problem, and (b) learners have access to a longer
+context for the same number of input token, which know to be an
+important factor in sequence processing \cite{Lee_2021}.
 
 \input{tab_results}
 
+Table~\ref{tab:results} presents F-score, Precision, and Recall
+metrics for the evaluated methods on all three evaluation setups.
+F-score is calculated for $\beta=2$, in order
+place more weight on recall than precision. This is due to fact that
+the dataset is very unbalanced and noise instances are rare, even in
+the 10min-window setup. F-score is adapted accordingly to reflect
+that recall is harder to achieve than precision.
 
-Table~\ref{tab3} presents the F2 score, together with the Precision and Recall metrics (shown in parenthesis, respectively), for the evaluated methods across the four test recordings, where the manufacturer detected more than one artifact.
-The Precision metric in Table~\ref{tab3} denotes the percentage of
-actual segments identified as having artifacts relative to the total
-segments predicted to contain artifacts. However, this metric fails to
-convey information regarding missed artifacts---specifically, those not
-identified by the anomaly detection methodologies. This aspect is
-quantified through the Recall metric (Table~\ref{tab4}), which
-indicates the ratio of segments predicted to have artifacts against
-the total number of actual segments containing artifacts. For
-instance, the PCA method exhibits a precision of 100\% from the data
-obtained during the HB1 test recording 1, yet it only achieves a
-recall of 11.11\%. This discrepancy arises because the PCA method
-successfully detected a singular artifact characterized by noise,
-deemed a noisy artifact; thus, the precision remains at
-100\%. However, it failed to identify the additional eight noisy
-segments (refer to Table~\ref{tab2}), resulting in a significantly
-reduced recall of approximately 11\%. Instances where there are empty
-cells, signify scenarios where the respective method did not identify
-any artifacts. Consequently, precision cannot be ascertained, and
-recall is recorded as 0\%.
+% NOTE: decided against it to not have the actual application
+% influence the research result
+%In this application, our primary objective is to identify as many
+%segments as possible that contain artifacts while allowing for some
+%tolerance regarding detecting noisy segments. The principal aim should
+%be to reduce the number of instances requiring the application of
+%reliable yet non-automated anomaly detection methods. Consequently,
+%the key performance metric to prioritize is Recall. For this reason,
+%the F2 score is considered, which is a weighted harmonic mean of
+%precision and recall, and where recall is given more importance than
+%precision.
 
-In this application, our primary objective is to identify as many segments as possible that contain artifacts while allowing for some tolerance regarding detecting noisy segments. The principal aim should be to reduce the number of instances requiring the application of reliable yet non-automated anomaly detection methods. Consequently, the key performance metric to prioritize is Recall. For this reason, the F2 score is considered, which is a weighted harmonic mean of precision and recall, and where recall is given more importance than precision.
+The first observation is that by comparing the three sub-tables we can
+immediatelly see that the three windows behave as expected, with
+results improving with longer windows. By comparing horizontally from
+right to left we also see that results improve as noise gets
+denser,\footnote{Note that HB1-A is out-of-order in this respect, as
+  it has no noise.}
+we we cannot speculate on whether the top-to-bottom improvement
+is due to the longer context or due to denser positives. But either
+way, we have clear indications about how task difficulty scales across
+the table.
 
-From the results presented in Table~\ref{tab3}, we conclude that all considered methods exhibited suboptimal performance. However, PCA demonstrated relatively high recall values in two recordings. One plausible explanation for this observation could be the selected time-window of 30 seconds that defines the examined segment. The efficacy of anomaly detection methods in time series analysis may be significantly influenced by the length of the time series, as supported by existing literature \cite{Lee_2021}.
+further evidence that 
 
-Due to this reasoning, we applied the selected methodologies to the same dataset while extending the segment duration from 30 seconds to 5 and 10 minutes. Table~\ref{tab4} and Table~\ref{tab5} present the resulting F2 scores, Precision, and Recall values of the selected methods for the 5 and 10-minute windows, respectively. 
+From the results presented in Table~\ref{tab3}, we conclude that all
+considered methods exhibited sub-optimal performance. However, PCA
+demonstrated relatively high recall values in two recordings. One
+plausible explanation for this observation could be the selected
+time-window of 30 seconds that defines the examined segment. The
+efficacy of anomaly detection methods in time series analysis may be
+significantly influenced by the length of the time series, as
+supported by existing literature.
 
-One initial conclusion drawn is that across all methods analyzed, the detection of anomalies is significantly enhanced when the duration of the time-window assigned to each segment is increased. However, this improvement comes at the expense of broader time-windows during which the detected anomalies may actually occur---a consideration that necessitates careful evaluation. 
-The primary conclusions are drawn through a comparative analysis of the performance of the evaluated methodologies. The introduced concept of utilizing attention mechanisms as a critical metric for anomaly detection appears to be promising. Across all segment durations (30 seconds, 5 minutes, and 10 minutes), the F2 and Recall metrics for the AbAE\_att and TP\_att methods, which identify anomalies based on their attention matrix values, surpass those of their counterparts, AbAE\_err and TP\_err, which detect anomalies via reconstruction or prediction errors, in all but one recording.
-The performance of attention-based methods is generally comparable to, if not superior, that of other state-of-the-art techniques, such as LSTM-AE and C-LSTM-AE. A similar conclusion can be derived from comparing the F2 scores and Recall values of the examined attention-based methods with those of baseline methods, including PCA and MNE. However, it is evident that the TP\_att method significantly outperforms the AbAE\_att method.
+Due to this reasoning, we applied the selected methodologies to the
+same dataset while extending the segment duration from 30 seconds to 5
+and 10 minutes. Table~\ref{tab4} and Table~\ref{tab5} present the
+resulting F2 scores, Precision, and Recall values of the selected
+methods for the 5 and 10-minute windows, respectively.
+
+One initial conclusion drawn is that across all methods analyzed, the
+detection of anomalies is significantly enhanced when the duration of
+the time-window assigned to each segment is increased. However, this
+improvement comes at the expense of broader time-windows during which
+the detected anomalies may actually occur---a consideration that
+necessitates careful evaluation.
+
+The primary conclusions are drawn through a comparative analysis of
+the performance of the evaluated methodologies. The introduced concept
+of utilizing attention mechanisms as a critical metric for anomaly
+detection appears to be promising. Across all segment durations (30
+seconds, 5 minutes, and 10 minutes), the F2 and Recall metrics for the
+AE\_att and TP\_att methods, which identify anomalies based on their
+attention matrix values, surpass those of their counterparts,
+AE\_err and TP\_err, which detect anomalies via reconstruction or
+prediction errors, in all but one recording.
+
+The performance of attention-based methods is generally comparable to,
+if not superior, that of other state-of-the-art techniques, such as
+LSTM and C-LSTM. A similar conclusion can be derived from
+comparing the F2 scores and Recall values of the examined
+attention-based methods with those of baseline methods, including PCA
+and MNE. However, it is evident that the TP\_att method significantly
+outperforms the AE\_att method.
 
 
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
-This paper investigates the innovative application of attention mechanisms within machine learning models as pivotal indicators for anomaly detection in time-series datasets. Two methodologies, namely an Autoencoder and a Transformer, are examined, with their performances benchmarked against conventional techniques and other advanced machine-learning approaches. The efficacy of the proposed methodology is assessed utilizing EEG signals sourced from wearable sleep-monitoring devices measuring Precision and Recall against a manufacturer's established ground truth methodology. The findings indicate that attention-based approaches, particularly the Transformer Predictor, exhibit promising capabilities in identifying anomalies, particularly with extended time windows for analysis. The study concludes that attention mechanisms significantly enhance anomaly detection in streaming data environments.
 
-The current study acts as a proof of concept, illustrating the potential of attention mechanisms as key-indicators of anomalies in time series data. Subsequent steps will entail exploring additional architectures beyond the AbAE\_att and TP\_att methods analyzed herein. Additionally, the investigation will focus on the performance parameters of attention-based techniques, such as the choice of time-window segments, to develop a task-agnostic approach for anomaly detection.
+This paper investigates the innovative application of attention
+mechanisms within machine learning models as pivotal indicators for
+anomaly detection in time-series datasets. Two methodologies, namely
+an Autoencoder and a Transformer, are examined, with their
+performances benchmarked against conventional techniques and other
+advanced machine-learning approaches. The efficacy of the proposed
+methodology is assessed utilizing EEG signals sourced from wearable
+sleep-monitoring devices measuring Precision and Recall against a
+manufacturer's established ground truth methodology. The findings
+indicate that attention-based approaches, particularly the Transformer
+Predictor, exhibit promising capabilities in identifying anomalies,
+particularly with extended time windows for analysis. The study
+concludes that attention mechanisms significantly enhance anomaly
+detection in streaming data environments.
+
+The current study acts as a proof of concept, illustrating the
+potential of attention mechanisms as key-indicators of anomalies in
+time series data. Subsequent steps will entail exploring additional
+architectures beyond the AbAE\_att and TP\_att methods analyzed
+herein. Additionally, the investigation will focus on the performance
+parameters of attention-based techniques, such as the choice of
+time-window segments, to develop a task-agnostic approach for anomaly
+detection.
 
 
 
@@ -701,3 +839,8 @@ This research was co-funded by the European Union under GA no. 101135782 (MANOLO
 \bibliography{refs}
 
 \end{document}
+
+
+% LocalWords:  Autoencoders stationarity datapoint Mejri PCA LSTM IQR
+% LocalWords:  Autoencoder dimensionality LeakyReLU BlendedLoss MNE
+% LocalWords:  neurophysiological overfit Frouros MANOLO CNECT
