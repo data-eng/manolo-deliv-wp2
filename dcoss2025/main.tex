@@ -29,8 +29,8 @@
 \DeclareUnicodeCharacter{2212}{-}
 
 
-% \def\anon{1}
-\def\anon{0}
+ \def\anon{1}
+%\def\anon{0}
 
 
 \begin{document}
@@ -488,10 +488,13 @@ neurophysiological data.
 %%%%%%%%%%%%
 
 
-
-This study employs a case analysis to validate the efficacy of the proposed noise estimation methods. The focus is detecting noise within electroencephalographic (EEG) signals, recorded via headbands utilized during slumber to monitor various stages of the user's sleep cycle.
-
 \subsection{Test case description}
+
+This study employs a case analysis to validate the efficacy of the
+proposed noise estimation methods. The focus is detecting noise within
+electroencephalographic (EEG) signals, recorded via headbands utilized
+during slumber to monitor various stages of the user's sleep cycle.
+
 
 One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
 
@@ -535,10 +538,19 @@ In this figure, pink-colored areas are typical of low-frequency noise (0.2-4Hz),
 
 In this analysis, EEG signals collected from a headband with two EEG channels synchronized with medical-grade EEG devices are considered. The recorded signal frequency for each channel of the headband is 128Hz. These signals are grouped into consecutive 30-second segments, and each segment is further annotated by three experts, into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms. The goal of the current analysis is to detect the presence of noise, if any, at any of these segments. In total, 56 recordings were examined. Each recording refers to the EEG signals acquired by the headband of a user during a night-long sleep. These signals are grouped into 30-second consecutive segments.
 
-As a ground-truth method to evaluate the results of the proposed noise estimation methods, the original estimation method used by the headband manufacturer is considered. This method consists of task-specific algorithms to automatically estimate noise and evaluate the overall quality of EEG signals, identifying the artifacts in recordings made using the wearable textile headband.
+As a ground-truth method to evaluate the results of the proposed noise
+estimation methods, the original estimation method used by the
+headband manufacturer is considered. This method consists of
+task-specific algorithms to automatically estimate noise and evaluate
+the overall quality of EEG signals, identifying the artifacts in
+recordings made using the wearable textile headband.\footnote{The
+  device manufacturers and data providers are co-authors, so further
+  details are withheld to preserve anonymity. More details about the
+  device and the data (including data access) will be made available in
+  the camera-ready.}
 
 
-\subsection{Data Pre-preocessing}
+\subsection{Data Pre-processing}
 
 Data normalization is required for the machine learning methods to
 ensure robust model training and reliable outcomes. It is performed
@@ -667,7 +679,7 @@ they have access to:
 \item \emph{MNE} is specifically, expertly designed to detect noise in
   EEG signals and has proven to be very effective on this task.
   \emph{PCA} is a general-purpose drift detection method, but for
-  the purposes of this paper has been carefully calibrated on the
+  the purposes of this paper has been manually calibrated on the
   training data to look for `drifts' that have the expected duration
   before returning to the previous data distribution.
 \item \emph{AE\_att} and \emph{TP\_att} implement our hypothesis that
@@ -680,7 +692,9 @@ they have access to:
 \end{enumerate}
 %
 This ordering reflects our prior expectation regarding their relative
-performance.
+performance. \emph{None of the above (neither machine learning nor
+manual calibration) has ever had any access to noise annotations
+in the training data, but only to sleep-stage annotations.}
 
 For the training configuration, we set the batch size to 512 and
 trained the models for a maximum of 1000 epochs with patience of 30
@@ -786,29 +800,52 @@ comparatively higher F-score through perfect recall.
 \section{Conclusions and Future Work}
 \label{sec:conc}
 
-This paper investigates the innovative application of attention
-mechanisms within machine learning models as pivotal indicators for
-anomaly detection in time-series datasets. Two methodologies, namely
-an Autoencoder and a Transformer, are examined, with their
-performances benchmarked against conventional techniques and other
-advanced machine-learning approaches. The efficacy of the proposed
-methodology is assessed utilizing EEG signals sourced from wearable
-sleep-monitoring devices measuring Precision and Recall against a
-manufacturer's established ground truth methodology. The findings
-indicate that attention-based approaches, particularly the Transformer
-Predictor, exhibit promising capabilities in identifying anomalies,
-particularly with extended time windows for analysis. The study
-concludes that attention mechanisms significantly enhance anomaly
-detection in streaming data environments.
+This paper investigates the extraction of anomaly indicators from
+\emph{intermediate} layers of a deep neural network trained on a
+sequence proicessing task. By removing the need to train on a sequence
+reconstruction/prediction task, we are free to train on whatever
+task-specific supervision is available. This alleviates the most
+pressing challenge of anomaly detection, namely that anomalies are
+vaguely defined and thus difficult to directly supervise, while
+simultaneously allowing task-specific knowledge to be extracted from
+whatever other (non anomaly-related) supervision might be available.
 
-The current study acts as a proof of concept, illustrating the
-potential of attention mechanisms as key-indicators of anomalies in
-time series data. Subsequent steps will entail exploring additional
-architectures beyond the AbAE\_att and TP\_att methods analyzed
-herein. Additionally, the investigation will focus on the performance
-parameters of attention-based techniques, such as the choice of
-time-window segments, to develop a task-agnostic approach for anomaly
-detection.
+Our ideas are positively validated on EEG signals sourced from
+wearable sleep-monitoring devices. This dataset has the great
+advantage of having both task supervision (sleep stage detection) and
+noise supervision, both expertly annotated by the device manufacturer.
+Our current findings already indicate that the attention layer of a
+Transformer trained on the sleep stage task exhibits promising
+performance when used as an anomaly detector.
+
+Subsequent steps must focus in two directions: exploring the current
+experimental setup at more depth and expanding the breadth of the
+results with diverse datasets and tasks. Regarding the first direction,
+we mostly plan to investigate how the three components of the attention
+layer (K, Q, and V) correlate with EEG noise, as it might be the case
+that a subset of these components is more tightly fitted on
+recognizing patterns that should be ignored. Another investigation
+would be to understand if the performance on HB2-A really indicates
+that the Transformer has `discovered' the lack of correlation between
+HB1-A and HB2-A on noisy segments or is incidental. Naturally, both
+investigations are hindered by the inherent difficulty of trying to
+understand the inner workings of neural networks even for single-layer
+attention, but as the field of \emph{explainable machine learning}
+evolves the required tools will become available.
+
+Regarding the second direction, the most immediate goal is to devise a
+second task on the same data besides the sleep stage detection that is
+currently available. This would allow us to experiment with training
+on different tasks and jointly training on multiple tasks, which we
+expect to give insights about that tasks are more appropriate as
+drivers for anomaly detection. A less directly accessible goal is to
+test our idea on different use cases and domains. Although both
+sequence processing and anomaly detection are ubuiquitous, the
+existence of parallel supervision is less so. We hope that the
+exposure to the community gained through publishing this proof of
+concept will create an interest that will lead to the development of
+such datasets.
+
 
 
 
