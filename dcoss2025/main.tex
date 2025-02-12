@@ -35,8 +35,8 @@
 
 \begin{document}
 
-\title{Investigation of Attention as a predictor \\
- for stream-data anomalies\thanks{Funding Acknowledgment in final version.}
+\title{Investigation of Attention as a Predictor \\
+  for Stream Data Anomalies\thanks{Funding Acknowledgment in final version.}
 }
 
 \ifnum\anon=0
@@ -94,7 +94,39 @@ luis.montesano@bitbrain.com}\hfill}
 \maketitle
 
 \begin{abstract}
-This paper presents a novel approach that employs attention mechanisms as a key indicator for detecting anomalies within time-series data. Machine learning models such as Autoencoders and Transformers are utilized for the tasks of signal reconstruction and sequence prediction, respectively. Autoencoders are designed to reconstruct input data, identifying noise through reconstruction errors; larger errors signify a higher likelihood of noise presence in the data segment. Conversely, Transformers are utilized to predict subsequent data points in a sequence, with noise identified through prediction errors. Building on these techniques, the proposed approach uses attention layers within machine learning models to estimate noise by assuming that lower attention values indicate noisy or, more generally, inconsistent data. The proposed method was evaluated for its effectiveness in detecting anomalies in electroencephalogram (EEG) signals acquired from medical-grade wearable devices. In this study, EEG signals are utilized to identify the sleep stages of subjects while they are sleeping. Each sleep stage is associated with distinct brain activity patterns characterized by specific waveforms. However, EEG signals collected from wearable devices during sleep are susceptible to noise, which complicates the accurate identification of contaminated data segments. The performance of the proposed approach was assessed against the established ground truth method used by the wearable manufacturer and other state-of-the-art baseline anomaly detection methods. The results indicate that the proposed method serves as a promising task-agnostic tool for anomaly detection in streaming data, particularly when compared to conventional baseline techniques.
+
+This paper presents a novel approach to anomaly detection in stream
+data. Modern machine learning methods are often used for this task, by
+training Autoencoders and Transformers on reconstruction and
+prediction, and then assuming the reconstruction/prediction error as
+an indication of anomalies. These approaches only take into account
+the morphology of the stream, and are not aware of the different,
+often use case-specific and highly contextualized, aspects of what
+is considered as an anomaly.
+%
+In this article we explore a novel idea that aims to involve the use
+case into the training of the anomaly detection model: Instead of
+aiming at a general-purpose anomaly detector, we aim at a
+general-purpose way to train a case-specific anomaly detector without
+direct supervision.
+%
+The core idea is to extract anomaly indicators from the attention
+layers of a deep neural network trained on a use case-specific
+task. By removing the need to train on reconstruction or prediction,
+we are free to train on any supervision that is available and is
+characteristic of the use case. This alleviates the most pressing
+challenge of anomaly detection, namely that anomalies are vaguely
+defined and thus difficult to directly supervise, while simultaneously
+allowing use case-specific knowledge to be extracted from whatever
+other (non anomaly-related) supervision might be available.
+%
+We evaluated our method using electroencephalogram (EEG) signals on a
+sleep-stage labeling task. The performance of the proposed approach
+was compared against reconstruction/prediction error and against
+EEG-specific noise detection methods. The results indicate that the
+proposed method is a promising task-agnostic tool for anomaly
+detection in streaming data.
+
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -142,7 +174,7 @@ in general superior, but conventional approaches (mostly PCA) can also
 in some cases perform. To address this, in this article we explore a
 novel idea that aims to involve the use case into the training of the
 anomaly detection model in a way that the system \emph{adapts itself}
-to different use cases. In other words, instead of aiming at
+to different use cases. In other words, instead of aiming at a
 general-purpose anomaly detector, we aim at a general-purpose way to
 train a case-specific anomaly detector without direct supervision.
 
@@ -158,8 +190,8 @@ decisions are made from fewer datapoints.}
 One can easily see how this maps directly to specific instances of
 anomalies. For example, assuming a classification task on sensor data,
 a burst of environment noise looks the same regardless of the correct
-class during that period; a successful classifier would learn to
-ignore such bursts as the same pattern maps to any class. As another
+label during that period; a successful classifier would learn to
+ignore such bursts as the same pattern maps to any label. As another
 example, a successful model for predicting upcoming network traffic
 would learn to ignore some kinds of bursts (although they might
 indicate a cyberattack) and learn to emphasize `normal' bursts
@@ -233,15 +265,16 @@ mechanism, which enables the model to assign different levels of
 importance to elements in the input sequence
 based on the value of \emph{any other element in the sequence.}
 Specifically, Transformers learn three sets of weights which are
-applied to the input to get three vectors: the \emph{query (Q)}, the
-\emph{key (K)}, and the \emph{Value (V)}.
+applied to input of dimensionality $d$ to get the
+\emph{query (Q)} vector, the \emph{key (K)} vector,
+and the \emph{Value (V)} vector.
 The attention mechanism computes the \emph{similarity score} $QK^T$
-which is a $n\times n$ matrix that determines the contribution of each
+which is a $d \times d$ matrix that determines the contribution of each
 element in the final representation of each other element. The
 similarity score is scaled and softmax'ed into a matrix of weights,
 which are applied to the value vector. This yields the representation
 %
-$\mathrm{softmax}\left(QK^T / \mathrm{sqrt}(d_k)\right)\cdot V$
+$\mathrm{softmax}\left(QK^T / \mathrm{sqrt}(d)\right)\cdot V$
 %
 where each element contains information aggregated from the entire
 sequence, improving the model's ability to detect long-range dependencies.
@@ -656,7 +689,7 @@ closely following local patterns (mean error).
 
 Revisiting our research hypothesis, we expect methods trained on
 predicting sleep stage to outperform methods trained on autoencoding
-since they have access to task-specifc labels. More generally our
+since they have access to task-specific labels. More generally our
 methods are ordered as follows in terms of task-specific knowledge
 they have access to:
 %
@@ -807,30 +840,30 @@ performance when used as an anomaly detector.
 Subsequent steps must focus in two directions: exploring the current
 experimental setup at more depth and expanding the breadth of the
 results with diverse datasets and tasks. Regarding the first direction,
-we mostly plan to investigate how the three components of the attention
-layer (K, Q, and V) correlate with EEG noise, as it might be the case
-that a subset of these components is more tightly fitted on
+we mostly plan to investigate how the components of the attention
+layer (Q, K, and V) interact in order to understand whether a subset 
+of these components is more tightly fitted on
 recognizing patterns that should be ignored. Another investigation
 would be to understand if the performance on HB2-A really indicates
 that the Transformer has `discovered' the lack of correlation between
-HB1-A and HB2-A on noisy segments or is incidental. Naturally, both
-investigations are hindered by the inherent difficulty of trying to
-understand the inner workings of neural networks even for single-layer
-attention, but as the field of \emph{explainable machine learning}
-evolves the required tools will become available.
+HB1-A and HB2-A on noisy segments or is incidental. Despite the
+inherent difficulty in trying to understand the inner workings of
+neural networks even for single-layer attention, as the the field
+of \emph{explainable machine learning} evolves the required tools
+are starting to materialize.
 
 Regarding the second direction, the most immediate goal is to devise a
-second task on the same data besides the sleep stage detection that is
-currently available. This would allow us to experiment with training
+second task on the same data besides sleep stage detection.
+This would allow us to experiment with training
 on different tasks and jointly training on multiple tasks, which we
-expect to give insights about that tasks are more appropriate as
+expect to give insights about what tasks are more appropriate as
 drivers for anomaly detection. A less directly accessible goal is to
 test our idea on different use cases and domains. Although both
 sequence processing and anomaly detection are ubiquitous, the
-existence of parallel supervision is less so. We hope that the
-exposure to the community gained through publishing this proof of
-concept will create an interest that will lead to the development of
-such datasets.
+existence of simultaneous task/noise supervision is less so.
+But we are confident that the exposure gained through publishing our
+EEG results will create an interest in compiling and publishing such
+datasets.
 
 
 
@@ -855,6 +888,6 @@ This research was co-funded by the European Union under GA no. 101135782 (MANOLO
 
 % LocalWords:  autoencode stationarity datapoint Mejri PCA LSTM IQR
 % LocalWords:  autoencoder dimensionality LeakyReLU BlendedLoss MNE
-% LocalWords:  neurophysiological overfit Frouros MANOLO CNECT
+% LocalWords:  neurophysiological overfit Frouros MANOLO CNECT Zenodo
 % LocalWords:  cyberattack autoencoding recurrency softmax bandpass
 % LocalWords:  convolutional interquartile ReduceLROnPlateau
