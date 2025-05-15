@@ -1,10 +1,10 @@
-\documentclass[compsoc,conference,letterpaper]{IEEEtran}
-\IEEEoverridecommandlockouts
-% The preceding line is only needed to identify funding in the first footnote
-%Template version as of 6/27/2024
+%14 pages
+\documentclass[runningheads]{llncs}
 
-% \usepackage{cite}
-\usepackage[noadjust]{cite}
+\usepackage[T1]{fontenc}
+
+\usepackage{rotating}
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
@@ -29,8 +29,8 @@
 \DeclareUnicodeCharacter{2212}{-}
 
 
- \def\anon{1}
-%\def\anon{0}
+% \def\anon{1}
+\def\anon{0}
 
 
 \begin{document}
@@ -41,52 +41,28 @@
 
 \ifnum\anon=0
 
-\author{\IEEEauthorblockN{Natalia Koliou}
-\IEEEauthorblockA{\textit{Institute of Informatics and} \\
-\textit{Telecomm., NCSR Demokritos}\\
-Ag. Paraskevi, Greece \\
-0009-0004-3920-9992}
-\and
-\IEEEauthorblockN{Georgios Dimitriou}
-\IEEEauthorblockA{\textit{R\&D Department} \\
-\textit{Four Dot Infinity}\\
-Chalandri, Greece \\
-0009-0006-7227-9612}
-\and
-\IEEEauthorblockN{Maria Sierra}
-\IEEEauthorblockA{\textit{Data Science Department} \\
-\textit{BitBrain}\\
-Zaragoza, Spain \\
-maria.sierra@bitbrain.com}
-\and
-\IEEEauthorblockN{Christoforos Romesis}
-\IEEEauthorblockA{\textit{Institute of Informatics and} \\
-\textit{Telecomm., NCSR Demokritos}\\
-Ag. Paraskevi, Greece \\
-0009-0001-6485-5548}
-\and
-\IEEEauthorblockN{\hskip 5em Stasinos Konstantopoulos}
-\IEEEauthorblockA{\textit{\hskip 5em Institute of Informatics and} \\
-\textit{\hskip 5em Telecomm., NCSR Demokritos}\\
-\hskip 5em Ag. Paraskevi, Greece \\
-\hskip 5em 0000-0002-2586-1726}
-\and
-\IEEEauthorblockN{Panagiotis Trakadas}
-\IEEEauthorblockA{\textit{R\&D Department} \\
-\textit{Four Dot Infinity}\\
-Chalandri, Greece \\
-0000-0002-5146-5954}
-\and
-\IEEEauthorblockN{Luis Montesano}\hfill
-\IEEEauthorblockA{\textit{Chief Scientific Officer} \\
-\textit{BitBrain}\\
-Zaragoza, Spain \\
-luis.montesano@bitbrain.com}\hfill}
+\author{Natalia Koliou\inst{1}\orcidID{0009-0004-3920-9992} \and
+Georgios Dimitriou\inst{2}\orcidID{0009-0006-7227-9612} \and
+Maria Sierra\inst{3} \and
+Christoforos Romesis\inst{1}\orcidID{0009-0001-6485-5548} \and
+Stasinos Konstantopoulos\inst{1}\orcidID{0000-0002-2586-1726} \and
+Panagiotis Trakadas\inst{2}\orcidID{0000-0002-5146-5954} \and
+Luis Montesano\inst{3}
+}
+
+\institute{Institute of Informatics and Telecommunications,
+  NCSR Demokritos, Ag. Paraskevi, Greece
+  \email{lncs@springer.com}
+  \and Four Dot Infinity, Chalandri, Greece
+  \and BitBrain, Zaragoza, Spain
+}
+  
+\authorrunning{N. Koliou et al.}
 
 \else
 
-\author{\IEEEauthorblockN{Authors}
-\IEEEauthorblockA{\textit{Affiliations}}}
+\author{Authors}
+\institute{Affiliations}
 
 \fi
 
@@ -127,11 +103,10 @@ EEG-specific noise detection methods. The results indicate that the
 proposed method is a promising task-agnostic tool for anomaly
 detection in streaming data.
 
+\keywords{AI \and Machine learning \and Transformers \and Robustness
+  \and Time-Series \and anomaly detection \and noise estimation \and outlier detection}
 \end{abstract}
 
-\begin{IEEEkeywords}
-AI, Machine learning, Transformers, Robustness, Time-Series, anomaly detection, noise estimation, outlier detection.
-\end{IEEEkeywords}
 
 
 \section{Introduction}
@@ -867,20 +842,27 @@ datasets.
 
 
 
-
 \ifnum\anon=0
 
-%%%%%%%%%%%%
-\section*{Acknowledgment}
-%%%%%%%%%%%%
+\begin{credits}
+  
+\subsubsection{\ackname} This research was co-funded by the European Union
+under GA no. 101135782 (MANOLO project). Views and opinions expressed
+are however those of the authors only and do not necessarily reflect
+those of the European Union or CNECT. Neither the European Union nor
+CNECT can be held responsible for them. AWS resources were provided by
+the National Infrastructures for Research and Technology GRNET and
+funded by the EU Recovery and Resiliency Facility.
 
-This research was co-funded by the European Union under GA no. 101135782 (MANOLO project). Views and opinions expressed are however those of the authors only and do not necessarily reflect those of the European Union or CNECT. Neither the European Union nor CNECT can be held responsible for them. AWS resources were provided by the National Infrastructures for Research and Technology GRNET and funded by the EU Recovery and Resiliency Facility.
+\subsubsection{\discintname} The authors have no competing
+interests.
+\end{credits}
 
 \fi
 
 % \section*{References}
 
-\bibliographystyle{IEEEtranDOI}
+\bibliographystyle{splncs04}
 \bibliography{refs}
 
 \end{document}

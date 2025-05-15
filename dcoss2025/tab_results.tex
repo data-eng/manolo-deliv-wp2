@@ -1,11 +1,10 @@
-
-\begin{table*}[bt]
+\begin{sidewaystable}[p]
 \centering
 \caption{F-score, precision and recall on for different segment length.
   The F-score is calculated for $\beta=2$, emphasising recall over
   precision, as it approproate in out setting.
   Precision and recall, respectively, are given in parenthesis; When
-  absent, it denoes that they are within three percentile points of
+  absent, it denotes that they are within three percentile points of
   the F2 score.
   Empty cells denote that the respective method did not mark any segment
   as noise, which implies that recall is 0\% and precision is undefined.}  
@@ -37,14 +36,14 @@ MNE      &    &        &    &   &\tbfs{40}12      &          &               &  
 \end{tabular}
 \end{subtable}
 
-\vskip 1.5em
+%\vskip 1.5em
 \begin{subtable}[t]{\textwidth}
 \centering
 \caption{Evaluation on 5min windows.}
 \label{tab4}
 
 \begin{tabular}{lp{\tbq}ccccccc}
-          & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
+%          & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
 RecID &  A & \hskip -0.5cm B & \hskip -0.5cm C & D & A & B & C & D  \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
@@ -65,14 +64,14 @@ MNE	&    &              &       &\tbfs{82}{100}{96}
 \end{subtable}
 
 
-\vskip 1.5em
+%\vskip 1.5em
 \begin{subtable}[t]{\textwidth}
 \centering
 \caption{Evaluation on 10min windows.}
 \label{tab5}
 
 \begin{tabular}{lp{\tbq}ccccccc}
-          & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
+%          & \multicolumn{4}{c}{\textbf{HB1}} & \multicolumn{4}{c}{\textbf{HB2}} \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
 RecID & A & B & \hskip -0.5cm C & D & A & B & C & D \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-9}
@@ -93,4 +92,4 @@ MNE	  &   &             &            &\tbmv{82}{100}{96}
 \end{subtable}
 
 \end{sc}
-\end{table*}
+\end{sidewaystable}
