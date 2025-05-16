@@ -35,9 +35,7 @@
 
 \begin{document}
 
-\title{Investigation of Attention as a Predictor \\
-  for Stream Data Anomalies\thanks{Funding Acknowledgment in final version.}
-}
+\title{Self-Attention as a Predictor of EEG Anomalies}
 
 \ifnum\anon=0
 
@@ -70,6 +68,7 @@ Luis Montesano\inst{3}
 \maketitle
 
 \begin{abstract}
+% 150--250 words. Now 270.
 
 This paper presents a novel approach to anomaly detection in stream
 data. Modern machine learning methods are often used for this task, by
@@ -103,13 +102,70 @@ EEG-specific noise detection methods. The results indicate that the
 proposed method is a promising task-agnostic tool for anomaly
 detection in streaming data.
 
-\keywords{AI \and Machine learning \and Transformers \and Robustness
-  \and Time-Series \and anomaly detection \and noise estimation \and outlier detection}
+\keywords{Machine learning \and Biomedical data \and EEG \and outlier detection \and anomaly detection}
 \end{abstract}
 
 
 
 \section{Introduction}
+
+One of the main concerns when dealing with electroencephalographic
+signals (EEG) is assuring that clean data with a high signal-to-noise
+ratio is recorded. The EEG signal amplitude is in the microvolts
+range, and it is easily contaminated with noise, known as artifacts,
+which need to be filtered from the neural processes to keep the
+valuable information needed for different applications.
+
+In this domain, an artifact is denoted as any component of the EEG
+signal not directly produced by human brain activity, making the
+system register noise that contaminates the neural EEG data. The
+ability to recognize these artifacts is the first step in removing
+them. EEG artifacts can be classified depending on their origin, which
+can be physiological or external to the human body
+(technical/non-physiological).
+
+
+\begin{figure}[tb]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb1.png}     
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb2.png}     
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb3.png} 
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb4.png}
+    \end{minipage}
+    \caption{\label{fig:Fig1} Examples of the temporal visualization of EEG signals and coloring of noisy segments.}
+\end{figure}
+
+Fig.~\ref{fig:Fig1} shows some examples of EEG signals contaminated
+with noise. In this figure, pink-colored areas are typical of
+low-frequency noise (0.2-4Hz), which is mainly due to perspiration
+originating from small drops of sweat produced by the skin glands,
+which cause changes in the electrical baseline of the
+electrodes. Brown-colored and green-colored areas are typical of
+high-frequency noise (30-45Hz) that may originate from electrical
+activity produced by the muscles when they are contracted, like, for
+example, muscle tension in the jaw or forehead that can take place
+when clenching or frowning, respectively. Orange-colored areas are
+typical of high-amplitude noise that may be due to temporary failures
+in contact between the EEG sensor and the scalp produced by touching
+the sensor or by spontaneous changes in electrode-skin contact.
+
+In this analysis, EEG signals collected from a headband with two EEG channels synchronized with medical-grade EEG devices are considered. The recorded signal frequency for each channel of the headband is 128Hz. These signals are grouped into consecutive 30-second segments, and each segment is further annotated by three experts, into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms. The goal of the current analysis is to detect the presence of noise, if any, at any of these segments. In total, 56 recordings were examined. Each recording refers to the EEG signals acquired by the headband of a user during a night-long sleep. These signals are grouped into 30-second consecutive segments.
+
+
 
 The term \emph{anomaly} is used in time series processing to indicate
 a wide range of deviations and encompasses not only unforeseen events
@@ -489,47 +545,12 @@ frequencies outside this range.
 \label{sec:exp}
 %%%%%%%%%%%%
 
-
-\subsection{Test case description}
-
 This study employs a case analysis to validate the efficacy of the
 proposed noise estimation methods. The focus is detecting noise within
 electroencephalographic (EEG) signals, recorded via headbands utilized
 during slumber to monitor various stages of the user's sleep cycle.
 
 
-One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
-
-In this domain, an artifact is denoted as any component of the EEG signal not directly produced by human brain activity, making the system register noise that contaminates the neural EEG data. The ability to recognize these artifacts is the first step in removing them. EEG artifacts can be classified depending on their origin, which can be physiological or external to the human body (technical/non-physiological). Fig.~\ref{fig:Fig1} shows some examples of EEG signals contaminated with noise.
-
-\begin{figure}[tb]
-    \centering
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb1.png}     
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb2.png}     
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb3.png} 
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb4.png}
-    \end{minipage}
-    \caption{\label{fig:Fig1} Examples of the temporal visualization of EEG signals and coloring of noisy segments.}
-\end{figure}
-
-
-In this figure, pink-colored areas are typical of low-frequency noise (0.2-4Hz), which is mainly due to perspiration originating from small drops of sweat produced by the skin glands, which cause changes in the electrical baseline of the electrodes. Brown-colored and green-colored areas are typical of high-frequency noise (30-45Hz) that may originate from electrical activity produced by the muscles when they are contracted, like, for example, muscle tension in the jaw or forehead that can take place when clenching or frowning, respectively. Orange-colored areas are typical of high-amplitude noise that may be due to temporary failures in contact between the EEG sensor and the scalp produced by touching the sensor or by spontaneous changes in electrode-skin contact.
-
-In this analysis, EEG signals collected from a headband with two EEG channels synchronized with medical-grade EEG devices are considered. The recorded signal frequency for each channel of the headband is 128Hz. These signals are grouped into consecutive 30-second segments, and each segment is further annotated by three experts, into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms. The goal of the current analysis is to detect the presence of noise, if any, at any of these segments. In total, 56 recordings were examined. Each recording refers to the EEG signals acquired by the headband of a user during a night-long sleep. These signals are grouped into 30-second consecutive segments.
 
 As a ground-truth method to evaluate the results of the proposed noise
 estimation methods, the original estimation method used by the
@@ -812,7 +833,7 @@ Our current findings already indicate that the attention layer of a
 Transformer trained on the sleep stage task exhibits promising
 performance when used as an anomaly detector.
 
-Subsequent steps must focus in two directions: exploring the current
+Subsequent steps will pursue two directions: exploring the current
 experimental setup at more depth and expanding the breadth of the
 results with diverse datasets and tasks. Regarding the first direction,
 we mostly plan to investigate how the components of the attention
@@ -826,20 +847,11 @@ inherent difficulty in trying to understand the inner workings of
 neural networks even for single-layer attention, as the the field
 of \emph{explainable machine learning} evolves the required tools
 are starting to materialize.
-
-Regarding the second direction, the most immediate goal is to devise a
-second task on the same data besides sleep stage detection.
-This would allow us to experiment with training
-on different tasks and jointly training on multiple tasks, which we
-expect to give insights about what tasks are more appropriate as
-drivers for anomaly detection. A less directly accessible goal is to
-test our idea on different use cases and domains. Although both
-sequence processing and anomaly detection are ubiquitous, the
-existence of simultaneous task/noise supervision is less so.
-But we are confident that the exposure gained through publishing our
-EEG results will create an interest in compiling and publishing such
-datasets.
-
+%
+Regarding the second direction, the most immediate goal is to jointly
+train on multiple tasks, which we expect to help the network
+distinguish between noisy segments and segments that happen to be
+irrelevant for a given task.
 
 
 \ifnum\anon=0
