@@ -33,6 +33,9 @@
 \def\anon{0}
 
 
+\newcommand{\deleted}[1]{\textbf{DEL:} #1}
+\renewcommand{\deleted}[1]{}
+
 \begin{document}
 
 \title{Self-Attention as a Predictor of EEG Anomalies}
@@ -163,27 +166,16 @@ typical of high-amplitude noise that may be due to temporary failures
 in contact between the EEG sensor and the scalp produced by touching
 the sensor or by spontaneous changes in electrode-skin contact.
 
-In this analysis, EEG signals collected from a headband with two EEG channels synchronized with medical-grade EEG devices are considered. The recorded signal frequency for each channel of the headband is 128Hz. These signals are grouped into consecutive 30-second segments, and each segment is further annotated by three experts, into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms. The goal of the current analysis is to detect the presence of noise, if any, at any of these segments. In total, 56 recordings were examined. Each recording refers to the EEG signals acquired by the headband of a user during a night-long sleep. These signals are grouped into 30-second consecutive segments.
+As understood from the above, there is a variety of artifacts, both
+technical and physiological, each with different characteristics.
+Furthermore, and in particular regarding the physiological artifacts,
+what is noise for one application might be useful signal for some
+other application. It is well-known that there is no general-purpose
+approach (or even paradigm) that works best across domains and
+applications and performance depends on the use case and the nature of
+the encountered anomalies \cite{MEJRI2024124922}.
 
-
-
-The term \emph{anomaly} is used in time series processing to indicate
-a wide range of deviations and encompasses not only unforeseen events
-in the observed system but also transient problems in the observation
-mechanism. Indicatively, across various domains, an anomaly in the
-observation data can be attributed to a cyberattack, a disease, a
-faulty subsystem or, on the other hand, to a sensor momentarily
-loosing contact or being heavily affected by noise in the environment
-\cite{laptev_generic_2015,geiger_tadgan:_2020,ji_novel_2021,zhou_anomaly_2021}.
-
-This vague definition of what constitutes an anomaly brings with it
-the range of technical challenges that distinctively characterize the
-field: the long and complex temporal dependencies that need to be
-considered due to the priorly unknown duration of what constitutes an
-event, non-stationarity when aiming at correctly separating anomalies
-from data shifts due to long-term trends, high-dimensional data as
-there is no clear prior knowledge of what variables are needed.
-As conventional approaches often struggle to provide satisfactory
+\deleted{As conventional approaches often struggle to provide satisfactory
 results, or are limited by the need to tune their parameters for each
 specific application on a case-by-case basis, recent advancements in
 \emph{deep learning} have gained significant attention in the research
@@ -195,20 +187,14 @@ and \emph{reconstruction-based} approaches train a neural network to
 reconstruct the sequence from a learned, compressed representation.
 In either case, the assumption is that a high error between the
 predicted/reconstructed sequence and the actual data is indicative of
-an abnormality.
+an abnormality.}
 
-However, as Mejri et al. \cite{MEJRI2024124922} note, there is no
-general-purpose approach (or even paradigm) that works best across
-domains and applications and performance depends on the use case and
-the nature of the encountered anomalies; Deep learning methods appear
-in general superior, but conventional approaches (mostly PCA) can also
-in some cases perform. To address this, in this article we explore a
-novel idea that aims to involve the use case into the training of the
-anomaly detection model in a way that the system \emph{adapts itself}
-to different use cases. In other words, instead of aiming at a
-general-purpose anomaly detector, we aim at a general-purpose way to
-train a case-specific anomaly detector without direct supervision.
-
+In the work described here, we present a method for automatically
+adapting a deep-learned anomaly detector to different domains. In
+other words, instead of aiming at a general-purpose anomaly detector
+(which is unatainable for the reasons explained above), we aim at a
+general-purpose way to train a case-specific anomaly detector without
+direct supervision.
 The core of the idea is that anomaly detection is a pre-processing
 step for some sequence processing task. We operate under the
 assumption that there is supervision for this downstream task,
@@ -550,6 +536,21 @@ proposed noise estimation methods. The focus is detecting noise within
 electroencephalographic (EEG) signals, recorded via headbands utilized
 during slumber to monitor various stages of the user's sleep cycle.
 
+
+
+In this analysis, EEG signals collected from a headband with two EEG
+channels synchronized with medical-grade EEG devices are
+considered. The recorded signal frequency for each channel of the
+headband is 128Hz. These signals are grouped into consecutive
+30-second segments, and each segment is further annotated by three
+experts, into one of five sleep stages: Wake, N1, N2, N3, and
+REM. These stages correspond to specific brain activity patterns, such
+as slow eye movements, sleep spindles, and other characteristic
+waveforms. The goal of the current analysis is to detect the presence
+of noise, if any, at any of these segments. In total, 56 recordings
+were examined. Each recording refers to the EEG signals acquired by
+the headband of a user during a night-long sleep. These signals are
+grouped into 30-second consecutive segments.
 
 
 As a ground-truth method to evaluate the results of the proposed noise
