@@ -29,7 +29,7 @@
 \DeclareUnicodeCharacter{2212}{-}
 
 
-% \def\anon{1}
+%\def\anon{1}
 \def\anon{0}
 
 
@@ -43,18 +43,15 @@
 \ifnum\anon=0
 
 \author{Natalia Koliou\inst{1}\orcidID{0009-0004-3920-9992} \and
-Georgios Dimitriou\inst{2}\orcidID{0009-0006-7227-9612} \and
-Maria Sierra\inst{3} \and
+Maria Sierra\inst{2} \and
 Christoforos Romesis\inst{1}\orcidID{0009-0001-6485-5548} \and
 Stasinos Konstantopoulos\inst{1}\orcidID{0000-0002-2586-1726} \and
-Panagiotis Trakadas\inst{2}\orcidID{0000-0002-5146-5954} \and
-Luis Montesano\inst{3}
+Luis Montesano\inst{2}
 }
 
 \institute{Institute of Informatics and Telecommunications,
   NCSR Demokritos, Ag. Paraskevi, Greece
   \email{lncs@springer.com}
-  \and Four Dot Infinity, Chalandri, Greece
   \and BitBrain, Zaragoza, Spain
 }
   
@@ -374,7 +371,6 @@ section.
                                       & Attention \\
 \textit{TP\_att} & Transformer Predictor &  \\
 \midrule
-\textit{PCA}     & \multicolumn{2}{l}{Principle component analysis} \\
 \textit{MNE}     & \multicolumn{2}{l}{IIR filter} \\
 \bottomrule
 \end{tabular} 
@@ -498,22 +494,12 @@ attention weight, it suggests that the information at that moment is
 likely noisy and, therefore, unimportant for the task.
 
 
-\subsection{Conventional Approaches}
+\subsection{Conventional Noise Detection}
 
 Alongside machine learning methods, conventional techniques provide a
 reliable alternative for detecting noise in time-series data and are
-commonly utilized. Among the various conventional methods proposed by
-many researchers over the years, a statistical method and a
-signal-processing technique have been considered for this work.
-
-\emph{Principal Component Analysis (PCA)} is a linear dimensionality
-reduction technique. It analyzes a data table where observations are
-described by quantitative dependent inter-correlated variables. With
-PCA, the important information is extracted from the table and
-represented in a new set of orthogonal variables, the principal
-components. Dissimilar segments are identified by finding appropriate
-distance thresholds in this lower-dimensionality, orthogonal space.
-
+commonly utilized.
+%
 \emph{Multinomial Noise Exponential filtering (MNE)} is a method used
 to remove unwanted frequencies from time-series data, typically EEG
 signals. It applies a bandpass filter to the data, allowing signals
@@ -532,8 +518,6 @@ proposed noise estimation methods. The focus is detecting noise within
 electroencephalographic (EEG) signals, recorded via headbands utilized
 during slumber to monitor various stages of the user's sleep cycle.
 
-
-
 In this analysis, EEG signals collected from a headband with two EEG
 channels synchronized with medical-grade EEG devices are
 considered. The recorded signal frequency for each channel of the
@@ -547,7 +531,6 @@ of noise, if any, at any of these segments. In total, 56 recordings
 were examined. Each recording refers to the EEG signals acquired by
 the headband of a user during a night-long sleep. These signals are
 grouped into 30-second consecutive segments.
-
 
 As a ground-truth method to evaluate the results of the proposed noise
 estimation methods, the original estimation method used by the
@@ -637,15 +620,6 @@ machine learning methods have been reposited in Zenodo.\footnote{To preserve
   anonymity the Zenodo record is not published but left as a draft;
   reviewers can access it at
   \href{https://zenodo.org/records/14842198?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjNjMWE3YTg3LTM4MzgtNGNlMC1hNDE4LTJjMWJlMjU5YjA3NyIsImRhdGEiOnt9LCJyYW5kb20iOiJiODVmNmVhMDE1NjczMThjNjI2MTI1ODQyZTExOWIxMiJ9.o4gCR2U_bkKruC97ZdexHkU7iVI2q28Cx_0tD8xkPjGyjoPdWNqsASLj62O0hhfdoFxliJFKKrQdrAWVoeLcXw}{https://zenodo.org/records/14842198} (must use this link to include the access token)}
-PCA is implemented using the
-Frouros\footnote{Documentation and source code are available at
-  \url{https://github.com/IFCA-Advanced-Computing/frouros}.
-\ifnum\anon=0
-  Access to the specific code designed and parametrized for this
-  paper can be discussed with the authors from Four Dot Infinity.
-\fi
-}
-open-source Python library for drift detection.
 MNE is used as implemented and configured in the `MNE Tools' Python
 package for exploring, visualizing, and analyzing human
 neurophysiological data.\footnote{Available from \url{https://mne.tools} and Pypi.}
@@ -655,7 +629,7 @@ targeting EEG data.
 To process the data with the \emph{AE} and \emph{TP} methods, we split
 each 30-second segment of EEG data (3840 samples per channel) into 16
 smaller chunks of 240 samples each. This point is moot for \emph{LSTM},
-\emph{C-LSTM}, \emph{PCA} and \emph{MNE}.
+\emph{C-LSTM}, and \emph{MNE}.
 
 The Autoencoder methods are trained on sequence reconstruction. The
 Predictor methods are trained on predicting sleep stage.
@@ -689,10 +663,6 @@ they have access to:
 \begin{enumerate}
 \item \emph{MNE} is specifically, expertly designed to detect noise in
   EEG signals and has proven to be very effective on this task.
-  \emph{PCA} is a general-purpose drift detection method, but for
-  the purposes of this paper has been manually calibrated on the
-  training data to look for `drifts' that have the expected duration
-  before returning to the previous data distribution.
 \item \emph{AE\_att} and \emph{TP\_att} implement our hypothesis that
   the attention mechanism can exploit supervision unrelated to anomaly
   detection to automatically extract task-specific knowledge of
@@ -712,15 +682,8 @@ trained the models for a maximum of 1000 epochs with patience of 30
 epochs, meaning that if the validation loss does not improve for 30
 consecutive epochs, training will stop. We set the learning rate to
 1e-4 and use the Adam optimizer to adjust the model
-weights. Additionally, we implement a ReduceLROnPlateau scheduler to
-adjust the learning rate dynamically based on the validation loss. If
-the validation loss plateaus, the scheduler reduces the learning rate
-to push the model to fit finer patterns.
-
-%Since dataset has low variability and extreme outliers, even the
-%relatively small networks we used are able to overfit; Which we
-%consider a positive quality, as argued in
-%Section~\ref{sec:method:hypothesis}.
+weights. Additionally, we use \emph{ReduceLROnPlateau} scheduling to
+reduce the learning rate if the validation loss plateaus.
 
 
 %%%%%%%%%%%%
@@ -797,15 +760,13 @@ Although the conditions present in HB1-C are worth investigating,
 the results show that the ideas presented here are validated and
 promising.
 
-What is also noteworthy is that TP\_att outperforms the
-task-calibrated conventional methods on HB2-A and HB2-B.
+What is also noteworthy is that TP\_att outperforms MNE on HB2-A and HB2-B.
 Regarding HB2-A it is worth investigating whether the transformer has
 `discovered' the lack of correlation between HB1-A and HB2-A on noisy
-segments.
-Regarding HB2-B, a possible explanation is that TP\_att is more robust
-to noise density considerably above the hard-wired 1\%: it suffers
-the unavoidable precision loss just as all methods, but it gets a
-comparatively higher F-score through perfect recall.
+segments. Regarding HB2-B, a possible explanation is that TP\_att is
+more robust to noise density considerably above the hard-wired 1\%: it
+suffers the unavoidable precision loss just as all methods, but it
+gets a comparatively higher F-score through perfect recall.
 
 
 
@@ -879,6 +840,6 @@ interests.
 
 % LocalWords:  autoencode stationarity datapoint Mejri PCA LSTM IQR
 % LocalWords:  autoencoder dimensionality LeakyReLU BlendedLoss MNE
-% LocalWords:  neurophysiological overfit Frouros MANOLO CNECT Zenodo
+% LocalWords:  neurophysiological overfit MANOLO CNECT Zenodo
 % LocalWords:  cyberattack autoencoding recurrency softmax bandpass
 % LocalWords:  convolutional interquartile ReduceLROnPlateau
