@@ -221,7 +221,7 @@
 {\color{myblue}\thesubsection}{1em}{}
 
 \titleformat{\subsubsection}
-{\color{myblue}\lightfont\fontsize{14}{16}\selectfont}
+{\color{myblue}\normalfont\fontsize{14}{16}\selectfont}
 {\color{myblue}\thesubsubsection}{1em}{}
 
 % {<left>}{<before-sep>}{<after-sep>}

@@ -4,6 +4,19 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage[usenames,dvipsnames]{color}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\usepackage{array}
+
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{longtable} % for Data Tier API tables
+
+\usepackage{url}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{\baselineskip}
@@ -17,8 +30,8 @@
 \title{Data Inspection and Generation v.1}
 \deliverable{2.1}
 \version{1}
-\lead{NCSR}
-\submission{Draft}
+\lead{NCSR-D}
+\submission{February 2025}
 
 
 \begin{document}
@@ -39,7 +52,7 @@
 \textcolor{white}{Issued by:}   & \thelead         \\
 \textcolor{white}{Issue date:}  & \thesubmission   \\
 \textcolor{white}{Due date:}    & 31 December 2024 \\
-\textcolor{white}{Work package leader:} & NCSR     \\
+\textcolor{white}{Work package leader:} & NCSR-D   \\
 \textcolor{white}{Dissemination level:} & Public   \\
 \end{NiceTabular}
 
@@ -49,19 +62,23 @@
 \CodeBefore
   \rowcolor{white}{1,2}
   \rowcolor{myblue}{3}
-  \rowcolor{mylblue}{4,6}
+  \rowcolor{mylblue}{4,6,8,10}
 \Body
 \multicolumn{3}{l}{\textcolor{myblue}{\bf Document History}} \\
 \multicolumn{3}{l}{} \\
 \textcolor{white}{Version} &
 \textcolor{white}{Date} &
 \textcolor{white}{Modifications made by} \\
-0.1 & June 2024 & Document structure by NCSR \\
-0.2 &           & \\
-0.3 &           & \\
+0.1 & June 2024     & Document structure by NCSR-D \\
+0.2 & December 2024 & Sections 4, 5 \& 6 finalized by NUIDUCD - CeADAR\\
+0.3 & December 2024 & Section 2 finalized by ARX.NET         \\
+0.4 & January 2025  & Section 3 finalized by NCSR-D and FDI   \\
+0.5 & January 2025  & Subsection 3.5.1 finalized by BIT\&BRAIN  \\
+0.9 & February 2025 & All partners addressed review comments    \\
+1.0 & February 2025 & D2.1 Delivered    \\
 \end{NiceTabular}
 
-\vskip 3em
+\vskip 2em
 
 \begin{NiceTabular}{m{0.69\textwidth}m{0.29\textwidth}}[colortbl-like]
 \CodeBefore
@@ -73,20 +90,21 @@
 \multicolumn{2}{l}{} \\
 \textcolor{white}{Name} &
 \textcolor{white}{Beneficiary} \\
-S. Konstantopoulos, N. Koliou & NCSR \\
-                              & NUIDUCD – CeADAR \\
-                              & ARX.net \\
-                              & FDI \\
-                              & ATOS \\
+T. Boura, N. Koliou, S. Konstantopoulos, C. Romesis & NCSR-D \\
+E. Arazo, C. Bosch, H. Stoev, A. Suarez-Cetrulo                & NUIDUCD – CeADAR \\
+P. I. Kaplanoglou, P. Doudoulakis & ARX.NET \\
+P. Trakadas, M. Kelaidis       & FDI \\
+L. Montesano, M. Sierra       & BIT\&BRAIN \\
+%                              & ATOS \\
 \end{NiceTabular}
 
 
 \noindent
 In case you want any additional information, or you want to consult
-with the authors of this document, please send your inquiries to:
-konstant@iit.demokritos.gr
+with the authors of this document, please send your inquiries to
+Stasinos Konstantopoulos, konstant@iit.demokritos.gr
 
-\vskip 3em
+\vskip 2em
 
 \begin{NiceTabular}{m{0.69\textwidth}m{0.29\textwidth}}[colortbl-like]
 \CodeBefore
@@ -98,8 +116,8 @@ konstant@iit.demokritos.gr
 \multicolumn{2}{l}{} \\
 \textcolor{white}{Name} &
 \textcolor{white}{Beneficiary} \\
-Name  & Partner \\
-Name  & Partner \\
+Mounir Bensalem    & TUBS \\
+Guillaume Charpiat & INRIA \\
 \end{NiceTabular}
 
 \vfill
@@ -136,23 +154,63 @@ Reproduction is authorised provided the source is acknowledged. \\
 \CodeBefore
   \rowcolor{white}{1,2}
   \rowcolor{myblue}{3}
-  \rowcolor{mylblue}{4}
+  \rowcolor{mylblue}{4,6,8,10,12,14,16}
 \Body
 \multicolumn{2}{l}{\textcolor{myblue}{\bf List of Terms and Definitions}} \\
 \multicolumn{2}{l}{} \\
 \textcolor{white}{Term} &
 \textcolor{white}{Definition} \\
-My Term           &
-This is a term \\
-Machine Learning  &
-This is another term \\
+DD           &
+Dataset Distillation \\
+UMAP  &
+Uniform Manifold Approximation and Projection \\
+VAE &
+Variational Autoencoder \\
+NN & Neural Network \\
+KNN & K-Nearest Neighbor \\
+INN & Invertible Neurla Network \\
+CINN & Conditional Invertible Neural Network \\
+GAN & Generative Adversarial Networks \\ 
+CGAN & Conditional Generative Adversarial Networks \\
+DCGAN & Deep Convolutional Generative Adversarial Networks \\
+TSNE & T-Distributed Stochastic Neighbor Embedding \\
+PCA & Pricnipal Component Analysis \\
 \end{NiceTabular}
 
 
 \section*{Executive Summary}
 
-This is a summary
-
+This report documents research \& development work carried out in WP2
+during Phase~2 \emph{MANOLO Framework Implementation} of the project's
+workplan. This work comprises the development of the following
+MANOLO library components:
+%
+\begin{itemize}
+\item The \emph{Data Operations Manager}
+\item The \emph{Data Quality Estimation Component}
+\item The \emph{Data Distillation and Synthesis Component}
+\end{itemize}
+%
+The \emph{Data Operations Manager} provides functionality for the
+management of the project's digital assets (data, models,
+experimental results) ensuring that provenance and lineage metadata
+is automatically maintained. The Data Operations Manager is an
+asset management back-end and a Python API that is specifically
+designed for ease of use from the tools in the MANOLO library.
+%
+The \emph{Data Quality Estimation Component} is a comprehensive
+toolkit for automatically annotating data in terms of quality.
+The toolkit comprises both prior methods and the result of R\&D
+work during MANOLO.
+%
+The \emph{Data Distillation and Synthesis Component}
+generates synthetic data using methods for distillation via data
+compression and hashing, feature extraction and synthesisation;
+as well as model inversion for synthesisation of data from labels.
+This enables the creation of useful dataset repositories to be
+utilized for posterior training processes, particularly for tasks
+where existing datasets are not adequate or they are not available
+due to ethical or regulatory considerations.
 
 \clearpage
 
@@ -185,7 +243,7 @@ is structured as follows:
 %
 \begin{itemize}
 \item Section~\ref{sec:datmgmt}: MANOLO presents to its cloud-edge operators
-  a complicated provenance and lineage environment where the different
+  a complex provenance and lineage environment where the different
   assets, i.e., datasets, algorithms, models, resources are multiply
   interlinked, providing explanation of the capacities, data, metadata
   and their relationships. For regulatory as well as pragmatic
@@ -203,23 +261,25 @@ is structured as follows:
   well as data maliciously manipulated will be given a special
   emphasis, employing adversarial machine learning while considering
   associated models.
-\item Sections~\ref{sec:datdist} to~\ref{sec:featextr}:
-  Techniques for data distillation will be
-  explored here such that will provide a good foundation and a richer
-  dataset to support the research in the Hardware-aware Model Training
-  and Optimisation component. This will produce new derived
+\item Sections~\ref{sec:datdist} to~\ref{sec:datsynth}:
+  Techniques for data distillation will be explored here with the aim
+  of providing a good foundation and richer datasets to support the
+  research in the Hardware-aware Model Training and Optimisation
+  component. The outcome of this work is the generation of new derived
   (synthetic) data using methods for distillation via data compression
-  and hashing, feature extraction and synthesisation; and model
+  and hashing, feature extraction and synthesisation; as well as model
   inversion for synthesisation of data from labels. Data compression
-  will ensure the reduction of storage necessities as well as a
-  faster, while accurate, training pipelines and lighter
-  models. Feature extraction and synthesisation will allow us to
+  will lead to a reduction in storage requirements, as well as faster
+  training pipelines and lighter models, all while preserving
+  accuracy. Feature extraction and synthesisation will allow us to
   propose meta-data for meta learning tasks. The creation of synthetic
-  data from labels is a technique that will help us gather reliable
-  datasets from accurate pretrained architectures to keep a useful
-  repository for their application to posterior training processes
-  where data are not satisfactory for quality, quantity or
-  availability due to ethical reasons.
+  data from labels is a technique that will help in the construction
+  of reliable datasets from accurate pretrained architectures. This
+  will enable the creation of useful dataset repositories to be
+  utilized for posterior training processes, particularly for tasks
+  where existing datasets are not of a high enough standard, whether
+  this be due to poor quality, insufficient quantity or ethical
+  reasons.
 \end{itemize}
 
 \clearpage
@@ -238,16 +298,57 @@ is structured as follows:
 \input{task3-distillation}
 
 \clearpage
-\section{Data and Feature Synthetisation}
-\label{sec:datsynth}
-\input{task3-synthesis}
-
-\clearpage
 \section{Feature Extraction}
 \label{sec:featextr}
 \input{task3-extraction}
 
 \clearpage
+\section{Data and Feature Synthesis}
+\label{sec:datsynth}
+\input{task3-synthesis}
+
+\clearpage
 \section{Conclusion}
+
+This report, titled \quotes{Data Inspection and Generation v.1},
+documents research \& development work carried out in WP2 during
+Phase~2 \emph{MANOLO Framework Implementation} of the project's
+workplan.
+
+This work aims at (a) developing a comprehensive assets repository,
+and (b) enriching it with methods for processing the data that will
+be used for machine learning.
+
+Regarding the assets repository, the we are developing an asset
+management system where data, method implementations, trained models,
+and benchmarking results are not only reposited, but also multiply
+interlinked. Metadata extraction is automated by offering APIs through
+which training and testing can be performed in a way that allows the
+automated tracking of the interactions between the different objects of
+the repository.
+
+Data pre-processing is organized on two major strands of work:
+Identifying subsets within the data that should be excluded from
+training due to low quality, as well as deriving synthetic data using
+methods for distillation via data compression and hashing, feature
+extraction and synthesisation, and model inversion.
+%
+Regarding data quality estimation, we developed a task-agnostic framework
+that combines a battery of ML-based and statistical methods for identifying
+noisy and inconsistent data. These include both refinements and calibrations
+of prior methods as well as a novel attention-based method which was
+validated to be highly effective in detecting noise.
+%
+Regarding data
+distillation, experimental results indicate that our method significantly
+reduces the size of image datasets at a relatively small loss in
+classification accuracy. As this method only requires the dataset's
+latent space, this comes with the added advantage of not requiring the
+transfer of sensitive or private user data for the purposes of training
+machine learning models.
+
+\clearpage
+\bibliographystyle{unsrt}
+\bibliography{biblio,refs}
 
 \end{document}

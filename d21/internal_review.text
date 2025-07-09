@@ -1,0 +1,237 @@
+TUBS
+====
+
+Comments:
+
+ - page 10: 2.3 has only one sub-section, it could have two sub-sections (2.3.1 about structure/representation, 2.3.2 about experiment)  
+ 
+ - page 12: 2.4 has only 2.4.1 => it would look better to make it either one title or to have more sub-sections.
+ 
+ - page 14-20 Tables are numbered and do not have  titles. ( a sentence for explanation of each table would be a nice addition)
+ WONT DO: These are not floats, the content of the section is tabular
+ 
+ - Sometimes the title of tables is on top and sometimes in the bottom => it would be good to harmonize the style (eg. Table 10 (title below) Table 11 (title on top))
+ 
+ DONE: for chapter 3 (caption on top) @ page 22, 26, 30, 31, 32, 33, 35, 36.
+ 
+ - Make sure the figures are positioned  correctly (Figure 8, 9) (in the pdf i have they are mis-placed)
+ 
+ - page 49: under 5.3.1 the titles are very big compared to the template
+ DONE: changed subsection* to subsubsection*
+
+Typos:
+ - page 10: Each object _is_ has an associative
+ - page 11: The container_s_ for those 
+
+
+
+ INRIA
+ =====
+
+   Hello,
+
+Here are some first comments:
+- apply a spell-checker. For instance, page 7: "Neurla" --> "Neural". There are now also automatic tools that check not only the spelling but also the grammar (eg, Grammarly)
+- figures 8 and 9 are not well aligned
+- Part "7 - Conclusion" is missing
+
+and now here below is more detailed review.
+
+Best,
+
+Guillaume
+
+========================================
+
+Here is feedback on both **technical accuracy** and **writing clarity/coherence**. Below is a structured review covering strengths, areas for improvement, and specific recommendations.
+
+---
+
+## **General Strengths:**
+1. **Comprehensive Coverage**: The document is well-structured and provides a thorough discussion of data management, quality estimation, distillation, and feature extraction.
+2. **Clear Methodology**: The methodologies used for machine learning, statistical analysis, and dataset distillation are well-explained with supporting figures and tables.
+3. **Strong Technical Justification**: The work is well-anchored in current literature, referencing state-of-the-art techniques in machine learning, statistical analysis, and feature extraction.
+4. **Use of Figures and Tables**: Visual elements such as UMAP plots, accuracy graphs, and data tables effectively support the explanations.
+
+---
+
+## **Areas for Improvement:**
+
+### **1. Writing Clarity and Readability**
+  
+  **Recommendation:** Perform a systematic spell-check.
+
+- **Issue: Awkward and Inconsistent Sentence Structure**
+  - Some sections use long, complex sentences that could be more readable.
+  - Example: 
+    - **Original:** “Taking the above into consideration, this remainder of this document is structured as follows.”
+    - **Suggested:** “Considering the above, the remainder of this document is structured as follows.”
+
+  **Recommendation:** Simplify and streamline sentence structures for clarity.
+
+---
+
+### **2. Technical Precision and Consistency**
+- **Issue: Incomplete Definitions or Unclear Terms**
+  - The introduction references “MANOLO framework” without giving an immediate high-level summary of what it is.
+  - The term **“Data Distillation”** is introduced without a concise definition before discussing methodologies.
+
+  **Recommendation:** Add a short paragraph at the beginning of each section defining key terms before diving into technical details.
+
+- **Issue: Missing or Unclear Explanations of Certain Concepts**
+  - Some subsections assume prior knowledge of methodologies. For example, the **TimeVQVAE** approach for time-series feature extraction is mentioned, but no intuitive explanation of what it does is provided before diving into details.
+
+  **Recommendation:** Provide a brief, non-technical summary before detailed descriptions.
+
+---
+
+### **3. Methodology and Results Interpretation**
+- **Issue: Lack of Explicit Comparisons Between Methods**
+  - The evaluation of different data quality estimation techniques presents recall and precision values but does not include a summary comparison of which performed best.
+  - The Data Distillation section does not explicitly state how well clustering-based methods perform compared to standard methods.
+
+  **Recommendation:** Include a short **"Key Takeaways"** subsection after experimental results, summarizing key observations.
+
+- **Issue: Lack of Discussion on Limitations**
+  - While the report presents strong results, it does not discuss **limitations** or **potential drawbacks** of the proposed methods.
+  - Example: The document does not discuss **when the clustering-based distillation method may fail** or **potential biases in noise estimation models**.
+
+  **Recommendation:** Add a "Limitations and Future Work" subsection at the end of each methodology section.
+
+---
+
+## **Specific Recommendations:**
+| **Issue** | **Location in Document** | **Recommendation** |
+|-----------|-------------------------|----------------------|
+| Long, complex sentences | Sections 2, 3, 5 | Simplify for readability |
+| Missing key term definitions | Introduction, Data Distillation | Add short definitions before explanations |
+| Incomplete method comparisons | Sections 3, 4, 5 | Include summary comparisons and key takeaways |
+| Absence of discussion on limitations | Methodology sections | Add a brief "Limitations and Future Work" section |
+
+---
+
+## **Final Verdict**
+The document is **technically sound** and **methodologically rigorous**, but it would benefit significantly from **better readability, clearer comparisons of methods, and a discussion of limitations**. Addressing these points will improve the impact of the work and ensure its accessibility to a broader audience.
+
+
+========================================================================
+
+If you want more:
+
+Here’s a refined review addressing **technical accuracy, clarity, methodology, and structure**.
+
+---
+
+## **General Strengths:**
+1. **Comprehensive and Well-Structured**  
+   - The document is logically structured, progressing from data management to quality estimation, distillation, feature extraction, and synthesis.  
+   - Each section has a clear scope and methodological details.
+
+2. **Methodological Rigor**  
+   - The approach to data inspection and generation is well-grounded in **state-of-the-art techniques**.  
+   - The use of **machine learning-based and statistical noise detection methods** provides a robust comparison.  
+   - The feature extraction module correctly leverages **pretrained networks and autoencoders**.
+
+3. **Strong Experimental Evaluation**  
+   - **Comparisons between different methods (e.g., attention-based models vs. autoencoders for noise estimation, clustering-based distillation vs. random selection) are well-structured**.  
+   - **Performance metrics such as accuracy, precision, recall, and evaluation over different time windows add credibility to the findings**.  
+
+4. **Relevance to Efficient AI and Edge Computing**  
+   - The discussion on **dataset distillation for storage and computational efficiency** aligns well with trends in AI efficiency.  
+   - The document acknowledges constraints imposed by edge devices, which adds practical value.  
+
+---
+
+## **Areas for Improvement & Recommendations**
+
+### **1. Clarity and Readability**
+#### **1.1 Missing Key Definitions or Background Information**
+- **Issue:**  
+  - The **introduction to the MANOLO framework** lacks an intuitive, high-level description before jumping into technical details.  
+  - The **Data Distillation** section introduces the method without defining dataset distillation in simple terms first.  
+
+- **Recommendation:**  
+  - Add **a 2-3 sentence summary at the beginning of each section**, explaining the core idea before detailing methodologies.  
+  - Example: In **Data Distillation**, briefly explain why dataset reduction is necessary and what "distillation" aims to achieve.  
+
+---
+
+#### **1.2 Unclear or Implicit Comparisons Between Methods**
+- **Issue:**  
+  - While results are provided, a **summary comparison** of different methods is missing. 
+
+  - For instance, the **noise estimation** section provides recall/precision metrics across different approaches but lacks an explicit **"which method is best and why"** conclusion.  
+
+- **Recommendation:**  
+  - After presenting results, add a **"Key Takeaways"** subsection summarizing which method performed best, under what conditions, and its trade-offs.  
+  - Example for Noise Estimation:
+    - **"Attention-based models performed best in recall, particularly in 10-minute windows, suggesting that self-attention effectively captures anomalies over longer sequences. However, PCA-based approaches provided the highest precision, indicating they are more conservative in detecting noise."**  
+
+DONE: page 34
+---
+
+#### **1.3 Certain Sections Could Benefit from More Intuition**
+- **Issue:**  
+  - Some deep-learning techniques (e.g., Transformer-based predictors) are described only in terms of architecture without a quick **intuition for why they work**.  
+  - The document states that the Transformer Classifier "uses attention matrices to estimate noise" but doesn’t **explain why attention weights are a useful noise indicator**.  
+
+- **Recommendation:**  
+  - Add a **one-paragraph intuitive explanation** before each method.  
+  - Example for Transformer Classifier:
+    - **"Transformers use self-attention to determine which time steps in a sequence are important. Noisy segments typically receive lower attention scores, as they do not contribute meaningfully to the model's decision-making. This makes attention weights a useful proxy for identifying corrupted data."** 
+
+DONE: We’ve already explained how noise is estimated using attention (see page 23), so there’s no need to repeat the same explanation for each attention-based model.
+
+---
+
+### **2. Methodological Considerations**
+#### **2.1 Dataset Distillation: Is the Clustering-Based Approach Always Optimal?**
+- **Issue:**  
+  - The clustering-based dataset distillation technique is presented as effective, but there is **no discussion of when it might fail**.  
+  - Clustering-based distillation assumes that points near centroids are redundant and less informative. However, in some datasets, central samples may actually **capture core variability**, and removing them could **harm performance more than removing outliers**.  
+
+- **Recommendation:**  
+  - Add a **Limitations and Future Work** subsection in **Data Distillation**:
+    - **"While clustering-based distillation performs well in structured datasets like MNIST and CIFAR-10, its effectiveness on high-dimensional, non-Euclidean spaces (e.g., graph-based data) remains an open question. Future work should explore adaptive clustering strategies that account for dataset-specific distributions."**  
+
+---
+
+#### **2.2 Evaluation of Data Quality Estimation: Why Not Combine Methods?**
+- **Issue:**  
+  - The document evaluates multiple noise estimation methods independently but does not consider whether a **hybrid approach** (e.g., combining PCA with attention-based models) could yield **better results**.  
+
+- **Recommendation:**  
+  - Consider adding a **brief discussion on the potential of ensemble methods**:
+    - **"An interesting future direction is to combine statistical and machine-learning-based approaches for more robust noise detection. For instance, using PCA to identify global trends while an attention-based model detects local inconsistencies might enhance both precision and recall."**  
+
+DONE: While combining PCA and attention-based models might seem like a way to improve noise estimation, it is not straightforward since each method perceives noise under different terms. To meaningfully merge them, we would need to define a common framework for noise estimation—what would this combined model represent, and how would it interpret noise? A deeper investigation is required to determine whether a hybrid approach is even feasible and, if so, how it should be structured conceptually.
+
+---
+
+### **3. Minor Points**
+| **Issue** | **Location** | **Suggestion** |
+|-----------|------------|----------------|
+| Figures & Tables lack clear captions summarizing key insights | Throughout | Add a brief description below each figure, stating the **main takeaway** from the graph |
+| Some methodologies reference equations but do not always **explain** them | Noise Estimation, Data Distillation | Provide a 1-2 sentence **interpretation** after each equation |
+| Transformer models could benefit from a visualization | Section 3.3.4 (Transformer Predictor) | A small diagram showing how attention weights affect sequence modeling would help |
+
+DONE: I don't quite understand how such a visualization is relative to our problem.
+---
+
+## **Final Summary**
+| **Aspect** | **Assessment** | **Recommendations** |
+|------------|---------------|---------------------|
+| **Technical Accuracy** | ✅ **Strong** | Ensure method comparisons are explicit and results are contextualized |
+| **Clarity & Readability** | ⚠️ **Good, but needs some refinements** | Add **short, intuitive explanations** before each method |
+| **Methodological Depth** | ✅ **High** | Discuss potential **hybrid approaches** and **limitations of clustering-based methods** |
+| **Presentation of Results** | ⚠️ **Good, but could be clearer** | Use **"Key Takeaways"** subsections after experiments |
+
+---
+
+### **Conclusion & Next Steps**
+The document is well-structured and presents **valuable research contributions**, but a few refinements would significantly **increase its clarity, depth, and impact**:
+1. **Explicitly compare methods in a "Key Takeaways" section.**
+2. **Clarify complex methods with brief intuitive explanations.**
+3. **Discuss limitations of clustering-based distillation and explore hybrid approaches.**
+4. **Enhance result presentation with better figure captions and explanations of equations.**
+
