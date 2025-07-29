@@ -1,4 +1,9 @@
-%14 pages
+% 14 pages including references and appendices
+% only one contact author, Springer License to Publish
+% https://resource-cms.springernature.com/springer-cms/rest/v1/content/19790018/data/SNCS_ProceedingsPaper_LTP_ST_SN_Switzerland
+% Submit a zip  containing:
+% PDF; tex source files including figures and tables; supplementary materials; license
+
 \documentclass[runningheads]{llncs}
 
 \usepackage[T1]{fontenc}
@@ -29,18 +34,12 @@
 \DeclareUnicodeCharacter{2212}{-}
 
 
-\def\anon{1}
-%\def\anon{0}
-
-
 \newcommand{\deleted}[1]{\textbf{DEL:} #1}
 \renewcommand{\deleted}[1]{}
 
 \begin{document}
 
 \title{Self-Attention as a Predictor of EEG Anomalies}
-
-\ifnum\anon=0
 
 \author{Natalia Koliou\inst{1}\orcidID{0009-0004-3920-9992} \and
 Maria Sierra\inst{2} \and
@@ -56,13 +55,6 @@ Luis Montesano\inst{2}
 }
   
 \authorrunning{N. Koliou et al.}
-
-\else
-
-\author{Authors}
-\institute{Affiliations}
-
-\fi
 
 
 \maketitle
@@ -533,15 +525,12 @@ the headband of a user during a night-long sleep. These signals are
 grouped into 30-second consecutive segments.
 
 As a ground-truth method to evaluate the results of the proposed noise
-estimation methods, the original estimation method used by the
-headband manufacturer is considered. This method consists of
+estimation methods, the original estimation method used by
+BitBrain, the headband manufacturer, is considered. This method consists of
 task-specific algorithms to automatically estimate noise and evaluate
 the overall quality of EEG signals, identifying the artifacts in
-recordings made using the wearable textile headband.\footnote{The
-  device manufacturers and data providers are co-authors, so further
-  details are withheld to preserve anonymity. More details about the
-  device and the data (including data access) will be made available in
-  the camera-ready.}
+recordings made using their wearable textile headband.
+The dataset is publicly available \cite{boas-dataset}.
 
 
 \subsection{Data Pre-processing}
@@ -616,10 +605,7 @@ HB2   & 151 (14\%) & 56 (5\%) & 26 (3\%) & 9 (1\%) \\
 
 The implementations of the methods in Table~\ref{tab1} that we used in
 our experiments are publicly available. Our implementation of the
-machine learning methods have been reposited in Zenodo.\footnote{To preserve
-  anonymity the Zenodo record is not published but left as a draft;
-  reviewers can access it at
-  \href{https://zenodo.org/records/14842198?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjNjMWE3YTg3LTM4MzgtNGNlMC1hNDE4LTJjMWJlMjU5YjA3NyIsImRhdGEiOnt9LCJyYW5kb20iOiJiODVmNmVhMDE1NjczMThjNjI2MTI1ODQyZTExOWIxMiJ9.o4gCR2U_bkKruC97ZdexHkU7iVI2q28Cx_0tD8xkPjGyjoPdWNqsASLj62O0hhfdoFxliJFKKrQdrAWVoeLcXw}{https://zenodo.org/records/14842198} (must use this link to include the access token)}
+machine learning methods have been reposited in Zenodo.\footnote{Cf. \url{https://doi.org/10.5281/zenodo.14842198}}
 MNE is used as implemented and configured in the `MNE Tools' Python
 package for exploring, visualizing, and analyzing human
 neurophysiological data.\footnote{Available from \url{https://mne.tools} and Pypi.}
@@ -812,8 +798,6 @@ distinguish between noisy segments and segments that happen to be
 irrelevant for a given task.
 
 
-\ifnum\anon=0
-
 \begin{credits}
   
 \subsubsection{\ackname} This research was co-funded by the European Union
@@ -827,8 +811,6 @@ funded by the EU Recovery and Resiliency Facility.
 \subsubsection{\discintname} The authors have no competing
 interests.
 \end{credits}
-
-\fi
 
 % \section*{References}
 
