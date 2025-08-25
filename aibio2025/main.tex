@@ -555,7 +555,7 @@ central portion of the data lies.
 
 % where $\mathrm{median}(x)$ and $\mathrm{IQR}(x)$ are the feature's median value and IQR respectively.
 
-PCA and MNE require raw data that preserves the characteristics of the
+MNE requires raw data that preserves the characteristics of the
 original signal, so no normalization is applied for these methods.
 
 To train the machine learning models, the available recordings were
@@ -563,8 +563,7 @@ randomly split into training (43 recordings), validation (3
 recordings), and testing subsets (10 recordings). Among the testing
 recordings, six had zero or one noisy segments are not reported here
 as it makes little sense to compare methods on having identified a
-single datapoint. For the record, only PCA identified the noisy
-segment in only one of the segments.
+single datapoint.
 
 Table~\ref{tab2} gives the absolute and relative noise density for the
 remaining four recordings, arranged in descending order.
@@ -820,7 +819,7 @@ interests.
 \end{document}
 
 
-% LocalWords:  autoencode stationarity datapoint Mejri PCA LSTM IQR
+% LocalWords:  autoencode stationarity datapoint Mejri LSTM IQR
 % LocalWords:  autoencoder dimensionality LeakyReLU BlendedLoss MNE
 % LocalWords:  neurophysiological overfit MANOLO CNECT Zenodo
 % LocalWords:  cyberattack autoencoding recurrency softmax bandpass
