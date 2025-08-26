@@ -1,0 +1,185 @@
+Submission ID 12
+
+**Reviewer #1**
+
+**Overall evaluation**
+
+The paper presents an EEG signal noise detection method based on the
+attention mechanism within a Transformer. The authors compared their
+proposed approach with methods used in the area.
+
+Interesting work done, but the motivation provided is weak and its not
+clear what value the work could have. In Section 1 (e.g. "a successful
+classifier will learn to ignore it"), the premise of the work is that
+a classifier is able to ignore noise and extract informative features
+for the classification task. Given this, it's not clear why then one
+would want to extra noise from the EEG signal -- why not just leave it
+to the classifier to ignore since this is the assumed truth. Some
+details in Section 3 (e.g. "Such a network might not be good to
+actually perform the task") are inconsistent with the premise form
+Section 1, although it's not clear how the attention scores of a poor
+classifier could be useful information.
+
+MINOR (but equally important):
+
+(1) The formatting in the tables are strange and make the information
+presented not straightforward to make sense of. This is especially
+significant for the results (Table 3) - it was impossible to follow.
+
+(2) It's not clear noise labelling was done or how proportion with
+artifacts (Table 2) was measured. It's also not clear how PCA was
+used.
+
+(3) Misleading use of the term 'anomalies' to mean noise since the
+term is more often used to mean non-noise characteristics that
+indicate an abnormal human state or pattern.
+
+(4) For the primary data was used, information is not provided to make
+clear whether ethical approval and participant consent were obtained.
+
+(5) It's not clear what "remaining four recordings" (p. 9).
+
+(6) It's not clear how median gives "overall trend" while mean gives
+"local patterns" (p. 10).
+
+(7) It's not clear how positive 5-min and 10-min windows are less
+sparse than positive 30-sec windows (p. 11). Given the how labels for
+the longer windows are derived, I would expect the opposite.
+
+(8) It's not clear if or how HB1 and HB2 data are fused.
+
+
+**Reviewer #2**
+
+**Overall evaluation**
+
+This paper proposes an attention-based method for EEG artifact
+detection using Transformer architectures. The core idea, identifying
+signal anomalies as low-attention regions during downstream
+classification tasks, is intriguing and well aligned with the AIBio
+workshop's focus on AI for biomedical data. The method is technically
+promising, with good potential for generalization across EEG
+tasks. However, several aspects weaken the contribution: the
+motivation is not clearly articulated, especially regarding why
+artifact detection is necessary if classifiers can learn to ignore
+noise; the methodology lacks comparisons with several recent
+Transformer-based denoising approaches; and key implementation details
+(e.g., PCA usage, noise labeling, fusion of datasets) are either
+unclear or underexplained. These issues affect the reproducibility and
+perceived robustness of the work. A dedicated related works section
+and clarification of the experimental pipeline would strengthen the
+paper considerably
+
+
+
+**Reviewer #3**
+
+**Overall evaluation**
+
+This paper presents a methodology for detecting artifacts in EEG
+signals based on the output of the multi-head attention layers of a
+Transformer architecture. Unlike methods that rely on reconstruction
+or prediction error, this approach identifies anomalies as the parts
+of the sequence that receive the least attention during a downstream
+task, such as sleep phase labeling. The results obtained on EEG data
+demonstrate that the Transformer Predictor is a promising and
+"task-agnostic" tool for artifact detection.
+
+Originality: 4/5
+
+According to the authors, the major novelty of their work lies in
+using the attention layers of a Transformer-based architecture to
+train an artifact detector specific for diverse downstream EEG
+classification tasks. While this is interesting, there is a lack of a
+"related works" section comparing the proposed approach to other
+Transformer-based denoising methods available in the literature. Such
+a comparison is necessary to understand the strengths and limitations
+of the proposed approach with respect to current studies in the field,
+especially since many methods are available, as illustrated in the
+following list.
+
+- Pu, X., Yi, P., Chen, K., Ma, Z., Zhao, D., & Ren,
+  Y. (2022). EEGDnet: Fusing non-local and local self-similarity for
+  EEG signal denoising with transformer. Computers in Biology and
+  Medicine, 151, 106248.
+
+- Peh, W. Y., Yao, Y., & Dauwels, J. (2022). Transformer convolutional
+  neural networks for automated artifact detection in scalp EEG. In
+  2022 44th Annual International Conference of the IEEE Engineering in
+  Medicine & Biology Society (EMBC) (pp. 3599-3602). IEEE.
+
+- Chen, J., Pi, D., Jiang, X., Xu, Y., Chen, Y., & Wang,
+  X. (2023). Denosieformer: A transformer-based approach for
+  single-channel EEG artifact removal. IEEE Transactions on
+  Instrumentation and Measurement, 73, 1-16.
+
+- Yin, J., Liu, A., Li, C., Qian, R., & Chen, X. (2023). A GAN guided
+  parallel CNN and transformer network for EEG denoising. IEEE Journal
+  of Biomedical and Health Informatics.
+
+- Chuang, C. H., Chang, K. Y., Huang, C. S., & Bessas,
+  A. M. (2024). Art: Artifact removal transformer for reconstructing
+  noise-free multichannel electroencephalographic signals. arXiv
+  preprint arXiv:2409.07326.
+
+- Yu, Y., Li, Y., Zhou, Y., Wang, Y., & Wang, J. (2024). A Learnable
+  and Explainable Wavelet Neural Network for EEG Artifacts Detection
+  and Classification. IEEE Transactions on Neural Systems and
+  Rehabilitation Engineering.
+
+- Choi, B. J. (2025). Removing Neural Signal Artifacts with
+  Autoencoder-Targeted Adversarial Transformers (AT-AT). arXiv
+  preprint arXiv:2502.05332.
+
+As such, the authors should improve the presentation of their
+methodology by including a qualitative comparison with the state of
+the art in a dedicated "related works" section.
+
+Technical quality: 3.5/5
+
+The paper is generally technically sound in terms of the proposed deep
+learning architecture, tests, and performance evaluation. However,
+there is room for improvement. Some statements and sections need to be
+properly referenced in the literature, for example:
+
+- The claim that reconstruction methods struggle to detect contextual
+  anomalies (Section 3.1).
+
+- The assertion that prediction error is susceptible to noise and
+  non-stationarity (Section 3.1).
+
+- Are the methods under comparison taken from the literature? If so,
+  the relevant papers from which these methodologies were drawn should
+  be cited, method by method. Otherwise, the authors should provide a
+  thorough justification for their choice of comparative methods.
+
+- Is the data preprocessing approach, specifically the use of IQR,
+  grounded in the literature? This point should be better clarified
+  and motivated by the authors.
+
+- In Section 4.1, Principal Component Analysis (PCA) is mentioned
+  briefly: the authors state that "PCA and MNE require raw data"
+  without introducing the role and usage of PCA in their
+  methodology. The application of PCA should therefore be better
+  explained and justified.
+
+
+Clarity: 5/5
+
+The paper is clear and well written. I found only one sentence that
+does not sound clear to me:
+
+"The hypothesis is that the part of the sequence that receives the
+least attention while performing a task relevant to the use case, then
+is this part is an anomaly."
+
+I suggest correcting it as follows:
+
+"The hypothesis is that the part of the sequence that receives the
+least attention while performing a task relevant to the use case is
+considered an anomaly."
+
+Relevance: 5/5
+
+The paper perfectly fits the topics of the AIBIO workshop.
+

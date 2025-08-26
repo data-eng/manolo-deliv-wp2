@@ -1,15 +1,14 @@
-\documentclass[compsoc,conference,letterpaper]{IEEEtran}
-\IEEEoverridecommandlockouts
-% The preceding line is only needed to identify funding in the first footnote
-%Template version as of 6/27/2024
+\documentclass[runningheads]{llncs}
 
-% \usepackage{cite}
-\usepackage[noadjust]{cite}
+\usepackage[T1]{fontenc}
+
+\usepackage{rotating}
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
 
-\usepackage{booktabs} % for professional tables
+\usepackage{booktabs}
 \usepackage{colortbl}
 \usepackage{subcaption}
 \usepackage{multirow}
@@ -29,96 +28,53 @@
 \DeclareUnicodeCharacter{2212}{-}
 
 
- \def\anon{1}
-%\def\anon{0}
-
-
 \begin{document}
 
-\title{Investigation of Attention as a Predictor \\
-  for Stream Data Anomalies\thanks{Funding Acknowledgment in final version.}
+\title{Self-Attention as a Predictor of EEG Anomalies}
+
+\author{Natalia Koliou\inst{1}\orcidID{0009-0004-3920-9992} \and
+Maria Sierra\inst{2} \and
+Christoforos Romesis\inst{1}\orcidID{0009-0001-6485-5548} \and
+Stasinos Konstantopoulos\inst{1}\orcidID{0000-0002-2586-1726} \and
+Luis Montesano\inst{2}
 }
 
-\ifnum\anon=0
-
-\author{\IEEEauthorblockN{Natalia Koliou}
-\IEEEauthorblockA{\textit{Institute of Informatics and} \\
-\textit{Telecomm., NCSR Demokritos}\\
-Ag. Paraskevi, Greece \\
-0009-0004-3920-9992}
-\and
-\IEEEauthorblockN{Georgios Dimitriou}
-\IEEEauthorblockA{\textit{R\&D Department} \\
-\textit{Four Dot Infinity}\\
-Chalandri, Greece \\
-0009-0006-7227-9612}
-\and
-\IEEEauthorblockN{Maria Sierra}
-\IEEEauthorblockA{\textit{Data Science Department} \\
-\textit{BitBrain}\\
-Zaragoza, Spain \\
-maria.sierra@bitbrain.com}
-\and
-\IEEEauthorblockN{Christoforos Romesis}
-\IEEEauthorblockA{\textit{Institute of Informatics and} \\
-\textit{Telecomm., NCSR Demokritos}\\
-Ag. Paraskevi, Greece \\
-0009-0001-6485-5548}
-\and
-\IEEEauthorblockN{\hskip 5em Stasinos Konstantopoulos}
-\IEEEauthorblockA{\textit{\hskip 5em Institute of Informatics and} \\
-\textit{\hskip 5em Telecomm., NCSR Demokritos}\\
-\hskip 5em Ag. Paraskevi, Greece \\
-\hskip 5em 0000-0002-2586-1726}
-\and
-\IEEEauthorblockN{Panagiotis Trakadas}
-\IEEEauthorblockA{\textit{R\&D Department} \\
-\textit{Four Dot Infinity}\\
-Chalandri, Greece \\
-0000-0002-5146-5954}
-\and
-\IEEEauthorblockN{Luis Montesano}\hfill
-\IEEEauthorblockA{\textit{Chief Scientific Officer} \\
-\textit{BitBrain}\\
-Zaragoza, Spain \\
-luis.montesano@bitbrain.com}\hfill}
-
-\else
-
-\author{\IEEEauthorblockN{Authors}
-\IEEEauthorblockA{\textit{Affiliations}}}
-
-\fi
+\institute{Institute of Informatics and Telecommunications,
+  NCSR Demokritos, Ag. Paraskevi, Greece
+  \email{lncs@springer.com}
+  \and BitBrain, Zaragoza, Spain
+}
+  
+\authorrunning{N. Koliou et al.}
 
 
 \maketitle
 
 \begin{abstract}
 
-This paper presents a novel approach to anomaly detection in stream
-data. Modern machine learning methods are often used for this task, by
+One of the main concerns when dealing with electroencephalographic
+signals (EEG) is assuring that clean data with a high signal-to-noise
+ratio is recorded. The relevant denoising methods tend to have
+a narrow scope of application as what is noise for one
+application might be useful signal for some other application and
+there no general-purpose approach (or even paradigm) that works best
+across domains and applications.
+%
+Machine learning methods are often used for this task, by
 training Autoencoders and Transformers on reconstruction and
 prediction, and then assuming the reconstruction/prediction error as
 an indication of anomalies. These approaches only take into account
 the morphology of the stream, and are not aware of the different,
-often use case-specific and highly contextualized, aspects of what
-is considered as an anomaly.
-%
-In this article we explore a novel idea that aims to involve the use
-case into the training of the anomaly detection model: Instead of
-aiming at a general-purpose anomaly detector, we aim at a
-general-purpose way to train a case-specific anomaly detector without
-direct supervision.
-%
-The core idea is to extract anomaly indicators from the attention
-layers of a deep neural network trained on a use case-specific
-task. By removing the need to train on reconstruction or prediction,
-we are free to train on any supervision that is available and is
-characteristic of the use case. This alleviates the most pressing
-challenge of anomaly detection, namely that anomalies are vaguely
-defined and thus difficult to directly supervise, while simultaneously
-allowing use case-specific knowledge to be extracted from whatever
-other (non anomaly-related) supervision might be available.
+often highly contextualized, aspects of artifacts.
+
+In this article we explore the novel idea that we can create
+application-specific artifact detectors by training an
+attention-based deep neural network and then extracting from the
+attention layer information about what is ignored.
+This removes the most pressing challenge of artifact detection, namely
+that artifacts are vaguely defined and thus difficult to directly
+supervise, and allows application-specific artifact patterns to be
+extracted from non artifact-related supervision.
 %
 We evaluated our method using electroencephalogram (EEG) signals on a
 sleep-stage labeling task. The performance of the proposed approach
@@ -127,57 +83,82 @@ EEG-specific noise detection methods. The results indicate that the
 proposed method is a promising task-agnostic tool for anomaly
 detection in streaming data.
 
+\keywords{Machine learning \and Biomedical data \and EEG \and denoising}
 \end{abstract}
 
-\begin{IEEEkeywords}
-AI, Machine learning, Transformers, Robustness, Time-Series, anomaly detection, noise estimation, outlier detection.
-\end{IEEEkeywords}
 
 
 \section{Introduction}
 
-The term \emph{anomaly} is used in time series processing to indicate
-a wide range of deviations and encompasses not only unforeseen events
-in the observed system but also transient problems in the observation
-mechanism. Indicatively, across various domains, an anomaly in the
-observation data can be attributed to a cyberattack, a disease, a
-faulty subsystem or, on the other hand, to a sensor momentarily
-loosing contact or being heavily affected by noise in the environment
-\cite{laptev_generic_2015,geiger_tadgan:_2020,ji_novel_2021,zhou_anomaly_2021}.
+One of the main concerns when dealing with electroencephalographic
+signals (EEG) is assuring that clean data with a high signal-to-noise
+ratio is recorded. The EEG signal amplitude is in the microvolts
+range, and it is easily contaminated with noise, known as artifacts,
+which need to be filtered from the neural processes to keep the
+valuable information needed for different applications.
 
-This vague definition of what constitutes an anomaly brings with it
-the range of technical challenges that distinctively characterize the
-field: the long and complex temporal dependencies that need to be
-considered due to the priorly unknown duration of what constitutes an
-event, non-stationarity when aiming at correctly separating anomalies
-from data shifts due to long-term trends, high-dimensional data as
-there is no clear prior knowledge of what variables are needed.
-As conventional approaches often struggle to provide satisfactory
-results, or are limited by the need to tune their parameters for each
-specific application on a case-by-case basis, recent advancements in
-\emph{deep learning} have gained significant attention in the research
-community \cite{MEJRI2024124922}. And, given the vagueness of what
-constitutes ground truth, the most successful approaches are
-unsupervised or self-supervised: \emph{forecasting-based} approaches
-train a neural network to predict the next datapoint in the sequence
-and \emph{reconstruction-based} approaches train a neural network to
-reconstruct the sequence from a learned, compressed representation.
-In either case, the assumption is that a high error between the
-predicted/reconstructed sequence and the actual data is indicative of
-an abnormality.
+In this domain, an artifact is denoted as any component of the EEG
+signal not directly produced by human brain activity, making the
+system register noise that contaminates the neural EEG data. The
+ability to recognize these artifacts is the first step in removing
+them. EEG artifacts can be classified depending on their origin, which
+can be physiological or external to the human body
+(technical/non-physiological).
 
-However, as Mejri et al. \cite{MEJRI2024124922} note, there is no
-general-purpose approach (or even paradigm) that works best across
-domains and applications and performance depends on the use case and
-the nature of the encountered anomalies; Deep learning methods appear
-in general superior, but conventional approaches (mostly PCA) can also
-in some cases perform. To address this, in this article we explore a
-novel idea that aims to involve the use case into the training of the
-anomaly detection model in a way that the system \emph{adapts itself}
-to different use cases. In other words, instead of aiming at a
-general-purpose anomaly detector, we aim at a general-purpose way to
-train a case-specific anomaly detector without direct supervision.
 
+\begin{figure}[tb]
+    \centering
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb1.png}     
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb2.png}     
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb3.png} 
+    \end{minipage}
+    \vspace{0.05cm}
+    \begin{minipage}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/bb4.png}
+    \end{minipage}
+    \caption{\label{fig:Fig1} Examples of the temporal visualization of EEG signals and coloring of noisy segments.}
+\end{figure}
+
+Fig.~\ref{fig:Fig1} shows some examples of EEG signals contaminated
+with noise. In this figure, pink-colored areas are typical of
+low-frequency noise (0.2-4Hz), which is mainly due to perspiration
+originating from small drops of sweat produced by the skin glands,
+which cause changes in the electrical baseline of the
+electrodes. Brown-colored and green-colored areas are typical of
+high-frequency noise (30-45Hz) that may originate from electrical
+activity produced by the muscles when they are contracted, like, for
+example, muscle tension in the jaw or forehead that can take place
+when clenching or frowning, respectively. Orange-colored areas are
+typical of high-amplitude noise that may be due to temporary failures
+in contact between the EEG sensor and the scalp produced by touching
+the sensor or by spontaneous changes in electrode-skin contact.
+
+As understood from the above, there is a variety of artifacts, both
+technical and physiological, each with different characteristics.
+Furthermore, and in particular regarding the physiological artifacts,
+what is noise for one application might be useful signal for some
+other application. It is well-known that there is no general-purpose
+approach (or even paradigm) that works best across domains and
+applications and performance depends on the use case and the nature of
+the encountered anomalies \cite{MEJRI2024124922}.
+
+In the work described here, we present a method for automatically
+adapting a deep-learned anomaly detector to different domains. In
+other words, instead of aiming at a general-purpose anomaly detector
+(which is unatainable for the reasons explained above), we aim at a
+general-purpose way to train a case-specific anomaly detector without
+direct supervision.
 The core of the idea is that anomaly detection is a pre-processing
 step for some sequence processing task. We operate under the
 assumption that there is supervision for this downstream task,
@@ -188,14 +169,13 @@ that ignoring them gives superior performance despite the fact that
 decisions are made from fewer datapoints.}
 
 One can easily see how this maps directly to specific instances of
-anomalies. For example, assuming a classification task on sensor data,
-a burst of environment noise looks the same regardless of the correct
-label during that period; a successful classifier would learn to
-ignore such bursts as the same pattern maps to any label. As another
-example, a successful model for predicting upcoming network traffic
-would learn to ignore some kinds of bursts (although they might
-indicate a cyberattack) and learn to emphasize `normal' bursts
-(that indicate, for instance, the start of working hours).
+anomalies. For example, assuming a sleep-stage classification task on
+EEG data, electrical activity produced by muscle contraction will
+have the same morphology regardless of the sleep stage and a
+successful classifier will learn to ignore it.
+\emph{We aim to exploit the labelling available for a given task
+in order to train a general-purpose anomaly detector that can be
+ported to different tasks, less well-understood, tasks.}
 
 Our contribution is the formulation of a methodology for leveraging
 the outputs of intermediate layers of deep neural networks in order
@@ -318,11 +298,11 @@ systems.
 
 On the other hand, the attention mechanism offers an alternative,
 currently unexplored, way to extract indications about what parts of
-the sequence are anomalies. The hypothesis is that the part of the
-sequence that receives the least attention while performing a task
-relevant to the use case, then is this part is an anomaly. The
+the sequence are anomalies. The hypothesis is that noise or anomalies
+are the part of the equence that receives the least attention while
+performing a relevant task. The
 intuition is that neural networks will happily overfit the data
-when they are given enough parameters to do so. Such a network might
+when they are given enough parameters to do so. Such an overfitted network might
 not be good to actually perform the task, but is good at recognizing
 two ways in which a sub-sequence is anomalous: (a) it does not follow
 any pattern that was boosted (gradient-wise) by the training;
@@ -360,7 +340,6 @@ section.
                                       & Attention \\
 \textit{TP\_att} & Transformer Predictor &  \\
 \midrule
-\textit{PCA}     & \multicolumn{2}{l}{Principle component analysis} \\
 \textit{MNE}     & \multicolumn{2}{l}{IIR filter} \\
 \bottomrule
 \end{tabular} 
@@ -410,7 +389,7 @@ combines convolutional layers with an attention mechanism to
 reconstruct the input data, again using the convolutional layers to
 capture local features while replacing LSTM with attention to capture
 long-term patterns.
-
+%
 Fig.~\ref{fig:Fig2} illustrates this architecture. The input to the
 encoder consists of a sequence of 240 measurements from two
 simultaneous channels, along with a same-size sequence of time
@@ -427,7 +406,7 @@ capturing both trends and amplitudes.
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=1\columnwidth]{images/Fig2.png}  
+\includegraphics[width=0.9\columnwidth]{images/Fig2.png}  
 \caption{\label{fig:Fig2} AE\_err/AE\_att architecture.}
 \end{figure}
 
@@ -447,7 +426,7 @@ multi-head attention layers in both the encoder and decoder
 components. The encoder captures temporal dependencies in the input
 sequence, while the decoder predicts the next sequence based on these
 encoded features.
-
+%
 Fig.~\ref{fig:Fig3} illustrates this architecture. The input consists
 of a sequence of 240 measurements from two simultaneous channels,
 along with a same-size sequence of time representation. This data
@@ -459,7 +438,7 @@ function to introduce non-linearity.
 
 \begin{figure}[tb]
 \centering
-\includegraphics[width=0.65\columnwidth]{images/Fig3.png}
+\includegraphics[width=0.55\columnwidth]{images/Fig3.png}
 \caption{\label{fig:Fig3} TP\_err/TP\_att architecture.}
 \end{figure}
 
@@ -484,23 +463,12 @@ attention weight, it suggests that the information at that moment is
 likely noisy and, therefore, unimportant for the task.
 
 
-\subsection{Conventional Approaches}
+\subsection{Conventional Noise Detection}
 
 Alongside machine learning methods, conventional techniques provide a
 reliable alternative for detecting noise in time-series data and are
-commonly utilized. Among the various conventional methods proposed by
-many researchers over the years, a statistical method and a
-signal-processing technique have been considered for this work.
-
-\emph{Principal Component Analysis (PCA)} is a linear dimensionality
-reduction technique. It analyzes a data table where observations are
-described by quantitative dependent inter-correlated variables. With
-PCA, the important information is extracted from the table and
-represented in a new set of orthogonal variables, called principal
-components \cite{bro2014principal}. The similarity patterns of the
-observations and the variables can then be depicted as points on maps
-\cite{abdi2010principal}.
-
+commonly utilized.
+%
 \emph{Multinomial Noise Exponential filtering (MNE)} is a method used
 to remove unwanted frequencies from time-series data, typically EEG
 signals. It applies a bandpass filter to the data, allowing signals
@@ -514,58 +482,32 @@ frequencies outside this range.
 \label{sec:exp}
 %%%%%%%%%%%%
 
-
-\subsection{Test case description}
-
 This study employs a case analysis to validate the efficacy of the
 proposed noise estimation methods. The focus is detecting noise within
 electroencephalographic (EEG) signals, recorded via headbands utilized
 during slumber to monitor various stages of the user's sleep cycle.
 
-
-One of the main concerns when dealing with electroencephalographic signals (EEG) is assuring that clean data with a high signal-to-noise ratio is recorded. The EEG signal amplitude is in the microvolts range, and it is easily contaminated with noise, known as artifacts, which need to be filtered from the neural processes to keep the valuable information needed for different applications.
-
-In this domain, an artifact is denoted as any component of the EEG signal not directly produced by human brain activity, making the system register noise that contaminates the neural EEG data. The ability to recognize these artifacts is the first step in removing them. EEG artifacts can be classified depending on their origin, which can be physiological or external to the human body (technical/non-physiological). Fig.~\ref{fig:Fig1} shows some examples of EEG signals contaminated with noise.
-
-\begin{figure}[tb]
-    \centering
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb1.png}     
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb2.png}     
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb3.png} 
-    \end{minipage}
-    \vspace{0.05cm}
-    \begin{minipage}[b]{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{images/bb4.png}
-    \end{minipage}
-    \caption{\label{fig:Fig1} Examples of the temporal visualization of EEG signals and coloring of noisy segments.}
-\end{figure}
-
-
-In this figure, pink-colored areas are typical of low-frequency noise (0.2-4Hz), which is mainly due to perspiration originating from small drops of sweat produced by the skin glands, which cause changes in the electrical baseline of the electrodes. Brown-colored and green-colored areas are typical of high-frequency noise (30-45Hz) that may originate from electrical activity produced by the muscles when they are contracted, like, for example, muscle tension in the jaw or forehead that can take place when clenching or frowning, respectively. Orange-colored areas are typical of high-amplitude noise that may be due to temporary failures in contact between the EEG sensor and the scalp produced by touching the sensor or by spontaneous changes in electrode-skin contact.
-
-In this analysis, EEG signals collected from a headband with two EEG channels synchronized with medical-grade EEG devices are considered. The recorded signal frequency for each channel of the headband is 128Hz. These signals are grouped into consecutive 30-second segments, and each segment is further annotated by three experts, into one of five sleep stages: Wake, N1, N2, N3, and REM. These stages correspond to specific brain activity patterns, such as slow eye movements, sleep spindles, and other characteristic waveforms. The goal of the current analysis is to detect the presence of noise, if any, at any of these segments. In total, 56 recordings were examined. Each recording refers to the EEG signals acquired by the headband of a user during a night-long sleep. These signals are grouped into 30-second consecutive segments.
+In this analysis, EEG signals collected from a headband with two EEG
+channels synchronized with medical-grade EEG devices are
+considered. The recorded signal frequency for each channel of the
+headband is 128Hz. These signals are grouped into consecutive
+30-second segments, and each segment is further annotated by three
+experts, into one of five sleep stages: Wake, N1, N2, N3, and
+REM. These stages correspond to specific brain activity patterns, such
+as slow eye movements, sleep spindles, and other characteristic
+waveforms. The goal of the current analysis is to detect the presence
+of noise, if any, at any of these segments. In total, 56 recordings
+were examined. Each recording refers to the EEG signals acquired by
+the headband of a user during a night-long sleep. These signals are
+grouped into 30-second consecutive segments.
 
 As a ground-truth method to evaluate the results of the proposed noise
-estimation methods, the original estimation method used by the
-headband manufacturer is considered. This method consists of
+estimation methods, the original estimation method used by
+BitBrain, the headband manufacturer, is considered. This method consists of
 task-specific algorithms to automatically estimate noise and evaluate
 the overall quality of EEG signals, identifying the artifacts in
-recordings made using the wearable textile headband.\footnote{The
-  device manufacturers and data providers are co-authors, so further
-  details are withheld to preserve anonymity. More details about the
-  device and the data (including data access) will be made available in
-  the camera-ready.}
+recordings made using their wearable textile headband.
+The dataset is publicly available \cite{boas-dataset}.
 
 
 \subsection{Data Pre-processing}
@@ -582,15 +524,7 @@ represents the spread of the middle 50\% of a dataset and reduces the
 influence of outliers by focusing on the range within which the
 central portion of the data lies.
 
-% For a particular feature of a time-series $x$, its normalized value $x_{\text{norm}}$ is given:
-
-% \begin{equation}
-%     x_{\text{norm}} = \frac{x - \mathrm{median}(x)}{\mathrm{IQR}(x)} \label{eq:robust_norm}
-% \end{equation}
-
-% where $\mathrm{median}(x)$ and $\mathrm{IQR}(x)$ are the feature's median value and IQR respectively.
-
-PCA and MNE require raw data that preserves the characteristics of the
+MNE requires raw data that preserves the characteristics of the
 original signal, so no normalization is applied for these methods.
 
 To train the machine learning models, the available recordings were
@@ -598,11 +532,10 @@ randomly split into training (43 recordings), validation (3
 recordings), and testing subsets (10 recordings). Among the testing
 recordings, six had zero or one noisy segments are not reported here
 as it makes little sense to compare methods on having identified a
-single datapoint. For the record, only PCA identified the noisy
-segment in only one of the segments.
+single datapoint.
 
 Table~\ref{tab2} gives the absolute and relative noise density for the
-remaining four recordings, arranged in descending order.
+remaining four testing recordings, arranged in descending order.
 Specifically, the table gives the count of 30-second segments within
 which at least one artifact is annotated as noise in the ground-truth
 labeling. Note that recordings are \emph{not} of equal length.
@@ -640,19 +573,7 @@ HB2   & 151 (14\%) & 56 (5\%) & 26 (3\%) & 9 (1\%) \\
 
 The implementations of the methods in Table~\ref{tab1} that we used in
 our experiments are publicly available. Our implementation of the
-machine learning methods have been reposited in Zenodo.\footnote{To preserve
-  anonymity the Zenodo record is not published but left as a draft;
-  reviewers can access it at
-  \href{https://zenodo.org/records/14842198?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjNjMWE3YTg3LTM4MzgtNGNlMC1hNDE4LTJjMWJlMjU5YjA3NyIsImRhdGEiOnt9LCJyYW5kb20iOiJiODVmNmVhMDE1NjczMThjNjI2MTI1ODQyZTExOWIxMiJ9.o4gCR2U_bkKruC97ZdexHkU7iVI2q28Cx_0tD8xkPjGyjoPdWNqsASLj62O0hhfdoFxliJFKKrQdrAWVoeLcXw}{https://zenodo.org/records/14842198} (must use this link to include the access token)}
-PCA is implemented using the
-Frouros\footnote{Documentation and source code are available at
-  \url{https://github.com/IFCA-Advanced-Computing/frouros}.
-\ifnum\anon=0
-  Access to the specific code designed and parametrized for this
-  paper can be discussed with the authors from Four Dot Infinity.
-\fi
-}
-open-source Python library for drift detection.
+machine learning methods have been reposited in Zenodo.\footnote{Cf. \url{https://doi.org/10.5281/zenodo.14842198}}
 MNE is used as implemented and configured in the `MNE Tools' Python
 package for exploring, visualizing, and analyzing human
 neurophysiological data.\footnote{Available from \url{https://mne.tools} and Pypi.}
@@ -662,7 +583,7 @@ targeting EEG data.
 To process the data with the \emph{AE} and \emph{TP} methods, we split
 each 30-second segment of EEG data (3840 samples per channel) into 16
 smaller chunks of 240 samples each. This point is moot for \emph{LSTM},
-\emph{C-LSTM}, \emph{PCA} and \emph{MNE}.
+\emph{C-LSTM}, and \emph{MNE}.
 
 The Autoencoder methods are trained on sequence reconstruction. The
 Predictor methods are trained on predicting sleep stage.
@@ -683,9 +604,6 @@ where $p$ is the power parameter that controls the sensitivity of the
 loss to differences and $b$ the \emph{blend factor} that controls
 the trade-off between learning the overall trend (median error) and
 closely following local patterns (mean error).
-% A systematic
-% investigation of various blend values within the range [0.1, 0.8]
-% reveals the impact on the model's performance in data reconstruction.
 
 Revisiting our research hypothesis, we expect methods trained on
 predicting sleep stage to outperform methods trained on autoencoding
@@ -696,10 +614,6 @@ they have access to:
 \begin{enumerate}
 \item \emph{MNE} is specifically, expertly designed to detect noise in
   EEG signals and has proven to be very effective on this task.
-  \emph{PCA} is a general-purpose drift detection method, but for
-  the purposes of this paper has been manually calibrated on the
-  training data to look for `drifts' that have the expected duration
-  before returning to the previous data distribution.
 \item \emph{AE\_att} and \emph{TP\_att} implement our hypothesis that
   the attention mechanism can exploit supervision unrelated to anomaly
   detection to automatically extract task-specific knowledge of
@@ -719,15 +633,8 @@ trained the models for a maximum of 1000 epochs with patience of 30
 epochs, meaning that if the validation loss does not improve for 30
 consecutive epochs, training will stop. We set the learning rate to
 1e-4 and use the Adam optimizer to adjust the model
-weights. Additionally, we implement a ReduceLROnPlateau scheduler to
-adjust the learning rate dynamically based on the validation loss. If
-the validation loss plateaus, the scheduler reduces the learning rate
-to push the model to fit finer patterns.
-
-%Since dataset has low variability and extreme outliers, even the
-%relatively small networks we used are able to overfit; Which we
-%consider a positive quality, as argued in
-%Section~\ref{sec:method:hypothesis}.
+weights. Additionally, we use \emph{ReduceLROnPlateau} scheduling to
+reduce the learning rate if the validation loss plateaus.
 
 
 %%%%%%%%%%%%
@@ -744,9 +651,12 @@ on 5min and 10min windows. If a method reports noise on any part of
 the window and the ground truth also annotates as noisy any part of the
 window, the window counts as a true positive. Obviously, these are
 easier tasks than the original 30-sec segmentation on two
-grounds: (a) positives get less sparse so task becomes less of a
+grounds:
+(a) Since any part of the window marks the window as noisy, longer
+windows give fewer instances but the same number of noisy instances;
+thus positives are less sparse and the task becomes less of a
 needle-in-a-haystack problem, and (b) learners have access to a longer
-context for the same number of input token, which know to be an
+context for the same number of input tokens, which we know to be an
 important factor in sequence processing \cite{Lee_2021}.
 
 \input{tab_results}
@@ -766,18 +676,6 @@ more weight on recall than precision. This is due to the fact that
 the dataset is very unbalanced and noise instances are rare, even in
 the 10min-window setup. F-score is adapted accordingly to reflect
 that recall is harder to achieve than precision.
-
-% NOTE: decided against it to not have the actual application
-% influence the research result
-%In this application, our primary objective is to identify as many
-%segments as possible that contain artifacts while allowing for some
-%tolerance regarding detecting noisy segments. The principal aim should
-%be to reduce the number of instances requiring the application of
-%reliable yet non-automated anomaly detection methods. Consequently,
-%the key performance metric to prioritize is Recall. For this reason,
-%the F2 score is considered, which is a weighted harmonic mean of
-%precision and recall, and where recall is given more importance than
-%precision.
 
 The first observation is that by comparing the three sub-tables we can
 immediately see that the three windows behave as expected, with
@@ -804,15 +702,13 @@ Although the conditions present in HB1-C are worth investigating,
 the results show that the ideas presented here are validated and
 promising.
 
-What is also noteworthy is that TP\_att outperforms the
-task-calibrated conventional methods on HB2-A and HB2-B.
+What is also noteworthy is that TP\_att outperforms MNE on HB2-A and HB2-B.
 Regarding HB2-A it is worth investigating whether the transformer has
 `discovered' the lack of correlation between HB1-A and HB2-A on noisy
-segments.
-Regarding HB2-B, a possible explanation is that TP\_att is more robust
-to noise density considerably above the hard-wired 1\%: it suffers
-the unavoidable precision loss just as all methods, but it gets a
-comparatively higher F-score through perfect recall.
+segments. Regarding HB2-B, a possible explanation is that TP\_att is
+more robust to noise density considerably above the hard-wired 1\%: it
+suffers the unavoidable precision loss just as all methods, but it
+gets a comparatively higher F-score through perfect recall.
 
 
 
@@ -837,7 +733,7 @@ Our current findings already indicate that the attention layer of a
 Transformer trained on the sleep stage task exhibits promising
 performance when used as an anomaly detector.
 
-Subsequent steps must focus in two directions: exploring the current
+Subsequent steps will pursue two directions: exploring the current
 experimental setup at more depth and expanding the breadth of the
 results with diverse datasets and tasks. Regarding the first direction,
 we mostly plan to investigate how the components of the attention
@@ -851,43 +747,91 @@ inherent difficulty in trying to understand the inner workings of
 neural networks even for single-layer attention, as the the field
 of \emph{explainable machine learning} evolves the required tools
 are starting to materialize.
-
-Regarding the second direction, the most immediate goal is to devise a
-second task on the same data besides sleep stage detection.
-This would allow us to experiment with training
-on different tasks and jointly training on multiple tasks, which we
-expect to give insights about what tasks are more appropriate as
-drivers for anomaly detection. A less directly accessible goal is to
-test our idea on different use cases and domains. Although both
-sequence processing and anomaly detection are ubiquitous, the
-existence of simultaneous task/noise supervision is less so.
-But we are confident that the exposure gained through publishing our
-EEG results will create an interest in compiling and publishing such
-datasets.
+%
+Regarding the second direction, the most immediate goal is to jointly
+train on multiple tasks, which we expect to help the network
+distinguish between noisy segments and segments that happen to be
+irrelevant for a given task.
 
 
+\begin{credits}
+  
+\subsubsection{\ackname} This research was co-funded by the European Union
+under GA no. 101135782 (MANOLO project). Views and opinions expressed
+are however those of the authors only and do not necessarily reflect
+those of the European Union or CNECT. Neither the European Union nor
+CNECT can be held responsible for them. AWS resources were provided by
+the National Infrastructures for Research and Technology GRNET and
+funded by the EU Recovery and Resiliency Facility.
 
-
-\ifnum\anon=0
-
-%%%%%%%%%%%%
-\section*{Acknowledgment}
-%%%%%%%%%%%%
-
-This research was co-funded by the European Union under GA no. 101135782 (MANOLO project). Views and opinions expressed are however those of the authors only and do not necessarily reflect those of the European Union or CNECT. Neither the European Union nor CNECT can be held responsible for them. AWS resources were provided by the National Infrastructures for Research and Technology GRNET and funded by the EU Recovery and Resiliency Facility.
-
-\fi
+\subsubsection{\discintname} The authors have no competing
+interests.
+\end{credits}
 
 % \section*{References}
 
-\bibliographystyle{IEEEtranDOI}
-\bibliography{refs}
+\bibliographystyle{splncs04}
+
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{aerospace6110117}
+Basora, L., Olive, X., Dubot, T.: Recent advances in anomaly detection methods
+  applied to aviation. Aerospace  \textbf{6}(11) (2019).
+  \doi{10.3390/aerospace6110117}
+
+\bibitem{10744017}
+Duja, K.U., Khan, I.A., Alsuhaibani, M.: Video surveillance anomaly detection:
+  A review on deep learning benchmarks. IEEE Access  \textbf{12} (2024).
+  \doi{10.1109/ACCESS.2024.3491868}
+
+\bibitem{hochreiter-schmidhuber:1997}
+Hochreiter, S., Schmidhuber, J.: Long short-term memory. Neural Computation
+  \textbf{9}(8) (1997). \doi{10.1162/neco.1997.9.8.1735}
+
+\bibitem{HOJJATI2024106106}
+Hojjati, H., Ho, T.K.K., Armanfard, N.: Self-supervised anomaly detection in
+  computer vision and beyond: A survey and outlook. Neural Networks
+  \textbf{172} (2024). \doi{10.1016/j.neunet.2024.106106}
+
+\bibitem{Lee_2021}
+Lee, M.C., Lin, J.C., Gran, E.G.: How far should we look back to achieve
+  effective real-time time-series anomaly detection? In: Advanced Information
+  Networking and Applications. Springer (2021).
+  \doi{10.1007/978-3-030-75100-5_13}
+
+\bibitem{boas-dataset}
+L{\' o}pez-Larraz, E., Sierra-Torralba, M., Clemente, S., Fierro, G., Oriol,
+  D., Minguez, J., Montesano, L., Klinzing, J.G.: The {B}itbrain open access
+  sleep {(BOAS)} dataset. OpenNeuro (2025).
+  \doi{10.18112/openneuro.ds005555.v1.1.1}
+
+\bibitem{MEJRI2024124922}
+Mejri, N., Lopez-Fuentes, L., Roy, K., Chernakov, P., Ghorbel, E., Aouada, D.:
+  Unsupervised anomaly detection in time-series: An extensive evaluation and
+  analysis of state-of-the-art methods. Expert Systems with Applications
+  \textbf{256} (2024). \doi{10.1016/j.eswa.2024.124922}
+
+\bibitem{SGUEGLIA2022170}
+Sgueglia, A., {Di Sorbo}, A., Visaggio, C.A., Canfora, G.: A systematic
+  literature review of iot time series anomaly detection solutions. Future
+  Generation Computer Systems  \textbf{134},  170--186 (2022).
+  \doi{10.1016/j.future.2022.04.005}
+
+\bibitem{vaswani-etal:2017}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N.,
+  Kaiser, {\L}., Polosukhin, I.: Attention is all you need. In: Advances in
+  Neural Information Processing Systems 30 (2017),
+  \url{http://papers.nips.cc/paper/7181-attention-is-all-you-need}
+
+\bibitem{10.1145/3691338}
+Zamanzadeh~Darban, Z., Webb, G.I., Pan, S., Aggarwal, C., Salehi, M.: Deep
+  learning for time series anomaly detection: A survey. ACM Comput. Surv.
+  \textbf{57}(1) (Oct 2024). \doi{10.1145/3691338}
+
+\end{thebibliography}
+
 
 \end{document}
-
-
-% LocalWords:  autoencode stationarity datapoint Mejri PCA LSTM IQR
-% LocalWords:  autoencoder dimensionality LeakyReLU BlendedLoss MNE
-% LocalWords:  neurophysiological overfit Frouros MANOLO CNECT Zenodo
-% LocalWords:  cyberattack autoencoding recurrency softmax bandpass
-% LocalWords:  convolutional interquartile ReduceLROnPlateau
