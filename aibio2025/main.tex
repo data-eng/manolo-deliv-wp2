@@ -1,9 +1,3 @@
-% 14 pages including references and appendices
-% only one contact author, Springer License to Publish
-% https://resource-cms.springernature.com/springer-cms/rest/v1/content/19790018/data/SNCS_ProceedingsPaper_LTP_ST_SN_Switzerland
-% Submit a zip  containing:
-% PDF; tex source files including figures and tables; supplementary materials; license
-
 \documentclass[runningheads]{llncs}
 
 \usepackage[T1]{fontenc}
@@ -14,7 +8,7 @@
 \usepackage{algorithmic}
 \usepackage{graphicx}
 
-\usepackage{booktabs} % for professional tables
+\usepackage{booktabs}
 \usepackage{colortbl}
 \usepackage{subcaption}
 \usepackage{multirow}
@@ -33,9 +27,6 @@
 
 \DeclareUnicodeCharacter{2212}{-}
 
-
-\newcommand{\deleted}[1]{\textbf{DEL:} #1}
-\renewcommand{\deleted}[1]{}
 
 \begin{document}
 
@@ -60,7 +51,6 @@ Luis Montesano\inst{2}
 \maketitle
 
 \begin{abstract}
-% 150--250 words. Now 270.
 
 One of the main concerns when dealing with electroencephalographic
 signals (EEG) is assuring that clean data with a high signal-to-noise
@@ -162,20 +152,6 @@ other application. It is well-known that there is no general-purpose
 approach (or even paradigm) that works best across domains and
 applications and performance depends on the use case and the nature of
 the encountered anomalies \cite{MEJRI2024124922}.
-
-\deleted{As conventional approaches often struggle to provide satisfactory
-results, or are limited by the need to tune their parameters for each
-specific application on a case-by-case basis, recent advancements in
-\emph{deep learning} have gained significant attention in the research
-community \cite{MEJRI2024124922}. And, given the vagueness of what
-constitutes ground truth, the most successful approaches are
-unsupervised or self-supervised: \emph{forecasting-based} approaches
-train a neural network to predict the next datapoint in the sequence
-and \emph{reconstruction-based} approaches train a neural network to
-reconstruct the sequence from a learned, compressed representation.
-In either case, the assumption is that a high error between the
-predicted/reconstructed sequence and the actual data is indicative of
-an abnormality.}
 
 In the work described here, we present a method for automatically
 adapting a deep-learned anomaly detector to different domains. In
@@ -548,14 +524,6 @@ represents the spread of the middle 50\% of a dataset and reduces the
 influence of outliers by focusing on the range within which the
 central portion of the data lies.
 
-% For a particular feature of a time-series $x$, its normalized value $x_{\text{norm}}$ is given:
-
-% \begin{equation}
-%     x_{\text{norm}} = \frac{x - \mathrm{median}(x)}{\mathrm{IQR}(x)} \label{eq:robust_norm}
-% \end{equation}
-
-% where $\mathrm{median}(x)$ and $\mathrm{IQR}(x)$ are the feature's median value and IQR respectively.
-
 MNE requires raw data that preserves the characteristics of the
 original signal, so no normalization is applied for these methods.
 
@@ -636,9 +604,6 @@ where $p$ is the power parameter that controls the sensitivity of the
 loss to differences and $b$ the \emph{blend factor} that controls
 the trade-off between learning the overall trend (median error) and
 closely following local patterns (mean error).
-% A systematic
-% investigation of various blend values within the range [0.1, 0.8]
-% reveals the impact on the model's performance in data reconstruction.
 
 Revisiting our research hypothesis, we expect methods trained on
 predicting sleep stage to outperform methods trained on autoencoding
@@ -711,18 +676,6 @@ more weight on recall than precision. This is due to the fact that
 the dataset is very unbalanced and noise instances are rare, even in
 the 10min-window setup. F-score is adapted accordingly to reflect
 that recall is harder to achieve than precision.
-
-% NOTE: decided against it to not have the actual application
-% influence the research result
-%In this application, our primary objective is to identify as many
-%segments as possible that contain artifacts while allowing for some
-%tolerance regarding detecting noisy segments. The principal aim should
-%be to reduce the number of instances requiring the application of
-%reliable yet non-automated anomaly detection methods. Consequently,
-%the key performance metric to prioritize is Recall. For this reason,
-%the F2 score is considered, which is a weighted harmonic mean of
-%precision and recall, and where recall is given more importance than
-%precision.
 
 The first observation is that by comparing the three sub-tables we can
 immediately see that the three windows behave as expected, with
@@ -818,13 +771,67 @@ interests.
 % \section*{References}
 
 \bibliographystyle{splncs04}
-\bibliography{refs}
+
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{aerospace6110117}
+Basora, L., Olive, X., Dubot, T.: Recent advances in anomaly detection methods
+  applied to aviation. Aerospace  \textbf{6}(11) (2019).
+  \doi{10.3390/aerospace6110117}
+
+\bibitem{10744017}
+Duja, K.U., Khan, I.A., Alsuhaibani, M.: Video surveillance anomaly detection:
+  A review on deep learning benchmarks. IEEE Access  \textbf{12} (2024).
+  \doi{10.1109/ACCESS.2024.3491868}
+
+\bibitem{hochreiter-schmidhuber:1997}
+Hochreiter, S., Schmidhuber, J.: Long short-term memory. Neural Computation
+  \textbf{9}(8) (1997). \doi{10.1162/neco.1997.9.8.1735}
+
+\bibitem{HOJJATI2024106106}
+Hojjati, H., Ho, T.K.K., Armanfard, N.: Self-supervised anomaly detection in
+  computer vision and beyond: A survey and outlook. Neural Networks
+  \textbf{172} (2024). \doi{10.1016/j.neunet.2024.106106}
+
+\bibitem{Lee_2021}
+Lee, M.C., Lin, J.C., Gran, E.G.: How far should we look back to achieve
+  effective real-time time-series anomaly detection? In: Advanced Information
+  Networking and Applications. Springer (2021).
+  \doi{10.1007/978-3-030-75100-5_13}
+
+\bibitem{boas-dataset}
+L{\' o}pez-Larraz, E., Sierra-Torralba, M., Clemente, S., Fierro, G., Oriol,
+  D., Minguez, J., Montesano, L., Klinzing, J.G.: The {B}itbrain open access
+  sleep {(BOAS)} dataset. OpenNeuro (2025).
+  \doi{10.18112/openneuro.ds005555.v1.1.1}
+
+\bibitem{MEJRI2024124922}
+Mejri, N., Lopez-Fuentes, L., Roy, K., Chernakov, P., Ghorbel, E., Aouada, D.:
+  Unsupervised anomaly detection in time-series: An extensive evaluation and
+  analysis of state-of-the-art methods. Expert Systems with Applications
+  \textbf{256} (2024). \doi{10.1016/j.eswa.2024.124922}
+
+\bibitem{SGUEGLIA2022170}
+Sgueglia, A., {Di Sorbo}, A., Visaggio, C.A., Canfora, G.: A systematic
+  literature review of iot time series anomaly detection solutions. Future
+  Generation Computer Systems  \textbf{134},  170--186 (2022).
+  \doi{10.1016/j.future.2022.04.005}
+
+\bibitem{vaswani-etal:2017}
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N.,
+  Kaiser, {\L}., Polosukhin, I.: Attention is all you need. In: Advances in
+  Neural Information Processing Systems 30 (2017),
+  \url{http://papers.nips.cc/paper/7181-attention-is-all-you-need}
+
+\bibitem{10.1145/3691338}
+Zamanzadeh~Darban, Z., Webb, G.I., Pan, S., Aggarwal, C., Salehi, M.: Deep
+  learning for time series anomaly detection: A survey. ACM Comput. Surv.
+  \textbf{57}(1) (Oct 2024). \doi{10.1145/3691338}
+
+\end{thebibliography}
+
 
 \end{document}
-
-
-% LocalWords:  autoencode stationarity datapoint Mejri LSTM IQR
-% LocalWords:  autoencoder dimensionality LeakyReLU BlendedLoss MNE
-% LocalWords:  neurophysiological overfit MANOLO CNECT Zenodo
-% LocalWords:  cyberattack autoencoding recurrency softmax bandpass
-% LocalWords:  convolutional interquartile ReduceLROnPlateau
