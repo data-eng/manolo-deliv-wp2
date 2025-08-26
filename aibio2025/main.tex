@@ -194,11 +194,12 @@ decisions are made from fewer datapoints.}
 
 One can easily see how this maps directly to specific instances of
 anomalies. For example, assuming a sleep-stage classification task on
-EEG data, electrical activity produced muscle contraction will
+EEG data, electrical activity produced by muscle contraction will
 have the same morphology regardless of the sleep stage and a
-successful classifier will learn to ignore it; But the same patterns
-might be considered useful signal for a different application of EEG
-data.
+successful classifier will learn to ignore it.
+\emph{We aim to exploit the labelling available for a given task
+in order to train a general-purpose anomaly detector that can be
+ported to different tasks, less well-understood, tasks.}
 
 Our contribution is the formulation of a methodology for leveraging
 the outputs of intermediate layers of deep neural networks in order
@@ -321,11 +322,11 @@ systems.
 
 On the other hand, the attention mechanism offers an alternative,
 currently unexplored, way to extract indications about what parts of
-the sequence are anomalies. The hypothesis is that the part of the
-sequence that receives the least attention while performing a task
-relevant to the use case, then is this part is an anomaly. The
+the sequence are anomalies. The hypothesis is that noise or anomalies
+are the part of the equence that receives the least attention while
+performing a relevant task. The
 intuition is that neural networks will happily overfit the data
-when they are given enough parameters to do so. Such a network might
+when they are given enough parameters to do so. Such an overfitted network might
 not be good to actually perform the task, but is good at recognizing
 two ways in which a sub-sequence is anomalous: (a) it does not follow
 any pattern that was boosted (gradient-wise) by the training;
@@ -566,7 +567,7 @@ as it makes little sense to compare methods on having identified a
 single datapoint.
 
 Table~\ref{tab2} gives the absolute and relative noise density for the
-remaining four recordings, arranged in descending order.
+remaining four testing recordings, arranged in descending order.
 Specifically, the table gives the count of 30-second segments within
 which at least one artifact is annotated as noise in the ground-truth
 labeling. Note that recordings are \emph{not} of equal length.
@@ -685,9 +686,12 @@ on 5min and 10min windows. If a method reports noise on any part of
 the window and the ground truth also annotates as noisy any part of the
 window, the window counts as a true positive. Obviously, these are
 easier tasks than the original 30-sec segmentation on two
-grounds: (a) positives get less sparse so task becomes less of a
+grounds:
+(a) Since any part of the window marks the window as noisy, longer
+windows give fewer instances but the same number of noisy instances;
+thus positives are less sparse and the task becomes less of a
 needle-in-a-haystack problem, and (b) learners have access to a longer
-context for the same number of input token, which know to be an
+context for the same number of input tokens, which we know to be an
 important factor in sequence processing \cite{Lee_2021}.
 
 \input{tab_results}
