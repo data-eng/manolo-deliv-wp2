@@ -130,13 +130,12 @@ The Data Tier Web API Reference provides an overview of the key endpoints used f
 
 \subsubsection{Data Structures}
 %=================================================================================================
-\begin{longtable}
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{center}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+%    \renewcommand{\arraystretch}{1.2}
 % -----------------------------------------------------------------------
 \hline
-    \underline{Method Name} & \underline{Description} 
+\textit{Method Name} & \textit{Description} 
 \\
 % -----------------------------------------------------------------------    
 \hline \textbf{GetDataStructures} & Summary: Handles the request to retrieve a list of data structures from the database.
@@ -191,8 +190,8 @@ Returns: A Result object indicating the success or failure of the operation, alo
 % ----------------------------------------------------------------------- 
 
         \hline
-    \end{tabular}
 \end{longtable}
+\end{center}
 %=================================================================================================
 
 
@@ -202,10 +201,9 @@ Returns: A Result object indicating the success or failure of the operation, alo
 \newpage
 \subsubsection{Items}
 %=================================================================================================
-\begin{longtable}
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{center}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+%    \renewcommand{\arraystretch}{1.2}
 % -----------------------------------------------------------------------     
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -292,19 +290,17 @@ Returns: A Result indicating the success or failure of the operation.
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}
-       
+\end{center}
 %=================================================================================================
 
 
 \newpage
 \subsubsection{Predicates}
 %=================================================================================================
-\begin{longtable}
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{center}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+%    \renewcommand{\arraystretch}{1.2}
 % -----------------------------------------------------------------------    
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -380,21 +376,19 @@ Returns: A Result object indicating success or failure. If successful, the Resul
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}        
+\end{center}
 %=================================================================================================
 
 
 \newpage
 \subsubsection{Relations}
 %=================================================================================================
-\begin{longtable}
-    \centering
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+%    \renewcommand{\arraystretch}{1.2}
 % -----------------------------------------------------------------------     
 \hline
-    \underline{Method Name} & \underline{Description} 
+    \textit{Method Name} & \textit{Description} 
 \\
 % ----------------------------------------------------------------------- 
 \hline
@@ -476,7 +470,6 @@ Parameters:
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}       
 %=================================================================================================
 
@@ -485,9 +478,7 @@ Parameters:
 \newpage
 \subsubsection{Global Aliases}
 %=================================================================================================
-\begin{longtable}{c}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
 % -----------------------------------------------------------------------     
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -538,7 +529,6 @@ Returns: A Result object containing either: 	- A successful result with the ID o
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}      
 %=================================================================================================
 
@@ -547,9 +537,7 @@ Returns: A Result object containing either: 	- A successful result with the ID o
 \newpage
 \subsubsection{Key-Value Pairs}
 %=================================================================================================
-\begin{longtable}{c}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
 % -----------------------------------------------------------------------     
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -596,7 +584,6 @@ Returns: A Result representing the asynchronous operation. The result is a Resul
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}     
 %=================================================================================================
 
@@ -604,9 +591,7 @@ Returns: A Result representing the asynchronous operation. The result is a Resul
 
 \subsubsection{Authentication}
 %=================================================================================================
-\begin{longtable}{c}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
 % -----------------------------------------------------------------------     
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -639,7 +624,6 @@ Returns: A Result object indicating the success of the logout operation.
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}       
 %=================================================================================================
 
@@ -648,9 +632,7 @@ Returns: A Result object indicating the success of the logout operation.
 \newpage
 \subsubsection{Management}
 %=================================================================================================
-\begin{longtable}{c}
-    \renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|p{0.25\linewidth}|p{0.75\linewidth}|}
+\begin{longtable}{|p{0.25\linewidth}|p{0.75\linewidth}|}
 % -----------------------------------------------------------------------     
 \hline
     \underline{Method Name} & \underline{Description} 
@@ -673,6 +655,5 @@ Returns: A task that represents the asynchronous operation. The result is an ind
 \\
 % ----------------------------------------------------------------------- 
         \hline
-    \end{tabular}
 \end{longtable}    
 %=================================================================================================
