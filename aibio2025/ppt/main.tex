@@ -18,7 +18,7 @@
 \setbox0=\hbox{\includegraphics[height=20pt]{#1}}%
 \parbox{\wd0}{\box0}\endgroup}
 
-\newcommand{\textbfburgundy}[1]{\textbf{\textcolor{DarkBurgundy}{#1}}}
+\newcommand{\textbfblue}[1]{\textbf{\textcolor{PrussianBlue}{#1}}}
 
 
 %----------------------------------------------------------------------------------------
@@ -29,15 +29,13 @@
 \subtitle{Explaining Classifier Decisions through EEG Signal Style Transfer Autoencoding}
 
 \author{\vskip -15pt Natalia Koliou (presenter),
-  \\ Panagiotis Zazos, Christoforos Romesis, Cristian Bosch,
-  \\ Stasinos Konstantopoulos, and Panagiotis Trakadas}
+  \\ Maria Sierra, Christoforos Romesis,
+  \\ Stasinos Konstantopoulos, and Luis Montesano}
 \institute[\textit{xSTAE: Explaining Classifier Decisions through EEG Signal Style Transfer Autoencoding}]{}
 
 \date{%
-  \raisebox{-0.2\height}{\includegraphics[width=2cm]{AICStyleData/logos/fdi.png}}%
-  \hspace{2em}%
-  \vcenteredlogo{AICStyleData/logos/ceadar.png}%
-  \hspace{2em}%
+%   \raisebox{-0.2\height}{\includegraphics[width=2cm]{AICStyleData/logos/bitbrain.png}}%
+%   \hspace{2em}%
   \vcenteredlogo{AICStyleData/logos/manolo-tagline.png}%
   \hspace{2em}%
   \vcenteredlogo{AICStyleData/logos/euflag-white.png}%
@@ -65,10 +63,10 @@
 \begin{frame}{Introduction \& Related Work}
     \begin{itemize}
         \item Understanding EEG-based sleep stage classification is crucial for sleep research and healthcare.
-        \item Traditional models struggle with \textbfburgundy{misclassifications}, especially for minority sleep stages.
+        \item Traditional models struggle with \textbfblue{misclassifications}, especially for minority sleep stages.
         \item Existing work interprets time-series classifiers, either by integrating explainers into the model (e.g., XTF-CNN, DeepVix) or using post-hoc techniques to highlight which input patterns drive predictions (e.g., timeXplain, LIME).
-        \item \textbfburgundy{Counterfactual explanations} have been successful in visual domains but are underexplored for time-series EEG.
-        \item We address this gap by generating \textbfburgundy{counterfactual EEG examples} that show what a misclassified instance should have looked like to be correctly classified.
+        \item \textbfblue{Counterfactual explanations} have been successful in visual domains but are underexplored for time-series EEG.
+        \item We address this gap by generating \textbfblue{counterfactual EEG examples} that show what a misclassified instance should have looked like to be correctly classified.
 
     \end{itemize}
 \end{frame}
@@ -79,14 +77,14 @@
 
 \begin{frame}{Problem Statement}
     \begin{itemize}
-        \item Counterfactual explanations provide \textbfburgundy{instance-based insights} for time-series classifiers.
+        \item Counterfactual explanations provide \textbfblue{instance-based insights} for time-series classifiers.
         \item The goal is to explain why a classifier predicts a certain label:
         \begin{itemize}
             \item Dataset: $D = \{x^{(i)}\}_{i=1}^N$, each $x^{(i)} \in \mathbb{R}^d$.
             \item Classifier: $C: \mathcal{X} \rightarrow \mathcal{Y}$, labels $\mathcal{Y} = \{1, \dots, n\}$.
             \item For input $x$, predicted label $y = C(x)$.
         \end{itemize}
-        \item For misclassified instances $x_m$ with $C(x_m) \neq y^*(x_m)$, find \textbfburgundy{minimal modification} $x'_m$ such that $C(x'_m) = y^*(x_m)$ and $x'_m$ is close to $x_m$.
+        \item For misclassified instances $x_m$ with $C(x_m) \neq y^*(x_m)$, find \textbfblue{minimal modification} $x'_m$ such that $C(x'_m) = y^*(x_m)$ and $x'_m$ is close to $x_m$.
         \item $\Delta x_m = x'_m - x_m$ reveals dominant patterns influencing the classifier's decision.
     \end{itemize}
 \end{frame}
@@ -97,7 +95,7 @@
 
 \begin{frame}{Proposed Methodology}
     \begin{itemize}
-        \item \textit{\textbfburgundy{xSTAE}}: A generative framework using class-conditional \textbfburgundy{autoencoders}.
+        \item \textit{\textbfblue{xSTAE}}: A generative framework using class-conditional \textbfblue{autoencoders}.
         \item Each autoencoder $E_\text{tgt}: \mathcal{X} \rightarrow \mathcal{X}_\text{tgt}$ is trained to reconstruct any input while restyling it toward a target class $y_\text{tgt} \in \mathcal{Y}$.
         \item For input $x$ with $y_\text{tgt} \neq C(x)$, the autoencoder generates a counterfactual:
         \[
@@ -106,19 +104,19 @@
         \item Comparing $x$ and $x'$ reveals the patterns in $x$ responsible for the classifier’s original decision.
         \item Training uses dual loss function:
         \begin{enumerate}
-            \item \textbfburgundy{Identity:} Ensures $x'$ remains similar to $x$, using a distance function $d(x, x')$.
-            \item \textbfburgundy{Classification:} Ensures $x'$ is classified as the target, by comparing $C(x')$ with $y_\text{tgt}$.
+            \item \textbfblue{Identity:} Ensures $x'$ remains similar to $x$, using a distance function $d(x, x')$.
+            \item \textbfblue{Classification:} Ensures $x'$ is classified as the target, by comparing $C(x')$ with $y_\text{tgt}$.
         \end{enumerate}
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Proposed Methodology}
-    \vspace{-1.5em}
-    \begin{figure}
-        \centering
-        \includegraphics[height=0.68\paperheight]{figures/xstae_arch.png}
-    \end{figure}
-\end{frame}
+% \begin{frame}{Proposed Methodology}
+%     \vspace{-1.5em}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[height=0.68\paperheight]{figures/xstae_arch.png}
+%     \end{figure}
+% \end{frame}
 
 
 %------------------------------------------------
@@ -129,21 +127,21 @@
 % Setup
 \begin{frame}{Setup}
 
-    We use the \textbfburgundy{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
+    We use the \textbfblue{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
     \vspace{1.5em}
 
     \begin{itemize}
-        \item \textbfburgundy{EEG Data:} 
+        \item \textbfblue{EEG Data:} 
         \begin{itemize}
             \item 30s epochs ($n_s = 7680$ samples, $n_c = 2$).
             \item FFT $\rightarrow$ 0.4-30 Hz filtering $\rightarrow$ segment into $n_s'=300$ spectral slices.
             \item Extract 3 features per slice (frequency, phase, amplitude).
         \end{itemize}
-        \item \textbfburgundy{Classifier:} Two-stage convolutional network over sequences of $k=5$ epochs:
+        \item \textbfblue{Classifier:} Two-stage convolutional network over sequences of $k=5$ epochs:
         \[
             X_t^f = [e_{t-k+1}, \dots, e_t] \rightarrow \hat{y}_t
         \]
-        \item \textbfburgundy{Autoencoders:} Hybrid networks with convolutional and attention layers:
+        \item \textbfblue{Autoencoders:} Hybrid networks with convolutional and attention layers:
         \[
         X_f^t = e_t \oplus \text{pos} \longrightarrow \hat{X}_f^{\,t} \text{ (reconstructed input)}
         \]
@@ -156,7 +154,7 @@
 \begin{frame}{Quantitative Results}
     \begin{itemize}
         \item We pass the test dataset through each class-specific autoencoder, then classify the restyled outputs using the original classifier.
-        \item High \textbfburgundy{classification accuracy} on restyled signals indicates the autoencoders have learned the patterns that the classifier uses for each sleep stage.
+        \item High \textbfblue{classification accuracy} on restyled signals indicates the autoencoders have learned the patterns that the classifier uses for each sleep stage.
     \end{itemize}
 
     \vspace{2em}
@@ -175,7 +173,7 @@
 % Qualitative Discussion
 \begin{frame}{Qualitative Discussion}
     \begin{itemize}
-        \item \textbfburgundy{Example case:} Original EEG segment was labeled as N2 but misclassified as N1.
+        \item \textbfblue{Example case:} Original EEG segment was labeled as N2 but misclassified as N1.
         \item xSTAE restyles the segment toward the correct class (N2), producing a counterfactual.
         \item Comparison reveals why the classifier erred:
         \begin{itemize}
@@ -183,17 +181,17 @@
             \item Restyled signal emphasizes features around timesteps 55-60, 70-75, 90-95.
             \item Classifier "expects" these more pronounced spikes to identify N2.
         \end{itemize}
-        \item Misclassification occurs not from wrong feature detection, but from \textbfburgundy{insufficient weighting} of existing patterns.
+        \item Misclassification occurs not from wrong feature detection, but from \textbfblue{insufficient weighting} of existing patterns.
     \end{itemize}
 \end{frame}
 
-\begin{frame}{Qualitative Discussion}
-    \vspace{-1.5em}
-    \begin{figure}
-        \centering
-        \includegraphics[width=0.56\textwidth]{figures/org0_tgt1_s3_f1a.png}
-    \end{figure}
-\end{frame}
+% \begin{frame}{Qualitative Discussion}
+%     \vspace{-1.5em}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=0.56\textwidth]{figures/org0_tgt1_s3_f1a.png}
+%     \end{figure}
+% \end{frame}
 
 %------------------------------------------------
 % Conclusion & Future Work
@@ -201,8 +199,8 @@
 
 \begin{frame}{Conclusion}
 \begin{itemize}
-    \item \textbfburgundy{xSTAE} explains classifier errors by restyling misclassified EEG instances into correctly classified ones.
-    \item Autoencoders balance \textbfburgundy{identity loss} (keep instance similar) and \textbfburgundy{classification loss} (push to correct label), revealing features the classifier missed.
+    \item \textbfblue{xSTAE} explains classifier errors by restyling misclassified EEG instances into correctly classified ones.
+    \item Autoencoders balance \textbfblue{identity loss} (keep instance similar) and \textbfblue{classification loss} (push to correct label), revealing features the classifier missed.
     \item Contributions:
     \begin{itemize}
         \item Ground counterfactual explanations in time-series EEG classification.
@@ -214,9 +212,9 @@
 
 \begin{frame}{Future Work}
 \begin{itemize}
-    \item Explore \textbfburgundy{alternative identity losses} to highlight meaningful changes (e.g., bigger local changes, selective brainwave bands).
-    \item Conduct \textbfburgundy{expert trials} to refine interpretability of restyled EEGs.
-    \item Investigate linking insights from misclassifications to \textbfburgundy{actionable guidance} at the data or confidence level, keeping xSTAE model-agnostic.
+    \item Explore \textbfblue{alternative identity losses} to highlight meaningful changes (e.g., bigger local changes, selective brainwave bands).
+    \item Conduct \textbfblue{expert trials} to refine interpretability of restyled EEGs.
+    \item Investigate linking insights from misclassifications to \textbfblue{actionable guidance} at the data or confidence level, keeping xSTAE model-agnostic.
 \end{itemize}
 \end{frame}
 
