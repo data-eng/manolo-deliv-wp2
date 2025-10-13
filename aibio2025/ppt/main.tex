@@ -25,8 +25,8 @@
 %	TITLE PAGE CONFIGURATION
 %----------------------------------------------------------------------------------------
 
-\title[short title]{xSTAE:}
-\subtitle{Explaining Classifier Decisions through EEG Signal Style Transfer Autoencoding}
+\title[short title]{Self-Attention as a Predictor of EEG Anomalies}
+\subtitle{}
 
 \author{\vskip -15pt Natalia Koliou (presenter),
   \\ Maria Sierra, Christoforos Romesis,
@@ -57,10 +57,10 @@
 \end{frame}
 
 %------------------------------------------------
-% Introduction & Related Work
-\makesection{Introduction \& Related Work}
+% Introduction & Background
+\makesection{Introduction \& Background}
 
-\begin{frame}{Introduction \& Related Work}
+\begin{frame}{Introduction \& Background}
     \begin{itemize}
         \item Understanding EEG-based sleep stage classification is crucial for sleep research and healthcare.
         \item Traditional models struggle with \textbfblue{misclassifications}, especially for minority sleep stages.
@@ -72,10 +72,10 @@
 \end{frame}
 
 %------------------------------------------------
-% Problem Statement
-\makesection{Problem Statement}
+% Research Methodology
+\makesection{Research Methodology}
 
-\begin{frame}{Problem Statement}
+\begin{frame}{Research Methodology}
     \begin{itemize}
         \item Counterfactual explanations provide \textbfblue{instance-based insights} for time-series classifiers.
         \item The goal is to explain why a classifier predicts a certain label:
@@ -89,28 +89,7 @@
     \end{itemize}
 \end{frame}
 
-%------------------------------------------------
-% Proposed Methodology
-\makesection{Proposed Methodology}
-
-\begin{frame}{Proposed Methodology}
-    \begin{itemize}
-        \item \textit{\textbfblue{xSTAE}}: A generative framework using class-conditional \textbfblue{autoencoders}.
-        \item Each autoencoder $E_\text{tgt}: \mathcal{X} \rightarrow \mathcal{X}_\text{tgt}$ is trained to reconstruct any input while restyling it toward a target class $y_\text{tgt} \in \mathcal{Y}$.
-        \item For input $x$ with $y_\text{tgt} \neq C(x)$, the autoencoder generates a counterfactual:
-        \[
-            x' = E_\text{tgt}(x) \quad \text{s.t.} \quad C(x') = y_\text{tgt}
-        \]
-        \item Comparing $x$ and $x'$ reveals the patterns in $x$ responsible for the classifier’s original decision.
-        \item Training uses dual loss function:
-        \begin{enumerate}
-            \item \textbfblue{Identity:} Ensures $x'$ remains similar to $x$, using a distance function $d(x, x')$.
-            \item \textbfblue{Classification:} Ensures $x'$ is classified as the target, by comparing $C(x')$ with $y_\text{tgt}$.
-        \end{enumerate}
-    \end{itemize}
-\end{frame}
-
-% \begin{frame}{Proposed Methodology}
+% \begin{frame}{Research Methodology}
 %     \vspace{-1.5em}
 %     \begin{figure}
 %         \centering
@@ -124,8 +103,8 @@
 \makesection{Experiments}
 
 %------------------------------------------------
-% Setup
-\begin{frame}{Setup}
+% Data Preprocessing
+\begin{frame}{Data Preprocessing}
 
     We use the \textbfblue{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
     \vspace{1.5em}
@@ -150,8 +129,8 @@
 \end{frame}
 
 %------------------------------------------------
-% Quantitative Results
-\begin{frame}{Quantitative Results}
+% Training Process \& Hyperparameters
+\begin{frame}{Training Process \& Hyperparameters}
     \begin{itemize}
         \item We pass the test dataset through each class-specific autoencoder, then classify the restyled outputs using the original classifier.
         \item High \textbfblue{classification accuracy} on restyled signals indicates the autoencoders have learned the patterns that the classifier uses for each sleep stage.
@@ -168,30 +147,35 @@
     \end{tabular}
 \end{frame}
 
+%------------------------------------------------
+% Results \& Discussion
+\makesection{Results \& Discussion}
 
 %------------------------------------------------
-% Qualitative Discussion
-\begin{frame}{Qualitative Discussion}
-    \begin{itemize}
-        \item \textbfblue{Example case:} Original EEG segment was labeled as N2 but misclassified as N1.
-        \item xSTAE restyles the segment toward the correct class (N2), producing a counterfactual.
-        \item Comparison reveals why the classifier erred:
-        \begin{itemize}
-            \item Original signal lacked sufficiently prominent spikes.
-            \item Restyled signal emphasizes features around timesteps 55-60, 70-75, 90-95.
-            \item Classifier "expects" these more pronounced spikes to identify N2.
-        \end{itemize}
-        \item Misclassification occurs not from wrong feature detection, but from \textbfblue{insufficient weighting} of existing patterns.
-    \end{itemize}
-\end{frame}
+% Results \& Discussion
+\begin{frame}{Results \& Discussion}
 
-% \begin{frame}{Qualitative Discussion}
-%     \vspace{-1.5em}
-%     \begin{figure}
-%         \centering
-%         \includegraphics[width=0.56\textwidth]{figures/org0_tgt1_s3_f1a.png}
-%     \end{figure}
-% \end{frame}
+    We use the \textbfblue{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
+    \vspace{1.5em}
+
+    \begin{itemize}
+        \item \textbfblue{EEG Data:} 
+        \begin{itemize}
+            \item 30s epochs ($n_s = 7680$ samples, $n_c = 2$).
+            \item FFT $\rightarrow$ 0.4-30 Hz filtering $\rightarrow$ segment into $n_s'=300$ spectral slices.
+            \item Extract 3 features per slice (frequency, phase, amplitude).
+        \end{itemize}
+        \item \textbfblue{Classifier:} Two-stage convolutional network over sequences of $k=5$ epochs:
+        \[
+            X_t^f = [e_{t-k+1}, \dots, e_t] \rightarrow \hat{y}_t
+        \]
+        \item \textbfblue{Autoencoders:} Hybrid networks with convolutional and attention layers:
+        \[
+        X_f^t = e_t \oplus \text{pos} \longrightarrow \hat{X}_f^{\,t} \text{ (reconstructed input)}
+        \]
+    \end{itemize}
+
+\end{frame}
 
 %------------------------------------------------
 % Conclusion & Future Work
