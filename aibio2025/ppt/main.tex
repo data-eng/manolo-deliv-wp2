@@ -160,19 +160,19 @@
 % Training Process \& Hyperparameters
 \begin{frame}{Training Process \& Hyperparameters}
     \begin{itemize}
-        \item We pass the test dataset through each class-specific autoencoder, then classify the restyled outputs using the original classifier.
-        \item High \textbfblue{classification accuracy} on restyled signals indicates the autoencoders have learned the patterns that the classifier uses for each sleep stage.
+        \item EEG segments (30s, 3840 samples/channel) split into \textbfblue{16 chunks of 240 samples} for AE and TP methods.
+        \item Custom \textbfblue{BlendedLoss} balances trend (median) and local pattern (mean) errors: 
+        \[
+        \text{Loss} = (1-b) \cdot \text{median}(|\hat{x}-x|^p) + b \cdot \text{mean}(|\hat{x}-x|^p)
+        \]
+        \item Methods compared:
+        \begin{enumerate}
+            \item \textbfblue{MNE}: expert-designed EEG noise filter.
+            \item \textbfblue{AE\_att / TP\_att}: anomalies inferred via attention weights.
+            \item \textbfblue{LSTM, C-LSTM, AE\_err, TP\_err}: anomalies inferred via reconstruction/prediction errors.
+        \end{enumerate}
+        \item \textbfblue{Training setup:} batch size: 512, epochs: 1000, patience: 30, optimizer: Adam, \\lr: 1e-4, scheduler: ReduceLROnPlateau.
     \end{itemize}
-
-    \vspace{2em}
-    \centering
-    \begin{tabular}{lcccc}
-        \toprule
-        Metric & N1 & N2 & N3 & REM \\
-        \midrule
-        Accuracy & 0.9997 & 0.9998 & 0.9260 & 0.9986 \\
-        \bottomrule
-    \end{tabular}
 \end{frame}
 
 %------------------------------------------------
@@ -182,26 +182,18 @@
 %------------------------------------------------
 % Results \& Discussion
 \begin{frame}{Results \& Discussion}
-
-    We use the \textbfblue{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
-    \vspace{1.5em}
-
     \begin{itemize}
-        \item \textbfblue{EEG Data:} 
-        \begin{itemize}
-            \item 30s epochs ($n_s = 7680$ samples, $n_c = 2$).
-            \item FFT $\rightarrow$ 0.4-30 Hz filtering $\rightarrow$ segment into $n_s'=300$ spectral slices.
-            \item Extract 3 features per slice (frequency, phase, amplitude).
-        \end{itemize}
-        \item \textbfblue{Classifier:} Two-stage convolutional network over sequences of $k=5$ epochs:
-        \[
-            X_t^f = [e_{t-k+1}, \dots, e_t] \rightarrow \hat{y}_t
-        \]
-        \item \textbfblue{Autoencoders:} Hybrid networks with convolutional and attention layers:
-        \[
-        X_f^t = e_t \oplus \text{pos} \longrightarrow \hat{X}_f^{\,t} \text{ (reconstructed input)}
-        \]
+        \item Three evaluation setups: \textbfblue{30s, 5min, 10min windows}.
+        \item Window marked as \textbfblue{noisy} if any sample is annotated as noise.
+        \item Predictions binarized with \textbfblue{threshold}: 1\% of training data marked as noise.
+        \item \textbfblue{F2-score (\(\beta=2\))} emphasizes recall to account for the strong class imbalance.
+        \item \textbfblue{Longer windows} improve results due to denser positives and more context.
+        \item Attention-based methods (AE\_att, TP\_att) outperform error-based counterparts (AE\_err, TP\_err).
+        \item TP\_att outperforms MNE on some recordings, likely due to better handling of \textbfblue{uncorrelated channel segments}.
     \end{itemize}
+
+    \vspace{0.5em}
+    {\small \textit{Attention is a promising indicator for anomaly detection in EEG signals.}}
 
 \end{frame}
 
@@ -210,24 +202,21 @@
 \makesection{Conclusion \& Future Work}
 
 \begin{frame}{Conclusion}
-\begin{itemize}
-    \item \textbfblue{xSTAE} explains classifier errors by restyling misclassified EEG instances into correctly classified ones.
-    \item Autoencoders balance \textbfblue{identity loss} (keep instance similar) and \textbfblue{classification loss} (push to correct label), revealing features the classifier missed.
-    \item Contributions:
     \begin{itemize}
-        \item Ground counterfactual explanations in time-series EEG classification.
-        \item Identify spectral representations suitable for EEG signals.
-        \item Validate on open BOAS dataset and release full experimental setup.
+        \item We extract \textbfblue{anomaly indicators} from intermediate layers of deep networks trained on sequence tasks, without needing explicit anomaly labels.
+        \item Validated on \textbfblue{EEG signals} from wearable sleep monitoring devices.
+        \item Attention layers show promising performance for anomaly detection.
     \end{itemize}
-\end{itemize}
 \end{frame}
 
 \begin{frame}{Future Work}
-\begin{itemize}
-    \item Explore \textbfblue{alternative identity losses} to highlight meaningful changes (e.g., bigger local changes, selective brainwave bands).
-    \item Conduct \textbfblue{expert trials} to refine interpretability of restyled EEGs.
-    \item Investigate linking insights from misclassifications to \textbfblue{actionable guidance} at the data or confidence level, keeping xSTAE model-agnostic.
-\end{itemize}
+    \begin{itemize}
+        \item Analyze \textbfblue{attention components} (Q, K, V) to understand which parts focus on ignoring noisy patterns.
+        \item Investigate model robustness to \textbfblue{uncorrelated/noisy} segments.
+        \item Extend experiments to \textbfblue{diverse} datasets and tasks.
+        \item Explore \textbfblue{multi-task training} to better distinguish between noise and task-irrelevant segments.
+        \item Use \textbfblue{explainable ML} tools to interpret attention-based anomaly detection more transparently.
+    \end{itemize}
 \end{frame}
 
 %------------------------------------------------
