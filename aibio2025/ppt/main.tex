@@ -66,7 +66,7 @@
     \item Artifacts may arise from physiological (muscle tension, sweating) or technical sources (electrode detachment).
     \item What counts as “noise” is often \textbfblue{task-dependent}: a feature irrelevant for one application may be meaningful for another.
     \item Traditional denoising via \textbfblue{reconstruction/prediction errors} (Autoencoders, LSTMs) ignores contextual relevance.
-    \item \textbfblue{Our idea:} Train an attention-based model on a downstream task (e.g., sleep stage classification) and use its attention patterns to infer anomalies without explicit artifact labels.
+    \item \textbfblue{Our idea:} Train attention-based models on a downstream task (e.g., sleep stage classification) and use its attention patterns to infer anomalies without explicit artifact labels.
 \end{itemize}
 \end{frame}
 
@@ -76,26 +76,61 @@
 
 \begin{frame}{Research Methodology}
     \begin{itemize}
-        \item Counterfactual explanations provide \textbfblue{instance-based insights} for time-series classifiers.
-        \item The goal is to explain why a classifier predicts a certain label:
-        \begin{itemize}
-            \item Dataset: $D = \{x^{(i)}\}_{i=1}^N$, each $x^{(i)} \in \mathbb{R}^d$.
-            \item Classifier: $C: \mathcal{X} \rightarrow \mathcal{Y}$, labels $\mathcal{Y} = \{1, \dots, n\}$.
-            \item For input $x$, predicted label $y = C(x)$.
-        \end{itemize}
-        \item For misclassified instances $x_m$ with $C(x_m) \neq y^*(x_m)$, find \textbfblue{minimal modification} $x'_m$ such that $C(x'_m) = y^*(x_m)$ and $x'_m$ is close to $x_m$.
-        \item $\Delta x_m = x'_m - x_m$ reveals dominant patterns influencing the classifier's decision.
+        \item Traditional anomaly detection uses \textbfblue{reconstruction or prediction errors}, but these often miss \textbfblue{context-specific anomalies}.
+        \item \textbfblue{Reconstruction error} can fail because models may learn to reproduce artifacts if trained on contaminated data (false negatives).
+        \item \textbfblue{Prediction error} can incorrectly flag unpredictable but normal variations as anomalies (false positives).
+        \item The \textbfblue{attention-based approach} assumes that \textbfblue{low-attention regions} correspond to noisy or irrelevant segments.
     \end{itemize}
+
+    \vspace{1em}
+
+    \textbfblue{Hypothesis:} during a task (e.g., reconstruction or prediction), the model learns to ignore artifacts that hinder performance.
 \end{frame}
 
-% \begin{frame}{Research Methodology}
-%     \vspace{-1.5em}
-%     \begin{figure}
-%         \centering
-%         \includegraphics[height=0.68\paperheight]{figures/xstae_arch.png}
-%     \end{figure}
-% \end{frame}
+\begin{frame}{Research Methodology}
 
+    \begin{table}[bt]
+    \centering
+        \begin{tabular}{lp{6cm}p{2cm}}
+        \toprule
+        \textbfblue{\emph{Acronym}}   & \textbfblue{\emph{Architecture}}& \textbfblue{\emph{Detection}}  \\
+        \midrule
+        \textit{LSTM}    & LSTM Autoencoder   & Reconstruction  \\
+        \textit{C-LSTM}  & Convolutional LSTM Autoencoder
+                                            & error  \\
+        \textit{AE\_err} & Attention-based Autoencoder
+                                            &   \\
+        \midrule
+        \textit{TP\_err} & Transformer Predictor
+                                            & Prediction error  \\
+        \midrule
+        \textit{AE\_att} & Attention-based Autoencoder
+                                            & Attention \\
+        \textit{TP\_att} & Transformer Predictor &  \\
+        \midrule
+        \textit{MNE}     & \multicolumn{2}{l}{IIR filter} \\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+
+\end{frame}
+
+\begin{frame}{Research Methodology}
+    \begin{figure}
+        \centering
+        \begin{minipage}{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/Fig2.png}
+        \end{minipage}
+        \hspace{3em}
+        \begin{minipage}{0.30\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/Fig3.png}
+        \end{minipage}
+        \vspace{1.5em}
+        {\small \textit{Left: AE\_err/AE\_att architecture \hspace{8em} TP\_err/TP\_att architecture}}
+    \end{figure}
+\end{frame}
 
 %------------------------------------------------
 % Experiments
@@ -105,25 +140,19 @@
 % Data Preprocessing
 \begin{frame}{Data Preprocessing}
 
-    We use the \textbfblue{BOAS EEG dataset}, with 128 full-night recordings from 2 channels (256 Hz), to explain classifier errors across 4 sleep stages (N1, N2, N3, REM).
-    \vspace{1.5em}
+    Our approach was evaluated using the \textbfblue{BOAS dataset}: 
+    \vspace{0.5em}
 
     \begin{itemize}
-        \item \textbfblue{EEG Data:} 
-        \begin{itemize}
-            \item 30s epochs ($n_s = 7680$ samples, $n_c = 2$).
-            \item FFT $\rightarrow$ 0.4-30 Hz filtering $\rightarrow$ segment into $n_s'=300$ spectral slices.
-            \item Extract 3 features per slice (frequency, phase, amplitude).
-        \end{itemize}
-        \item \textbfblue{Classifier:} Two-stage convolutional network over sequences of $k=5$ epochs:
-        \[
-            X_t^f = [e_{t-k+1}, \dots, e_t] \rightarrow \hat{y}_t
-        \]
-        \item \textbfblue{Autoencoders:} Hybrid networks with convolutional and attention layers:
-        \[
-        X_f^t = e_t \oplus \text{pos} \longrightarrow \hat{X}_f^{\,t} \text{ (reconstructed input)}
-        \]
+        \item EEG signals recorded from a \textbfblue{two-channel headband} at \textbfblue{128 Hz}.
+        \item Signals segmented into \textbfblue{30s epochs}, each labeled into five sleep stages (Wake, N1, N2, N3, REM).
+        \item \textbfblue{56 overnight recordings} from different users in total; 43 train, 3 validation, 10 test.
+        \item Data normalized using \textbfblue{median and IQR} for robustness (skipped for MNE to preserve signal shape).
+        \item Ground truth from Bitbrain's \textbfblue{proprietary artifact estimation algorithm}.
     \end{itemize}
+
+    \vspace{0.5em}
+    {\small \textit{\underline{Note}: 6 test recordings have minimal noise; comparisons focus on the remaining 4.}}
 
 \end{frame}
 
